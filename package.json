@@ -1,19 +1,28 @@
 {
-  "name": "listenup",
+  "name": "svelte-express-socketio-app",
   "version": "1.0.0",
+  "description": "Svelte + Express + SocketIO 모노레포 프로젝트",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "frontend",
+    "backend"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "npm run dev --workspace=server",
-    "dev:client": "npm run dev --workspace=client"
+    "install:all": "npm install && npm run install:frontend && npm run install:backend",
+    "install:frontend": "npm install --workspace=frontend",
+    "install:backend": "npm install --workspace=backend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build": "npm run build --workspace=frontend",
+    "start": "npm run start --workspace=backend",
+    "clean": "rm -rf node_modules frontend/node_modules backend/node_modules frontend/dist backend/dist"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
-  "dependencies": {
-    "svelte": "^5.35.2"
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
