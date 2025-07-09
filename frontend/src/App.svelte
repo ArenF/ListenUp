@@ -1,348 +1,108 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { io } from 'socket.io-client';
-  import type { Socket } from 'socket.io-client';
-  
-  interface Message {
-    id: string;
-    text: string;
-    timestamp: string;
-    socketId: string;
-  }
 
-  interface User {
-    id: number;
-    name: string;
-    email: string;
-  }
-
-  let socket: Socket;
-  let messages: Message[] = [];
-  let currentMessage = '';
-  let isConnected = false;
-  let socketId = '';
-  let users: User[] = [];
-  let isLoading = false;
-
-  // 백엔드 API 호출
-  async function fetchUsers() {
-    isLoading = true;
-    try {
-      const response = await fetch('/api/users');
-      if (response.ok) {
-        users = await response.json();
-      }
-    } catch (error) {
-      console.error('사용자 목록 가져오기 실패:', error);
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  // 메시지 전송
-  function sendMessage() {
-    if (currentMessage.trim() && socket) {
-      socket.emit('message', {
-        id: Date.now().toString(),
-        text: currentMessage.trim()
-      });
-      currentMessage = '';
-    }
-  }
-
-  // Enter 키로 메시지 전송
-  function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
-  }
-
-  onMount(() => {
-    // Socket.IO 연결 (개발환경과 프로덕션 환경 모두 지원)
-    const socketUrl = import.meta.env.DEV 
-      ? 'http://localhost:3000'
-      : window.location.origin;
-    
-    socket = io(socketUrl, {
-      transports: ['websocket', 'polling']
-    });
-
-    // 연결 이벤트
-    socket.on('connect', () => {
-      isConnected = true;
-      socketId = socket.id;
-      console.log('Socket.IO 연결됨:', socketId);
-    });
-
-    // 연결 해제 이벤트
-    socket.on('disconnect', () => {
-      isConnected = false;
-      console.log('Socket.IO 연결 해제됨');
-    });
-
-    // 환영 메시지
-    socket.on('welcome', (data) => {
-      console.log('환영 메시지:', data);
-    });
-
-    // 메시지 수신
-    socket.on('message', (data: Message) => {
-      messages = [...messages, data];
-    });
-
-    // 초기 사용자 목록 로드
-    fetchUsers();
-  });
-
-  onDestroy(() => {
-    if (socket) {
-      socket.disconnect();
-    }
-  });
 </script>
 
-<main>
-  <div class="container">
-    <header>
-      <h1>🚀 Svelte + Express + Socket.IO</h1>
-      <div class="status">
-        <span class="status-indicator" class:connected={isConnected}></span>
-        <span>연결 상태: {isConnected ? '연결됨' : '연결 해제됨'}</span>
-        {#if socketId}
-          <span class="socket-id">Socket ID: {socketId}</span>
-        {/if}
-      </div>
-    </header>
+<svelte:head>
+  <title>ListenUp - 음악 퀴즈 게임</title>
+</svelte:head>
 
-    <div class="content">
-      <!-- 사용자 목록 섹션 -->
-      <section class="users-section">
-        <h2>👥 사용자 목록</h2>
-        {#if isLoading}
-          <p>로딩 중...</p>
-        {:else if users.length > 0}
-          <div class="users-grid">
-            {#each users as user}
-              <div class="user-card">
-                <strong>{user.name}</strong>
-                <span>{user.email}</span>
-              </div>
-            {/each}
-          </div>
-        {:else}
-          <p>사용자를 불러올 수 없습니다.</p>
-        {/if}
-        <button on:click={fetchUsers} disabled={isLoading}>
-          새로고침
-        </button>
-      </section>
+<div class="background-grid"></div>
 
-      <!-- 실시간 채팅 섹션 -->
-      <section class="chat-section">
-        <h2>💬 실시간 채팅</h2>
-        
-        <div class="messages-container">
-          {#each messages as message}
-            <div class="message" class:own={message.socketId === socketId}>
-              <div class="message-content">
-                <p>{message.text}</p>
-                <small>
-                  {new Date(message.timestamp).toLocaleTimeString()}
-                  {#if message.socketId !== socketId}
-                    - {message.socketId}
-                  {/if}
-                </small>
-              </div>
-            </div>
-          {/each}
-        </div>
+<div class="container">
+  <h1 class="logo">LISTEN UP</h1>
+  <p class="subtitle">🎵 음악을 듣고 제목을 맞춰보세요! 🎵</p>
+</div>
 
-        <div class="message-input">
-          <input
-            bind:value={currentMessage}
-            on:keypress={handleKeyPress}
-            placeholder="메시지를 입력하세요..."
-            disabled={!isConnected}
-          />
-          <button on:click={sendMessage} disabled={!isConnected || !currentMessage.trim()}>
-            전송
-          </button>
-        </div>
-      </section>
-    </div>
-  </div>
-</main>
+<div class="game-buttons">
+  <button class="game-btn">방 만들기</button>
+  <button class="game-btn join-btn">방 참여하기</button>
+</div>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Audiowide:wght@400&family=Bungee:wght@400&display=swap');
+
+  :global(body) {
+    font-family: 'Audiowide', 'Bungee', 'Orbitron', monospace;
+    background: linear-gradient(
+      -45deg,
+      #0a0a0a 0%,
+      #1a0a2e 15%,
+      #2d1b69 25%,
+      #1e3a8a 40%,
+      #312e81 55%,
+      #4a2c7a 70%,
+      #1a0a2e 85%,
+      #0a0a0a 100%
+    );
+    background-size: 400% 400%;
+    animation: diagonalGradient 18s ease-in-out infinite;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  @keyframes diagonalGradient {
+    0% { background-position: 0% 0%;}
+    25% { background-position: 100% 0%;}
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  .background-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(rgba(0,255,255,0.4) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(255,0,110,0.3) 2px, transparent 2px),
+      linear-gradient(rgba(131,56,236,0.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(131, 56, 236, 0.2) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+    z-index: -1;
+    opacity: 0.7;
+  }
+
+  /* 화면 전체 구성 박스 */
   .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
-  header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  h1 {
-    color: #333;
-    margin-bottom: 10px;
-  }
-
-  .status {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 14px;
-    color: #666;
-  }
-
-  .status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #dc3545;
-  }
-
-  .status-indicator.connected {
-    background-color: #28a745;
-  }
-
-  .socket-id {
-    font-family: monospace;
-    background: #f8f9fa;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-  }
-
-  @media (max-width: 768px) {
-    .content {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  h2 {
-    margin-top: 0;
-    color: #333;
-  }
-
-  .users-grid {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-
-  .user-card {
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
   }
 
-  .user-card strong {
-    color: #333;
+  .logo {
+    font-family: 'Bungee', 'Audiowide', cursive;
+    font-size: 5.5rem;
+    font-weight: 400; 
+    text-align: center;
+    margin-bottom: 20px;
+    background: linear-gradient(45deg, #ff006e, #00f5ff, #8338ec, #ff006e);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: neonGlow 3s ease-in-out infinite alternate;
+    text-shadow: 0 0 30px rgba(255, 0, 110, 0.8);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
-  .user-card span {
-    color: #666;
-    font-size: 14px;
-  }
-
-  .messages-container {
-    height: 300px;
-    overflow-y: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 15px;
-    background: #f8f9fa;
-  }
-
-  .message {
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  .message.own {
-    justify-content: flex-end;
-  }
-
-  .message-content {
-    max-width: 70%;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: #e9ecef;
-  }
-
-  .message.own .message-content {
-    background: #007bff;
-    color: white;
-  }
-
-  .message-content p {
-    margin: 0 0 4px 0;
-    word-wrap: break-word;
-  }
-
-  .message-content small {
-    opacity: 0.7;
-    font-size: 12px;
-  }
-
-  .message-input {
-    display: flex;
-    gap: 10px;
-  }
-
-  .message-input input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    font-size: 14px;
-  }
-
-  .message-input input:focus {
-    outline: none;
-    border-color: #007bff;
-  }
-
-  button {
-    padding: 8px 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  button:hover:not(:disabled) {
-    background: #0056b3;
-  }
-
-  button:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
+  @keyframes neonGlow {
+    0% {
+      background-position: 0% 50%;
+      text-shadow: 0 0 30px rgba(255, 0, 110, 0.8), 0 0 60px rgba(255, 0, 110, 0.4)'
+    }
+    100% {
+      background-position: 100% 50%;
+      text-shadow: 0 0 40px rgba(0, 245, 255, 1), 0 0 80px rgba(0, 245, 255, 0.6);
+    }
   }
 </style>
