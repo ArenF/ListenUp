@@ -53,6 +53,74 @@
     }
   }
 
+  function confirmCreateRoom(): void {
+    if (!roomName || !hostName) {
+      alert('방 이름과 호스트 닉네임을 모두 입력해주세요!');
+      return;
+    }
+
+    playSound(1000, 0.2);
+
+    const generatedRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    alert(`방이 생성되었습니다!\n방 코드: ${generatedRoomCode}\n방 이름: ${roomName}\n호스트: ${hostName}`);
+
+    showCreateModal = false;
+
+    // 실제로는 여기서 게임 룸 화면으로 이동
+    // goto(generatedRoomCode);
+  }
+
+  function confirmJoinRoom(): void {
+    if (!roomCode || !playerName) {
+      alert('방 코드와 닉네임을 모두 입력해주세요!');
+      return;
+    }
+
+    if (roomCode.length !== 6) {
+      alert('방 코드는 6자리여야 합니다!');
+      return;
+    }
+
+    playSound(1000, 0.2);
+
+    alert(`방에 참여합니다!\n방 코드: ${roomCode}\n닉네임: ${playerName}`);
+
+    showJoinModal = false;
+
+    // 실제로 여기서 게임 룸 화면으로 이동
+    // goto(roomCode);
+  }
+
+
+  // 키보드 이벤트 처리
+
+  function handleKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      showCreateModal = false;
+      showJoinModal = false;
+    }
+  }
+
+  function handleRoomCodeInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    roomCode = target.value.toUpperCase();
+  }
+
+  function handleModalClick(event:MouseEvent, modalType: 'create' | 'join'): void {
+    if (event.target === event.currentTarget) {
+      closeModal(modalType);
+    }
+  }
+
+  onMount(() => {
+    document.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
+    };
+  })
+
 </script>
 
 <svelte:head>
@@ -76,6 +144,76 @@
     <button class="game-btn join-btn">방 참여하기</button>
   </div>
 
+  {#if showCreateModal}
+    <div class="modal" on:click={(e) => handleModalClick(e, 'create')}>
+      <h2>새 게임 방 만들기</h2>
+      <div class="input-group">
+        <label for="roomName">방 이름</label>
+        <input 
+          type="text"
+          id="roomName"
+          bind:value={roomName}
+          placeholder="예: 90년대 K-POP 퀴즈"
+          maxlength="30"
+        >
+      </div>
+      <div class="input-group">
+        <label for="hostName">호스트 닉네임</label>
+        <input 
+          type="text"
+          id="hostName"
+          bind:value={hostName}
+          placeholder="닉네임을 입력하세요"
+          maxlength="15"
+        />
+      </div>
+      <div class="input-group">
+        <label for="maxPlayers">최대 플레이어 수</label>
+        <input 
+          type="text"
+          id="maxPlayers"
+          bind:value={maxPlayers}
+          min="2"
+          max="8"
+        />
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn primary" on:click={confirmCreateRoom}>방 만들기</button>
+        <button class="modal-btn secondary" on:click={() => closeModal('create')}>취소</button>
+      </div>
+    </div>
+  {/if}
+
+  {#if showJoinModal}
+    <div class="modal" on:click={(e) => handleModalClick(e, 'join')}>
+      <h2>방 참여하기</h2>
+      <div class="input-group">
+        <label for="roomCode">방 코드</label>
+        <input
+          type="text"
+          id="roomCode"
+          value={roomCode}
+          on:input={handleRoomCodeInput}
+          placeholder="6자리 코드 입력 (예: ABC123)"
+          maxlength="6"
+          style="text-transform: uppercase;"
+        >
+      </div>
+      <div class="input-group">
+        <input 
+          type="text"
+          id="playerName"
+          bind:value={playerName}
+          placeholder="닉네임을 입력하세요"
+          maxlength="15"
+        >
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn primary" on:click={confirmJoinRoom}>참여하기</button>
+        <button class="modal-btn secondary" on:click={() => closeModal('join')}>취소</button>
+      </div>
+    </div>
+  {/if}
 </div>
 
 
