@@ -140,8 +140,8 @@
   </div>
 
   <div class="game-buttons">
-    <button class="game-btn">방 만들기</button>
-    <button class="game-btn join-btn">방 참여하기</button>
+    <button class="game-btn" on:click={() => {openCreateModal()}}>방 만들기</button>
+    <button class="game-btn join-btn" on:click={() => {openJoinModal()}}>방 참여하기</button>
   </div>
 
   {#if showCreateModal}
@@ -400,6 +400,232 @@
 
   .join-btn:hover {
     box-shadow: 0 5px 30px rgba(0, 245, 255, 0.6);
+  }
+
+  /*
+  
+  모달 스타일
+
+  */
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #00f5ff;
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+    min-width: 400px;
+    text-align: center;
+  }
+
+  .modal h2 {
+    color: #00f5ff;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    font-family: 'Audiowide', monospace;
+    text-shadow: 0 0 15px rgba(0, 245, 255, 0.6);
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+    font-weight: 600;
+    font-family: 'Audiowide', monospace;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #8338ec;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    text-align: center;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #00f5ff;
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+  }
+  
+  .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+
+  /* 모달 버튼 스타일 */
+  .modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+
+  .modal-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Audiowide', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 100px;
+  }
+
+  .modal-btn.primary {
+    background: linear-gradient(45deg, #00f5ff, #0077ff);
+    color: white;
+    box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+  }
+
+  .modal-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 245, 255, 0.6);
+  }
+
+  .modal-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  }
+
+  .modal-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .modal-btn:active {
+    transform: translateY(0);
+  }
+
+  /* 반응형 스타일 */
+  @media (max-width: 768px) {
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      margin-bottom: 30px;
+      padding: 0 10px;
+    }
+
+    .wave-container {
+      height: 60px;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .game-btn {
+      min-width: 200px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      margin: 0 10px;
+    }
+
+    .game-buttons {
+      gap: 15px;
+    }
+
+    .modal-content {
+      min-width: 90%;
+      max-width: 95%;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+
+    .modal h2 {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+    }
+
+    /* 입력 그룹 간격 축소 */
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group input {
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+
+    /* 모달 버튼 조정 */
+    .modal-buttons {
+      gap: 10px;
+      margin-top: 20px;
+      flex-direction: column;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 14px 20px;
+      min-height: 44px;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .logo {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+    }
+
+    .game-btn {
+      min-width: 180px;
+      font-size: 1rem;
+    }
+
+    .modal-content {
+      min-width: 95%;
+      padding: 15px;
+    }
   }
 
 </style>
