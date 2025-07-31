@@ -1,631 +1,143 @@
-<script lang="ts">
-  import { onMount } from "svelte";
-
-  // 방 생성 버튼 클릭시 모달 표시
-  let showCreateModal = false;
-  // 방 참가 버튼 클릭시 모달 표시
-  let showJoinModal = false;
-
-  let roomName = '';
-  let hostName = '';
-  let maxPlayers = 8;
-  let roomCode = '';
-  let playerName = '';
-
-  // 효과음 재생 함수
-  function playSound(frequency: number, duration: number): void {
-    const audioContext = new (window.AudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
-
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + duration);
-  }
-
-  // 방 생성 모달 열기
-  function openCreateModal():void {
-    playSound(800, 0.1);
-    showCreateModal = true;
-  }
-
-  // 방 참가 모달 열기
-  function openJoinModal():void {
-    playSound(600, 0.1);
-    showJoinModal = true;
-  }
-
-  // 모달 닫기 함수
-  function closeModal(modalType: 'create' | 'join'):void {
-    playSound(400, 0.1);
-    if (modalType === 'create') {
-      showCreateModal = false;
-    } else if(modalType === 'join') {
-      showJoinModal = false;
-    }
-  }
-
-  function confirmCreateRoom(): void {
-    if (!roomName || !hostName) {
-      alert('방 이름과 호스트 닉네임을 모두 입력해주세요!');
-      return;
-    }
-
-    playSound(1000, 0.2);
-
-    const generatedRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    alert(`방이 생성되었습니다!\n방 코드: ${generatedRoomCode}\n방 이름: ${roomName}\n호스트: ${hostName}`);
-
-    showCreateModal = false;
-
-    // 실제로는 여기서 게임 룸 화면으로 이동
-    // goto(generatedRoomCode);
-  }
-
-  function confirmJoinRoom(): void {
-    if (!roomCode || !playerName) {
-      alert('방 코드와 닉네임을 모두 입력해주세요!');
-      return;
-    }
-
-    if (roomCode.length !== 6) {
-      alert('방 코드는 6자리여야 합니다!');
-      return;
-    }
-
-    playSound(1000, 0.2);
-
-    alert(`방에 참여합니다!\n방 코드: ${roomCode}\n닉네임: ${playerName}`);
-
-    showJoinModal = false;
-
-    // 실제로 여기서 게임 룸 화면으로 이동
-    // goto(roomCode);
-  }
-
-
-  // 키보드 이벤트 처리
-
-  function handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      showCreateModal = false;
-      showJoinModal = false;
-    }
-  }
-
-  function handleRoomCodeInput(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    roomCode = target.value.toUpperCase();
-  }
-
-  function handleModalClick(event:MouseEvent, modalType: 'create' | 'join'): void {
-    if (event.target === event.currentTarget) {
-      closeModal(modalType);
-    }
-  }
-
-  onMount(() => {
-    document.addEventListener('keydown', handleKeydown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeydown);
-    };
-  })
+<script lang='ts'>
 
 </script>
 
-<svelte:head>
-  <title>ListenUp - 음악 퀴즈 게임</title>
-</svelte:head>
-
-<div class="background-grid"></div>
-
-<div class="container">
-  <h1 class="logo">LISTEN UP</h1>
-  <p class="subtitle">🎵 음악을 듣고 제목을 맞춰보세요! 🎵</p>
-
-  <div class="wave-container">
-    {#each Array(10) as _, i}
-      <div class="wave-bar" style="animation-delay: {i * 0.1}s;"></div>
-    {/each}
+<body>
+  <h1 class="title">Listen Up</h1>
+  <div class="subtitle-container">
+    <p class="subtitle">실시간 음악 퀴즈 게임</p>
+    <p class="content">
+      친구들과 함께 음악을 듣고 제목을 맞춰보세요!
+    </p>
+    <p class="content">
+      최대 8명이 실시간으로 경쟁하는 스피드 음악 퀴즈 게임
+    </p>
   </div>
 
-  <div class="game-buttons">
-    <button class="game-btn" on:click={() => {openCreateModal()}}>방 만들기</button>
-    <button class="game-btn join-btn" on:click={() => {openJoinModal()}}>방 참여하기</button>
+  <div class="buttons-container">
+    <button class="create-button">새 방 만들기</button>
+    <button class="join-button">방 참여하기</button>
   </div>
 
-  {#if showCreateModal}
-    <div class="modal" on:click={(e) => handleModalClick(e, 'create')}>
-      <h2>새 게임 방 만들기</h2>
-      <div class="input-group">
-        <label for="roomName">방 이름</label>
-        <input 
-          type="text"
-          id="roomName"
-          bind:value={roomName}
-          placeholder="예: 90년대 K-POP 퀴즈"
-          maxlength="30"
-        >
-      </div>
-      <div class="input-group">
-        <label for="hostName">호스트 닉네임</label>
-        <input 
-          type="text"
-          id="hostName"
-          bind:value={hostName}
-          placeholder="닉네임을 입력하세요"
-          maxlength="15"
-        />
-      </div>
-      <div class="input-group">
-        <label for="maxPlayers">최대 플레이어 수</label>
-        <input 
-          type="text"
-          id="maxPlayers"
-          bind:value={maxPlayers}
-          min="2"
-          max="8"
-        />
-      </div>
-      <div class="modal-buttons">
-        <button class="modal-btn primary" on:click={confirmCreateRoom}>방 만들기</button>
-        <button class="modal-btn secondary" on:click={() => closeModal('create')}>취소</button>
-      </div>
+  <div class="iconcard-container">
+    <div class="iconcard">
+      <img src="" alt="">
+      <p class="content len-sm">Spotify 기반 최신 음악</p>
     </div>
-  {/if}
-
-  {#if showJoinModal}
-    <div class="modal" on:click={(e) => handleModalClick(e, 'join')}>
-      <h2>방 참여하기</h2>
-      <div class="input-group">
-        <label for="roomCode">방 코드</label>
-        <input
-          type="text"
-          id="roomCode"
-          value={roomCode}
-          on:input={handleRoomCodeInput}
-          placeholder="6자리 코드 입력 (예: ABC123)"
-          maxlength="6"
-          style="text-transform: uppercase;"
-        >
-      </div>
-      <div class="input-group">
-        <input 
-          type="text"
-          id="playerName"
-          bind:value={playerName}
-          placeholder="닉네임을 입력하세요"
-          maxlength="15"
-        >
-      </div>
-      <div class="modal-buttons">
-        <button class="modal-btn primary" on:click={confirmJoinRoom}>참여하기</button>
-        <button class="modal-btn secondary" on:click={() => closeModal('join')}>취소</button>
-      </div>
+    <div class="iconcard">
+      <img src="" alt="">
+      <p class="content len-sm">실시간 경쟁</p>
     </div>
-  {/if}
-</div>
+    <div class="iconcard">
+      <img src="" alt="">
+      <p class="content len-sm">채팅과 정답을 동시에!</p>
+    </div>
+    <div class="iconcard">
+      <img src="" alt="">
+      <p class="content len-sm">어디에서나 모든 기기로 플레이!</p>
+    </div>
+  </div>
 
+  <div class="modal-container">
+    <div class="create-modal" style="visibility: hidden;"></div>
+  </div>
 
-<style lang="css">
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Audiowide:wght@400&family=Bungee:wght@400&display=swap');
+  <div class="modal-container">
+    <div class="join-modal" style="visibility: hidden;"></div>
+  </div>
+</body>
 
-  :global(body) {
-    font-family: 'Audiowide', 'Bungee', 'Orbitron', monospace;
-    background: linear-gradient(
-      -45deg,
-      #0a0a0a 0%,
-      #1a0a2e 15%,
-      #2d1b69 25%,
-      #1e3a8a 40%,
-      #312e81 55%,
-      #4a2c7a 70%,
-      #1a0a2e 85%,
-      #0a0a0a 100%
-    );
-    background-size: 400% 400%;
-    animation: diagonalGradient 18s ease-in-out infinite;
-    min-height: 100vh;
-    overflow-x: hidden;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+<style>
+  /**
 
-  @keyframes diagonalGradient {
-    0% { background-position: 0% 0%;}
-    25% { background-position: 100% 0%;}
-    50% { background-position: 100% 100%; }
-    75% { background-position: 0% 100%; }
-    100% { background-position: 0% 0%; }
-  }
-
-  .background-grid {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-      linear-gradient(rgba(0,255,255,0.4) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(255,0,110,0.3) 2px, transparent 2px),
-      linear-gradient(rgba(131,56,236,0.2) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(131, 56, 236, 0.2) 1px, transparent 1px);
-    background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
-    z-index: -1;
-    opacity: 0.7;
-  }
-
-  /* 화면 전체 구성 박스 */
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  /* 제목 스타일 및 애니메이션 */
-  .logo {
-    font-family: 'Bungee', 'Audiowide', cursive;
-    font-size: 5.5rem;
-    font-weight: 400; 
-    text-align: center;
-    margin-bottom: 20px;
-    background: linear-gradient(45deg, #ff006e, #00f5ff, #8338ec, #ff006e);
-    background-size: 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: neonGlow 3s ease-in-out infinite alternate;
-    text-shadow: 0 0 30px rgba(255, 0, 110, 0.8);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  @keyframes neonGlow {
-    0% {
-      background-position: 0% 50%;
-      text-shadow: 0 0 30px rgba(255, 0, 110, 0.8), 0 0 60px rgba(255, 0, 110, 0.4);
-    }
-    100% {
-      background-position: 100% 50%;
-      text-shadow: 0 0 40px rgba(0, 245, 255, 1), 0 0 80px rgba(0, 245, 255, 0.6);
-    }
-  }
-
-  /* 부제목 폰트 스타일 */
-  .subtitle {
-    font-family: 'Audiowide', monospace;
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: #00f5ff;
-    margin-bottom: 50px;
-    text-align: center;
-    opacity: 0.9;
-    text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
-    letter-spacing: 0.05em;
-  }
-
-  /* 웨이브 애니메이션 스타일 구현 */
-  .wave-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 50px;
-    height: 80px;
-  }
-
-  .wave-bar {
-    width: 4px;
-    background: linear-gradient(to top, #ff006e, #00f5ff);
-    margin: 0 2px;
-    border-radius: 2px;
-    animation: waveAnimation 1.5s ease-in-out infinite;
-  }
-
-  @keyframes waveAnimation {
-    0%, 100% { height: 20px; }
-    50% { height: 60px; }
-  }
-
-  /* 버튼 스타일 */
-  /* 버튼들을 담는 컨테이너 */
-  .game-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    align-items: center;
-  }
-
-  .game-btn {
-    font-family: 'Audiowide', 'Bungee', cursive;
-    background: linear-gradient(45deg, #8338ec, #ff006e);
-    border: none;
-    color: white;
-    padding: 18px 45px;
-    font-size: 1.4rem;
-    font-weight: 400;
-    border-radius: 12px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 25px rgba(131, 56, 236, 0.5);
-    min-width: 280px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-  .game-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100;
-    height: 100;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-  }
-
-  .game-btn:hover::before {
-    left: 100%;
-  }
-
-  .game-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 30px rgba(131, 56, 236, 0.6);
-  }
-
-  .game-btn:active {
-    transform: translateY(0);
-  }
-
-  .join-btn {
-    background: linear-gradient(45deg, #00f5ff, #0077ff);
-    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
-  }
-
-  .join-btn:hover {
-    box-shadow: 0 5px 30px rgba(0, 245, 255, 0.6);
-  }
-
-  /*
-  
-  모달 스타일
+  배경 그라데이션 애니메이션 제작 코드
 
   */
 
-  .modal {
-    position: fixed;
-    top: 0;
+  :root {
+    --bg-color-gradient-1: #0d1421;
+    --bg-color-gradient-2: #1e2a3a;
+    --bg-color-gradient-3: #0a0e1a;
+    --bg-color-gradient-4: #1a1d29;
+
+    --theme-main-primary: #8A2BE2;
+    --theme-main-secondary: #9D4EDD;
+    --theme-sub-primary: #FFFF00;
+    --theme-sub-secondary: #F1C40F;
+  }
+
+  body {
+    position: absolute;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    z-index: 1000;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-content {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    padding: 30px;
-    border-radius: 15px;
-    border: 2px solid #00f5ff;
-    box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
-    min-width: 400px;
-    text-align: center;
-  }
-
-  .modal h2 {
-    color: #00f5ff;
-    margin-bottom: 20px;
-    font-size: 1.8rem;
-    font-family: 'Audiowide', monospace;
-    text-shadow: 0 0 15px rgba(0, 245, 255, 0.6);
-  }
-
-  .input-group {
-    margin-bottom: 20px;
-    text-align: left;
-  }
-
-  .input-group label {
-    display: block;
-    margin-bottom: 10px;
-    color: #fff;
-    font-weight: 600;
-    font-family: 'Audiowide', monospace;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05rem;
-  }
-
-  .input-group input {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #8338ec;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    color: #fff;
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    text-align: center;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+    background: linear-gradient(
+      -45deg,
+      var(--bg-color-gradient-1),
+      var(--bg-color-gradient-2),
+      var(--bg-color-gradient-3),
+      var(--bg-color-gradient-4)
+    );
+    background-size: 400% 400%;
+    animation: diagonalAnim 18s ease-in-out infinite;
   }
 
-  .input-group input:focus {
-    outline: none;
-    border-color: #00f5ff;
-    box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
-  }
-  
-  .input-group input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    font-style: italic;
+  @keyframes diagonalAnim {
+    0% { background-position: 0% 0%; }
+    25% { background-position: 100%, 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0 100%; }
+    100% { background-position: 100% 100%; }
   }
 
-  /* 모달 버튼 스타일 */
-  .modal-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 30px;
+  /* 타이틀 및 글자 요소 */
+
+  .title {
+    font-size: 4rem;
+    color: var(--theme-main-primary);
+    text-shadow: 2px 2px 10px var(--theme-main-secondary); 
   }
 
-  .modal-btn {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Audiowide', monospace;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    min-width: 100px;
+  .subtitle-container {
+    padding: 1.5em;
+    background-color: darkgray;
+    opacity: 0.5;
   }
 
-  .modal-btn.primary {
-    background: linear-gradient(45deg, #00f5ff, #0077ff);
-    color: white;
-    box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+  .subtitle {
+    font-size: 1.5em;
   }
 
-  .modal-btn.primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 245, 255, 0.6);
+  .subtitle-container > .content {
+    margin: 0;
+    max-width: 35em;
   }
 
-  .modal-btn.secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  .content {  
+    font-family: "Orbitron", monospace;
+    font-size: 1.2em;
   }
 
-  .modal-btn.secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-1px);
+  /* 
+    모달 관련 CSS
+  */
+
+  .modal-container {
+
   }
 
-  .modal-btn:active {
-    transform: translateY(0);
+  .create-modal {
+
   }
 
-  /* 반응형 스타일 */
-  @media (max-width: 768px) {
-    .logo {
-      font-size: 3rem;
-      margin-bottom: 15px;
-    }
+  .join-modal {
 
-    .subtitle {
-      font-size: 1rem;
-      margin-bottom: 30px;
-      padding: 0 10px;
-    }
-
-    .wave-container {
-      height: 60px;
-      margin-bottom: 30px;
-    }
-
-    .container {
-      padding: 15px;
-    }
-
-    .game-btn {
-      min-width: 200px;
-      padding: 12px 30px;
-      font-size: 1.1rem;
-      margin: 0 10px;
-    }
-
-    .game-buttons {
-      gap: 15px;
-    }
-
-    .modal-content {
-      min-width: 90%;
-      max-width: 95%;
-      padding: 20px;
-      margin: 10px;
-      border-radius: 10px;
-    }
-
-    .modal h2 {
-      font-size: 1.4rem;
-      margin-bottom: 15px;
-    }
-
-    /* 입력 그룹 간격 축소 */
-    .input-group {
-      margin-bottom: 15px;
-    }
-
-    .input-group input {
-      padding: 10px;
-      font-size: 0.9rem;
-    }
-
-    .input-group label {
-      font-size: 0.8rem;
-      margin-bottom: 8px;
-    }
-
-    /* 모달 버튼 조정 */
-    .modal-buttons {
-      gap: 10px;
-      margin-top: 20px;
-      flex-direction: column;
-    }
-
-    .modal-btn {
-      width: 100%;
-      padding: 14px 20px;
-      min-height: 44px;
-      font-size: 0.9rem;
-    }
   }
-
-  @media (max-width: 320px) {
-    .logo {
-      font-size: 2.5rem;
-    }
-
-    .subtitle {
-      font-size: 0.9rem;
-    }
-
-    .game-btn {
-      min-width: 180px;
-      font-size: 1rem;
-    }
-
-    .modal-content {
-      min-width: 95%;
-      padding: 15px;
-    }
-  }
-
 </style>
