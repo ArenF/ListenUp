@@ -7,7 +7,8 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import roomHandler from "./handlers/RoomHandler";
+import RoomHandler from "./handlers/RoomHandler";
+import PlayerHandler from "./handlers/PlayerHandler";
 
 // ES modules에서 __dirname 대체
 const __filename = fileURLToPath(import.meta.url);
@@ -69,7 +70,8 @@ app.get("/api/users", (req, res) => {
 io.on("connection", (socket) => {
   console.log(`사용자 연결됨: ${socket.id}`);
 
-  roomHandler(io, socket);
+  RoomHandler(io, socket);
+  PlayerHandler(io, socket);
 });
 
 // 프로덕션 환경에서 SPA 라우팅 처리
