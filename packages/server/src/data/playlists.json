@@ -1,8 +1,42 @@
 {
+  "test-playlist": {
+    "id": "test-playlist",
+    "name": "테스트 플레이리스트",
+    "description": "Spotify API 테스트용 플레이리스트",
+    "trackIds": [
+      "여기에_수집한_Track_ID_1",
+      "여기에_수집한_Track_ID_2",
+      "여기에_수집한_Track_ID_3",
+      "여기에_수집한_Track_ID_4",
+      "여기에_수집한_Track_ID_5"
+    ],
+    "roundCount": 5
+  },
   "kpop-2000s": {
     "id": "kpop-2000s",
     "name": "2000년대 K-POP",
     "description": "추억의 2000년대 히트곡",
+    "trackIds": [],
+    "roundCount": 0
+  },
+  "kpop-2010s": {
+    "id": "kpop-2010s",
+    "name": "2010년대 K-POP",
+    "description": "2010년대를 빛낸 K-POP",
+    "trackIds": [],
+    "roundCount": 0
+  },
+  "pop-classics": {
+    "id": "pop-classics",
+    "name": "팝 명곡",
+    "description": "세대를 초월한 팝 명곡",
+    "trackIds": [],
+    "roundCount": 0
+  },
+  "latest-chart": {
+    "id": "latest-chart",
+    "name": "최신 차트",
+    "description": "지금 핫한 최신 곡",
     "trackIds": [],
     "roundCount": 0
   }
