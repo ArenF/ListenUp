@@ -1,4 +1,20 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
+  onMount(() => {
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // API 준비 완료 콜백
+    (window as any).onYouTubeIframeAPIReady = () => {
+      console.log('YouTube Player API 로드 완료!');
+      // Player 초기화...
+    };
+  });
+
   let message = "ListenUp! Client is running 🎵";
 </script>
 
