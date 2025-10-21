@@ -2,13 +2,13 @@
   "test-playlist": {
     "id": "test-playlist",
     "name": "테스트 플레이리스트",
-    "description": "Spotify API 테스트용 플레이리스트",
+    "description": "YouTube API 테스트용 플레이리스트",
     "trackIds": [
-      "0FKR7mQJnYqdEmHAMhgQjw",
-      "48JjpKbGmbCLFw8eYN64x6",
-      "0qhreE12TQ0x669kJDfL3V",
-      "5R5NMy7zc7QPCfdvy8dvCQ",
-      "7GOIrZTegzVty8mhNhRuA0"
+      "dQw4w9WgXcQ",
+      "kJQP7kiw5Fk",
+      "9bZkp7q19f0",
+      "fJ9rUzIMcZQ",
+      "2Vv-BfVoq4g"
     ],
     "roundCount": 5
   },
@@ -16,28 +16,72 @@
     "id": "kpop-2000s",
     "name": "2000년대 K-POP",
     "description": "추억의 2000년대 히트곡",
-    "trackIds": [],
-    "roundCount": 0
+    "trackIds": [
+      "WkdtmT8A2iY",
+      "HG6Zye_S7zw",
+      "q3xy4p2JTfU",
+      "U7mPqycQ0tQ",
+      "1k_BO5KUBUE",
+      "T_3LZuT2LFw",
+      "zYoYoBtLqOY",
+      "Dww9UjJ4Dt8",
+      "TGbwL8kSpEk",
+      "vBVnN90Tg4s"
+    ],
+    "roundCount": 10
   },
   "kpop-2010s": {
     "id": "kpop-2010s",
     "name": "2010년대 K-POP",
     "description": "2010년대를 빛낸 K-POP",
-    "trackIds": [],
-    "roundCount": 0
+    "trackIds": [
+      "9bZkp7q19f0",
+      "IHNzOHi8sJs",
+      "jeqdYqsrsA0",
+      "bw9CALKOvAI",
+      "J_CFBjAyPWE",
+      "UwuAPyOImoI",
+      "kTlv5_Bs8aw",
+      "7Zfx8GMa8qc",
+      "cwPdPTl8lKM",
+      "pIgZ7gMze7A"
+    ],
+    "roundCount": 10
   },
   "pop-classics": {
     "id": "pop-classics",
     "name": "팝 명곡",
     "description": "세대를 초월한 팝 명곡",
-    "trackIds": [],
-    "roundCount": 0
+    "trackIds": [
+      "dQw4w9WgXcQ",
+      "kJQP7kiw5Fk",
+      "fJ9rUzIMcZQ",
+      "2Vv-BfVoq4g",
+      "rY0WxgSXdEE",
+      "A_MjCqQoLLA",
+      "hTWKbfoikeg",
+      "CevxZvSJLk8",
+      "djV11Xbc914",
+      "CD-E-LDc384"
+    ],
+    "roundCount": 10
   },
   "latest-chart": {
     "id": "latest-chart",
     "name": "최신 차트",
     "description": "지금 핫한 최신 곡",
-    "trackIds": [],
-    "roundCount": 0
+    "trackIds": [
+      "5Eqb_-j3FDA",
+      "3JZ4pnNtyxQ",
+      "pBk4NYhWNMM",
+      "ulsOkf0k1Uc",
+      "IxuThNgl3YA",
+      "BBJa32lCaaY",
+      "aAkMkVFwAoo",
+      "WAtNXdGEV3E",
+      "ewLpXw6uN28",
+      "BQ0mxQXmLsk"
+    ],
+    "roundCount": 10
   }
 }

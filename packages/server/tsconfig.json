@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "es2020",
+    "module": "es2022",
     "moduleResolution": "node",
     "target": "es2024",
     "outDir": "./dist",
@@ -9,6 +9,7 @@
     "types": ["node"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts"],

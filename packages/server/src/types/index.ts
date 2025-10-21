@@ -34,21 +34,46 @@ export interface GameState {
   streaks: Map<string, number>;
 }
 
-export interface Track {
-  id: string;
-  name: string;
-  artist: string;
-  album: string;
-  releaseDate: string;
-  year: string;
-  previewUrl: string;
-  duration: number;
-}
-
 export interface Playlist {
   id: string;
   name: string;
   description: string;
   trackIds: string[];
   roundCount: number;
+}
+
+export interface Track {
+  id: string;                   
+  name: string;                  
+  artist: string;                
+  uploadDate: string;            
+  year: string;                  
+  embedUrl: string;              
+  duration: number;            
+  startSeconds: number;          
+  endSeconds: number;            
+  thumbnailUrl?: string;         
+}
+
+export interface YouTubeVideoSnippet {
+  title: string;
+  publishedAt: string;
+  channelTitle: string;
+  thumbnails: {
+    default: { url: string };
+    medium: { url: string };
+    high: { url: string };
+  };
+}
+
+export interface YouTubeVideoContentDetails {
+  duration: string;              // ISO 8601 형식 (PT3M45S)
+}
+
+export interface YouTubeApiResponse {
+  items: Array<{
+    id: string;
+    snippet: YouTubeVideoSnippet;
+    contentDetails: YouTubeVideoContentDetails;
+  }>;
 }

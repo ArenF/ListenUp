@@ -2,12 +2,9 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import dotenv from "dotenv";
-import { config, validateEnvSpotify } from "./config/env";
-import { spotifyService } from "./services/spotify";
+import { config, validateEnvYouTube } from "./config/env";
+import { youtubeService } from "./services/youtube";
 import playlists from "./data/playlists.json";
-
-dotenv.config({ path: "../../.env" });
 
 const app = express();
 const httpServer = createServer(app);
@@ -22,16 +19,16 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({
-    message: "Litenp! Server is running!",
+    message: "ListenUp! Server is running!",
     status: "ok",
     timestamp: new Date().toISOString(),
   });
 });
 
 // 테스트용 플레이리스트 목록
-app.get("/api/test/playlists", (req, res) => {
+app.get("/api/test/playlists", (_req, res) => {
   res.json(playlists);
 });
 
@@ -45,7 +42,7 @@ app.get("/api/test/playlist/:playlistId", async (req, res) => {
       return res.status(404).json({ error: "Playlist not found" });
     }
 
-    if (playlist.trackids.length === 0) {
+    if (playlist.trackIds.length === 0) {
       return res.json({
         playlist: {
           id: playlist.id,
@@ -57,24 +54,24 @@ app.get("/api/test/playlist/:playlistId", async (req, res) => {
       });
     }
 
-    const tracks = await spotifyService.getTracks(playlist.trackIds);
+    const tracks = await youtubeService.getTracks(playlist.trackIds);
 
-    res.json({
+    return res.json({
       playlist: {
         id: playlist.id,
         name: playlist.name,
-        descripion: playlist.description,
+        description: playlist.description,
       },
       tracks,
       stats: {
-        totla: playlist.trackIds.length,
-        withPreview: tracks.length,
+        total: playlist.trackIds.length,
+        retrieved: tracks.length,
         filtered: playlist.trackIds.length - tracks.length,
       },
     });
   } catch (err: any) {
     console.error("Error fetching playlist:", err);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to fetch playlist",
       message: err.message,
     });
@@ -85,27 +82,27 @@ app.get("/api/test/playlist/:playlistId", async (req, res) => {
 app.get("/api/test/track/:trackId", async (req, res) => {
   try {
     const { trackId } = req.params;
-    const track = await spotifyService.getTrack(trackId);
+    const track = await youtubeService.getTrack(trackId);
 
     if (!track) {
       return res.status(404).json({
-        error: "Track not found or no preview available",
+        error: "Track not found or unavailable",
       });
     }
 
-    res.json();
+    return res.json(track);
   } catch (error: any) {
     console.error("Error fetching track:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to fetch track",
       message: error.message,
     });
   }
 });
 
-// 테스트용 Spotify 캐시 통계
-app.get("/api/test/cache-stats", (req, res) => {
-  res.json(spotifyService.getCacheStats());
+// 테스트용 캐시 통계
+app.get("/api/test/cache-stats", (_req, res) => {
+  res.json(youtubeService.getCacheStats());
 });
 
 //소켓 연결
@@ -117,9 +114,9 @@ io.on("connection", (socket) => {
   });
 });
 
-validateEnvSpotify();
+validateEnvYouTube();
 
-httpServer.listen(config.port, () => {
-  console.log(`Server running on http://localhost:${config.port}`);
+httpServer.listen(config.server.port, () => {
+  console.log(`Server running on http://localhost:${config.server.port}`);
   console.log(`Socket.IO Ready`);
 });

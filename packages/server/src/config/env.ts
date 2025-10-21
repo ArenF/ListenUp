@@ -1,18 +1,34 @@
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// ES 모듈에서 __dirname 대체
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// .env 파일은 프로젝트 루트에 있음
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+
 export const config = {
-  port: process.env.PORT || 3000,
-  nodeEnv: process.env.NODE_ENV || "development",
-  frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
-  spotify: {
-    clientId: process.env.SPOTIFY_CLIENT_ID || "",
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET || "",
+  youtube: {
+    apiKey: process.env.YOUTUBE_API_KEY || "",
+  },
+  server: {
+    port: parseInt(process.env.PORT || "3000"),
+    nodeEnv: process.env.NODE_ENV || "development",
+  },
+  cors: {
+    frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   },
 };
 
-export function validateEnvSpotify(): boolean {
-  if (!config.spotify.clientId || !config.spotify.clientSecret) {
-    console.warn(`Spoify credentials not found in .env`);
-    return false;
+export function validateEnvYouTube() {
+  if (!config.youtube.apiKey) {
+    console.warn(
+      "⚠️  WARNING: YOUTUBE_API_KEY is not set. YouTube features will not work."
+    );
+    console.warn(
+      "   Get your API key from: https://console.cloud.google.com/apis/credentials"
+    );
   }
-
-  return true;
 }
