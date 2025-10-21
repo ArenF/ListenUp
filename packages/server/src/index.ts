@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { config, validateEnvYouTube } from "./config/env";
 import { youtubeService } from "./services/youtube";
+import { registerRoomHandlers } from "./socket/handlers/room.handler";
 import playlists from "./data/playlists.json";
 
 const app = express();
@@ -107,10 +108,13 @@ app.get("/api/test/cache-stats", (_req, res) => {
 
 //소켓 연결
 io.on("connection", (socket) => {
-  console.log(`Client connected : ${socket.id}`);
+  console.log(`✅ Client connected: ${socket.id}`);
+
+  // 방 관리 핸들러 등록
+  registerRoomHandlers(io, socket);
 
   socket.on("disconnect", () => {
-    console.log(`Client Disconnected : ${socket.id}`);
+    console.log(`❌ Client disconnected: ${socket.id}`);
   });
 });
 
