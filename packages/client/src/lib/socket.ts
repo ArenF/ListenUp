@@ -8,8 +8,13 @@ let socket: Socket | null = null;
  */
 export function initSocket(): Socket {
   if (!socket) {
-    socket = io("http://localhost:3000", {
+    // 개발 환경: Vite 프록시 사용 (빈 문자열로 상대 경로)
+    // 프로덕션: 환경변수로 서버 URL 지정
+    const serverUrl = import.meta.env.VITE_SERVER_URL || "";
+
+    socket = io(serverUrl, {
       autoConnect: false,
+      path: "/socket.io",
     });
   }
 
