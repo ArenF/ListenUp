@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { Room, Player, RoomSettings, GameState } from "../types/index";
+import type { Room, Player, RoomSettings, GameState } from "../types/index.js";
 
 // 방 관리 서비스
 

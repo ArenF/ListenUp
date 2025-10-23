@@ -1,7 +1,7 @@
 import axios from "axios";
 import NodeCache from "node-cache";
-import { config } from "../config/env";
-import type { Track, YouTubeApiResponse } from "../types/index";
+import { config } from "../config/env.js";
+import type { Track, YouTubeApiResponse } from "../types/index.js";
 
 // YouTube Data API v3 연동 서비스
 

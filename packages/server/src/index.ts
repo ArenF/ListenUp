@@ -2,10 +2,10 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import { config, validateEnvYouTube } from "./config/env";
-import { youtubeService } from "./services/youtube";
-import { registerRoomHandlers } from "./socket/handlers/room.handler";
-import playlists from "./data/playlists.json";
+import { config, validateEnvYouTube } from "./config/env.js";
+import { youtubeService } from "./services/youtube.js";
+import { registerRoomHandlers } from "./socket/handlers/room.handler.js";
+import playlists from "./data/playlists.json" with { type: "json" };
 
 const app = express();
 const httpServer = createServer(app);
