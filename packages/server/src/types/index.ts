@@ -77,3 +77,49 @@ export interface YouTubeApiResponse {
     contentDetails: YouTubeVideoContentDetails;
   }>;
 }
+
+// ============================================================================
+// Game Service Types
+// ============================================================================
+
+export interface AnswerSubmission {
+  playerId: string;
+  answer: string;
+  timestamp: number;          // 제출 시간 (ms)
+  isCorrect: boolean;
+  score: number;              // 해당 라운드에서 획득한 점수
+}
+
+export interface RoundResult {
+  roundNumber: number;
+  track: Track;                           // 정답 트랙 정보
+  answers: AnswerSubmission[];            // 모든 플레이어의 답안
+  correctAnswers: AnswerSubmission[];     // 정답자들
+  scores: Map<string, number>;            // 현재까지 누적 점수
+  streaks: Map<string, number>;           // 연속 정답 스트릭
+}
+
+export interface GameResult {
+  roomCode: string;
+  totalRounds: number;
+  finalScores: Array<{
+    playerId: string;
+    nickname: string;
+    score: number;
+    correctAnswers: number;
+    maxStreak: number;
+  }>;
+  winner: {
+    playerId: string;
+    nickname: string;
+    score: number;
+  } | null;
+  playedAt: number;
+}
+
+export interface AnswerCheckResult {
+  isCorrect: boolean;
+  score: number;
+  message: string;
+  streak: number;
+}
