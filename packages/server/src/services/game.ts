@@ -8,6 +8,7 @@ import type {
   GameResult,
   AnswerCheckResult,
 } from "../types/index.js";
+import playlistsData from "../data/playlists.json" with { type: "json" };
 
 /**
  * 게임 로직 관리 서비스
@@ -32,19 +33,15 @@ export class GameService {
   }
 
   /**
-   * 플레이리스트 초기화 (테스트용 샘플 데이터)
+   * 플레이리스트 초기화 (JSON 파일에서 로드)
    */
   private initializePlaylists(): void {
-    // TODO: 실제 플레이리스트 데이터로 교체
-    const samplePlaylist: Playlist = {
-      id: "test-playlist",
-      name: "테스트 플레이리스트",
-      description: "테스트용 샘플 플레이리스트",
-      trackIds: ["track1", "track2", "track3"],
-      roundCount: 3,
-    };
+    // playlists.json 파일에서 모든 플레이리스트 로드
+    for (const [key, playlist] of Object.entries(playlistsData)) {
+      this.playlists.set(key, playlist as Playlist);
+    }
 
-    this.playlists.set(samplePlaylist.id, samplePlaylist);
+    console.log(`✅ Loaded ${this.playlists.size} playlists from data/playlists.json`);
   }
 
   /**

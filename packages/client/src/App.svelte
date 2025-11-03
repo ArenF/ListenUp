@@ -11,9 +11,20 @@
   let players = $state<any[]>([]);
   let currentRoom = $state<any>(null);
 
+  // 게임 상태
+  let gameStarted = $state(false);
+  let currentRound = $state(0);
+  let totalRounds = $state(0);
+  let currentTrack = $state<any>(null);
+  let answer = $state("");
+  let gameResult = $state<any>(null);
+
   onMount(() => {
     // Socket.IO 초기화 및 연결
     socket = initSocket();
+
+    // 디버깅용: 콘솔에서 socket 접근 가능하게
+    (window as any).socket = socket;
 
     // 연결 이벤트
     socket.on("connect", () => {
@@ -58,6 +69,59 @@
       if (currentRoom) {
         currentRoom.settings = data.settings;
       }
+    });
+
+    // 게임 시작 알림
+    socket.on("game-started", (data) => {
+      console.log("🎮 게임 시작!", data);
+      gameStarted = true;
+      totalRounds = data.totalRounds;
+      statusMessage = `🎮 게임 시작! (총 ${data.totalRounds}라운드)`;
+    });
+
+    // 라운드 시작 알림
+    socket.on("round-started", (data) => {
+      console.log("🎵 라운드 시작!", data);
+      currentRound = data.roundNumber;
+      currentTrack = data.track;
+      answer = "";
+      statusMessage = `🎵 Round ${data.roundNumber}/${totalRounds} - 음악을 듣고 맞춰보세요!`;
+    });
+
+    // 정답 제출 알림
+    socket.on("answer-submitted", (data) => {
+      console.log("📝 답안 제출됨:", data);
+      statusMessage = `📝 ${data.nickname}님이 답을 제출했습니다!`;
+    });
+
+    // 점수 업데이트
+    socket.on("score-updated", (data) => {
+      console.log("📊 점수 업데이트:", data);
+      // 점수 정보를 players 배열에 업데이트
+      if (currentRoom) {
+        data.scores.forEach(([playerId, score]: [string, number]) => {
+          const player = players.find(p => p.id === playerId);
+          if (player) {
+            player.score = score;
+          }
+        });
+        players = [...players]; // 반응성 트리거
+      }
+    });
+
+    // 라운드 종료
+    socket.on("round-ended", (data) => {
+      console.log("🏁 라운드 종료!", data);
+      statusMessage = `🏁 정답: ${data.result.track.name} - ${data.result.track.artist}`;
+      currentTrack = null;
+    });
+
+    // 게임 종료
+    socket.on("game-end", (data) => {
+      console.log("🎊 게임 종료!", data);
+      gameStarted = false;
+      gameResult = data.result;
+      statusMessage = `🎊 게임 종료! 우승: ${data.result.winner?.nickname || "없음"}`;
     });
 
     // 서버 연결 시작
@@ -148,6 +212,8 @@
         currentRoom = null;
         players = [];
         roomCode = "";
+        gameStarted = false;
+        gameResult = null;
         console.log("방 나가기 성공");
       } else {
         statusMessage = "❌ 방 나가기 실패";
@@ -155,6 +221,85 @@
       }
     });
   }
+
+  // 게임 시작 (방장만)
+  function startGame() {
+    if (!currentRoom) return;
+
+    statusMessage = "⏳ 게임 시작 중...";
+    socket.emit("start-game", {
+      roomCode: currentRoom.code
+    }, (response: any) => {
+      if (response.success) {
+        console.log("게임 시작 성공");
+      } else {
+        statusMessage = `❌ 게임 시작 실패: ${response.error}`;
+        console.error("게임 시작 실패:", response.error);
+      }
+    });
+  }
+
+  // 정답 제출
+  function submitAnswer() {
+    if (!currentRoom || !answer.trim()) return;
+
+    const userAnswer = answer.trim();
+    answer = ""; // 입력 초기화
+
+    socket.emit("submit-answer", {
+      roomCode: currentRoom.code,
+      answer: userAnswer
+    }, (response: any) => {
+      if (response.success) {
+        const result = response.result;
+        if (result.isCorrect) {
+          statusMessage = `✅ ${result.message} (스트릭: ${result.streak})`;
+        } else {
+          statusMessage = `❌ ${result.message}`;
+        }
+        console.log("정답 제출 결과:", response);
+      } else {
+        statusMessage = `❌ 제출 실패: ${response.error}`;
+        console.error("정답 제출 실패:", response.error);
+      }
+    });
+  }
+
+  // 다음 라운드 (방장만)
+  function nextRound() {
+    if (!currentRoom) return;
+
+    statusMessage = "⏳ 다음 라운드 시작 중...";
+    socket.emit("next-round", {
+      roomCode: currentRoom.code
+    }, (response: any) => {
+      if (response.success) {
+        console.log("다음 라운드 시작");
+      } else {
+        statusMessage = `❌ 다음 라운드 실패: ${response.error}`;
+        console.error("다음 라운드 실패:", response.error);
+      }
+    });
+  }
+
+  // 게임 종료 (방장만)
+  function endGame() {
+    if (!currentRoom) return;
+
+    socket.emit("game-end", {
+      roomCode: currentRoom.code
+    }, (response: any) => {
+      if (response.success) {
+        console.log("게임 강제 종료");
+      } else {
+        statusMessage = `❌ 게임 종료 실패: ${response.error}`;
+        console.error("게임 종료 실패:", response.error);
+      }
+    });
+  }
+
+  // 방장 여부 확인
+  let isHost = $derived(currentRoom && currentRoom.players.some((p: any) => p.id === socket?.id && p.isHost));
 </script>
 
 <main>
@@ -241,10 +386,91 @@
               {#if player.isHost}
                 <span class="host-badge">👑</span>
               {/if}
+              {#if player.score !== undefined}
+                <span class="score">({player.score}점)</span>
+              {/if}
             </span>
           </div>
         {/each}
       </div>
+
+      {#if !gameStarted && !gameResult}
+        <!-- 게임 시작 전 -->
+        {#if isHost}
+          <button class="game-button" onclick={startGame}>
+            🎮 게임 시작
+          </button>
+        {:else}
+          <div class="waiting-message">
+            ⏳ 방장이 게임을 시작하기를 기다리는 중...
+          </div>
+        {/if}
+      {:else if gameStarted}
+        <!-- 게임 진행 중 -->
+        <div class="game-controls">
+          <h3>🎮 게임 진행 중 (Round {currentRound}/{totalRounds})</h3>
+
+          {#if currentTrack}
+            <!-- YouTube 플레이어 -->
+            <div class="youtube-player">
+              <iframe
+                width="100%"
+                height="300"
+                src="{currentTrack.embedUrl}?autoplay=1&start={currentTrack.startSeconds}&end={currentTrack.endSeconds}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+
+            <!-- 정답 입력 -->
+            <div class="answer-input">
+              <input
+                type="text"
+                bind:value={answer}
+                placeholder="정답을 입력하세요..."
+                onkeydown={(e) => e.key === 'Enter' && submitAnswer()}
+              />
+              <button onclick={submitAnswer} disabled={!answer.trim()}>
+                ✅ 제출
+              </button>
+            </div>
+          {/if}
+
+          {#if isHost}
+            <div class="host-controls">
+              <button onclick={nextRound}>
+                ⏭️ 다음 라운드
+              </button>
+              <button class="end-button" onclick={endGame}>
+                🛑 게임 종료
+              </button>
+            </div>
+          {/if}
+        </div>
+      {:else if gameResult}
+        <!-- 게임 결과 -->
+        <div class="game-result">
+          <h3>🎊 게임 종료!</h3>
+          {#if gameResult.winner}
+            <div class="winner">
+              <p>🏆 우승자: <strong>{gameResult.winner.nickname}</strong></p>
+              <p>점수: {gameResult.winner.score}점</p>
+            </div>
+          {/if}
+
+          <h4>최종 순위</h4>
+          <div class="final-scores">
+            {#each gameResult.finalScores as score, index}
+              <div class="score-item">
+                <span class="rank">{index + 1}위</span>
+                <span class="player">{score.nickname}</span>
+                <span class="score">{score.score}점</span>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
 
       <button class="leave-button" onclick={leaveRoom}>
         🚪 방 나가기
@@ -466,6 +692,140 @@
 
   .leave-button:hover:not(:disabled) {
     background-color: #616161;
+  }
+
+  /* 게임 컨트롤 */
+  .score {
+    color: #ff3e00;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .game-button {
+    margin-top: 1.5rem;
+    background-color: #4caf50;
+  }
+
+  .game-button:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+
+  .waiting-message {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border-radius: 8px;
+    color: #856404;
+    font-weight: 500;
+  }
+
+  .game-controls {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .youtube-player {
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .youtube-player iframe {
+    display: block;
+  }
+
+  .answer-input {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .answer-input input {
+    flex: 1;
+  }
+
+  .answer-input button {
+    width: auto;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .host-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .host-controls button {
+    flex: 1;
+  }
+
+  .end-button {
+    background-color: #f44336;
+  }
+
+  .end-button:hover:not(:disabled) {
+    background-color: #d32f2f;
+  }
+
+  .game-result {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .winner {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #fff8e1;
+    border-radius: 8px;
+    border: 2px solid #ffd54f;
+  }
+
+  .winner p {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+  }
+
+  .winner strong {
+    color: #ff3e00;
+  }
+
+  .final-scores {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .score-item .rank {
+    font-weight: 700;
+    color: #ff3e00;
+    min-width: 40px;
+  }
+
+  .score-item .player {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .score-item .score {
+    font-weight: 600;
+    color: #4caf50;
+    margin: 0;
   }
 
   /* 하단 정보 */

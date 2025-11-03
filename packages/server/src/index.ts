@@ -5,6 +5,7 @@ import cors from "cors";
 import { config, validateEnvYouTube } from "./config/env.js";
 import { youtubeService } from "./services/youtube.js";
 import { registerRoomHandlers } from "./socket/handlers/room.handler.js";
+import { registerGameHandlers } from "./socket/handlers/game.handler.js";
 import playlists from "./data/playlists.json" with { type: "json" };
 
 const app = express();
@@ -112,6 +113,9 @@ io.on("connection", (socket) => {
 
   // 방 관리 핸들러 등록
   registerRoomHandlers(io, socket);
+
+  // 게임 핸들러 등록
+  registerGameHandlers(io, socket);
 
   socket.on("disconnect", () => {
     console.log(`❌ Client disconnected: ${socket.id}`);

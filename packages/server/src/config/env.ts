@@ -20,6 +20,10 @@ export const config = {
   cors: {
     frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   },
+  game: {
+    // 기본 플레이리스트 ID (환경 변수로 설정 가능)
+    defaultPlaylistId: process.env.DEFAULT_PLAYLIST_ID || "test-playlist",
+  },
 };
 
 export function validateEnvYouTube() {

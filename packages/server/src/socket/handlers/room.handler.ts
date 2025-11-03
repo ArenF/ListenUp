@@ -2,6 +2,7 @@ import type { Server, Socket } from "socket.io";
 import { roomService } from "../../services/room.js";
 import type { Room, RoomSettings } from "../../types/index.js";
 import * as events from "../events.js";
+import { config } from "../../config/env.js";
 
 // ============================================================================
 // 타입 정의
@@ -74,7 +75,7 @@ function validateRoomSettings(settings: Partial<RoomSettings>): RoomSettings {
   return {
     maxPlayers: settings.maxPlayers || 8,
     roundInterval: settings.roundInterval || 30,
-    playlistId: settings.playlistId || "test-playlist",
+    playlistId: settings.playlistId || config.game.defaultPlaylistId,
   };
 }
 
