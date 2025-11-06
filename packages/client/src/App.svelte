@@ -19,6 +19,11 @@
   let answer = $state("");
   let gameResult = $state<any>(null);
 
+  // YouTube Player 상태
+  let player: any = null;
+  let playerReady = $state(false);
+  let isMuted = $state(true);
+
   onMount(() => {
     // Socket.IO 초기화 및 연결
     socket = initSocket();
@@ -135,13 +140,84 @@
 
     (window as any).onYouTubeIframeAPIReady = () => {
       console.log('YouTube Player API 로드 완료!');
+      playerReady = true;
     };
 
     // 컴포넌트 정리
     return () => {
       socket.disconnect();
+      if (player) {
+        player.destroy();
+      }
     };
   });
+
+  // YouTube Player 초기화 및 업데이트
+  $effect(() => {
+    if (!playerReady || !currentTrack) {
+      return;
+    }
+
+    const YT = (window as any).YT;
+    if (!YT || !YT.Player) {
+      console.error('YouTube Player API가 로드되지 않았습니다');
+      return;
+    }
+
+    // 플레이어가 이미 존재하면 비디오만 변경
+    if (player && typeof player.loadVideoById === 'function') {
+      console.log('기존 플레이어에 새 비디오 로드:', currentTrack.id);
+      player.loadVideoById({
+        videoId: currentTrack.id,
+        startSeconds: currentTrack.startSeconds,
+        endSeconds: currentTrack.endSeconds,
+      });
+      player.mute(); // 자동 재생을 위해 음소거
+      isMuted = true;
+      return;
+    }
+
+    // 새 플레이어 생성
+    console.log('YouTube Player 생성 중...', currentTrack.id);
+    player = new YT.Player('youtube-player', {
+      height: '300',
+      width: '100%',
+      videoId: currentTrack.id,
+      playerVars: {
+        autoplay: 1,
+        start: currentTrack.startSeconds,
+        end: currentTrack.endSeconds,
+        controls: 1,
+        rel: 0,
+        modestbranding: 1,
+      },
+      events: {
+        onReady: (event: any) => {
+          console.log('YouTube Player 준비 완료!');
+          event.target.mute(); // 자동 재생을 위해 초기에는 음소거
+          event.target.playVideo();
+          isMuted = true;
+        },
+        onError: (event: any) => {
+          console.error('YouTube Player 에러:', event.data);
+          statusMessage = '❌ 영상 재생 오류';
+        },
+      },
+    });
+  });
+
+  // 음소거 토글
+  function toggleMute() {
+    if (!player) return;
+
+    if (isMuted) {
+      player.unMute();
+      isMuted = false;
+    } else {
+      player.mute();
+      isMuted = true;
+    }
+  }
 
   // 방 생성
   function createRoom() {
@@ -413,14 +489,10 @@
           {#if currentTrack}
             <!-- YouTube 플레이어 -->
             <div class="youtube-player">
-              <iframe
-                width="100%"
-                height="300"
-                src="{currentTrack.embedUrl}?autoplay=1&start={currentTrack.startSeconds}&end={currentTrack.endSeconds}"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
+              <div id="youtube-player"></div>
+              <button class="mute-button" onclick={toggleMute}>
+                {isMuted ? '🔇 음소거 해제' : '🔊 음소거'}
+              </button>
             </div>
 
             <!-- 정답 입력 -->
@@ -732,10 +804,23 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
   }
 
-  .youtube-player iframe {
+  .youtube-player #youtube-player {
     display: block;
+  }
+
+  .mute-button {
+    width: auto;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background-color: #2196f3;
+  }
+
+  .mute-button:hover:not(:disabled) {
+    background-color: #1976d2;
   }
 
   .answer-input {
