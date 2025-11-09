@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { config, validateEnvYouTube } from "./config/env.js";
 import { youtubeService } from "./services/youtube.js";
+import { playlistService } from "./services/playlist.js";
 import { registerRoomHandlers } from "./socket/handlers/room.handler.js";
 import { registerGameHandlers } from "./socket/handlers/game.handler.js";
 import playlists from "./data/playlists.json" with { type: "json" };
@@ -107,6 +108,164 @@ app.get("/api/test/cache-stats", (_req, res) => {
   res.json(youtubeService.getCacheStats());
 });
 
+// ============================================================================
+// 플레이리스트 관리 API
+// ============================================================================
+
+// 모든 플레이리스트 조회
+app.get("/api/playlists", (_req, res) => {
+  try {
+    const allPlaylists = playlistService.getAllPlaylists();
+    res.json(allPlaylists);
+  } catch (error: any) {
+    console.error("Error fetching playlists:", error);
+    res.status(500).json({ error: "Failed to fetch playlists" });
+  }
+});
+
+// 특정 플레이리스트 조회
+app.get("/api/playlists/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const playlist = playlistService.getPlaylist(id);
+
+    if (!playlist) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+
+    return res.json(playlist);
+  } catch (error: any) {
+    console.error("Error fetching playlist:", error);
+    return res.status(500).json({ error: "Failed to fetch playlist" });
+  }
+});
+
+// 플레이리스트 생성
+app.post("/api/playlists", async (req, res) => {
+  try {
+    const { name, description, trackIds } = req.body;
+
+    if (!name || typeof name !== "string") {
+      return res.status(400).json({ error: "Playlist name is required" });
+    }
+
+    const result = await playlistService.createPlaylist(
+      name,
+      description || "",
+      trackIds || []
+    );
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    return res.status(201).json(result.playlist);
+  } catch (error: any) {
+    console.error("Error creating playlist:", error);
+    return res.status(500).json({ error: "Failed to create playlist" });
+  }
+});
+
+// 플레이리스트 수정
+app.put("/api/playlists/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, trackIds } = req.body;
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (trackIds !== undefined) updates.trackIds = trackIds;
+
+    const result = await playlistService.updatePlaylist(id, updates);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    return res.json(result.playlist);
+  } catch (error: any) {
+    console.error("Error updating playlist:", error);
+    return res.status(500).json({ error: "Failed to update playlist" });
+  }
+});
+
+// 플레이리스트 삭제
+app.delete("/api/playlists/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await playlistService.deletePlaylist(id);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    return res.json({ message: "Playlist deleted successfully" });
+  } catch (error: any) {
+    console.error("Error deleting playlist:", error);
+    return res.status(500).json({ error: "Failed to delete playlist" });
+  }
+});
+
+// 플레이리스트에 트랙 추가
+app.post("/api/playlists/:id/tracks", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { trackId } = req.body;
+
+    if (!trackId || typeof trackId !== "string") {
+      return res.status(400).json({ error: "Track ID is required" });
+    }
+
+    const result = await playlistService.addTrack(id, trackId);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    return res.json(result.playlist);
+  } catch (error: any) {
+    console.error("Error adding track:", error);
+    return res.status(500).json({ error: "Failed to add track" });
+  }
+});
+
+// 플레이리스트에서 트랙 제거
+app.delete("/api/playlists/:id/tracks/:trackId", async (req, res) => {
+  try {
+    const { id, trackId } = req.params;
+
+    const result = await playlistService.removeTrack(id, trackId);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    return res.json(result.playlist);
+  } catch (error: any) {
+    console.error("Error removing track:", error);
+    return res.status(500).json({ error: "Failed to remove track" });
+  }
+});
+
+// YouTube 트랙 정보 조회 (플레이리스트 관리용)
+app.get("/api/youtube/track/:trackId", async (req, res) => {
+  try {
+    const { trackId } = req.params;
+    const track = await youtubeService.getTrack(trackId);
+
+    if (!track) {
+      return res.status(404).json({ error: "Track not found or unavailable" });
+    }
+
+    return res.json(track);
+  } catch (error: any) {
+    console.error("Error fetching YouTube track:", error);
+    return res.status(500).json({ error: "Failed to fetch track" });
+  }
+});
+
 //소켓 연결
 io.on("connection", (socket) => {
   console.log(`✅ Client connected: ${socket.id}`);
@@ -122,9 +281,20 @@ io.on("connection", (socket) => {
   });
 });
 
-validateEnvYouTube();
+// 초기화 및 서버 시작
+async function startServer() {
+  validateEnvYouTube();
 
-httpServer.listen(config.server.port, () => {
-  console.log(`Server running on http://localhost:${config.server.port}`);
-  console.log(`Socket.IO Ready`);
+  // 플레이리스트 서비스 초기화
+  await playlistService.initialize();
+
+  httpServer.listen(config.server.port, () => {
+    console.log(`Server running on http://localhost:${config.server.port}`);
+    console.log(`Socket.IO Ready`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
 });

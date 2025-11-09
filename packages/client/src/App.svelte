@@ -2,6 +2,10 @@
   import { onMount } from "svelte";
   import { initSocket } from "./lib/socket";
   import type { Socket } from "socket.io-client";
+  import PlaylistManager from "./lib/components/PlaylistManager.svelte";
+
+  // 페이지 라우팅
+  let currentPage = $state<"game" | "playlist">("game");
 
   let socket: Socket;
   let connected = $state(false);
@@ -10,6 +14,10 @@
   let statusMessage = $state("서버에 연결되지 않음");
   let players = $state<any[]>([]);
   let currentRoom = $state<any>(null);
+
+  // 플레이리스트 선택
+  let playlists = $state<any[]>([]);
+  let selectedPlaylistId = $state("test-playlist");
 
   // 게임 상태
   let gameStarted = $state(false);
@@ -32,6 +40,9 @@
   let roundEnded = $state(false);
 
   onMount(() => {
+    // 플레이리스트 목록 로드
+    loadPlaylists();
+
     // Socket.IO 초기화 및 연결
     socket = initSocket();
 
@@ -268,6 +279,19 @@
     });
   });
 
+  // 플레이리스트 목록 로드
+  async function loadPlaylists() {
+    try {
+      const response = await fetch("/api/playlists");
+      if (response.ok) {
+        playlists = await response.json();
+        console.log("✅ Loaded playlists:", playlists);
+      }
+    } catch (error) {
+      console.error("❌ Failed to load playlists:", error);
+    }
+  }
+
   // 서버에 플레이어 준비 완료 알림
   function notifyPlayerReady() {
     if (!currentRoom) return;
@@ -298,7 +322,7 @@
       settings: {
         maxPlayers: 8,
         roundInterval: 30,
-        playlistId: "test-playlist"
+        playlistId: selectedPlaylistId
       }
     }, (response: any) => {
       if (response.success) {
@@ -456,13 +480,38 @@
 </script>
 
 <main>
-  <h1>🎵 ListenUp! 테스트</h1>
+  <!-- 네비게이션 -->
+  <nav class="navbar">
+    <h1>🎵 ListenUp!</h1>
+    <div class="nav-buttons">
+      <button
+        class="nav-button"
+        class:active={currentPage === "game"}
+        onclick={() => currentPage = "game"}
+      >
+        🎮 게임
+      </button>
+      <button
+        class="nav-button"
+        class:active={currentPage === "playlist"}
+        onclick={() => currentPage = "playlist"}
+      >
+        🎵 플레이리스트 관리
+      </button>
+    </div>
+  </nav>
 
-  <!-- 연결 상태 -->
-  <div class="status-bar" class:connected={connected}>
-    <div class="status-indicator"></div>
-    <span>{statusMessage}</span>
-  </div>
+  {#if currentPage === "playlist"}
+    <!-- 플레이리스트 관리 페이지 -->
+    <PlaylistManager />
+  {:else}
+    <!-- 게임 페이지 -->
+    <div class="game-container">
+      <!-- 연결 상태 -->
+      <div class="status-bar" class:connected={connected}>
+        <div class="status-indicator"></div>
+        <span>{statusMessage}</span>
+      </div>
 
   {#if !currentRoom}
     <!-- 방 생성/참가 폼 -->
@@ -480,6 +529,14 @@
 
       <div class="section">
         <h2>방 생성</h2>
+        <div class="input-group">
+          <label for="playlist">플레이리스트 선택</label>
+          <select id="playlist" bind:value={selectedPlaylistId} disabled={!connected}>
+            {#each playlists as playlist}
+              <option value={playlist.id}>{playlist.name} ({playlist.trackIds.length} 트랙)</option>
+            {/each}
+          </select>
+        </div>
         <button
           onclick={createRoom}
           disabled={!connected || !nickname.trim()}
@@ -655,21 +712,69 @@
     </div>
   {/if}
 
-  <div class="info">
-    <p>🔧 Socket.IO 연결 테스트 v2.0</p>
-    <p>Backend: Node.js + Socket.IO + TypeScript</p>
-    <p>Frontend: Svelte 5 + Socket.IO Client</p>
-  </div>
+      <div class="info">
+        <p>🔧 Socket.IO 연결 테스트 v2.0</p>
+        <p>Backend: Node.js + Socket.IO + TypeScript</p>
+        <p>Frontend: Svelte 5 + Socket.IO Client</p>
+      </div>
+    </div>
+  {/if}
 </main>
 
 <style>
   main {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* 네비게이션 */
+  .navbar {
+    background-color: #ff3e00;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .nav-button {
+    padding: 0.75rem 1.5rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .nav-button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .nav-button.active {
+    background-color: white;
+    color: #ff3e00;
+    border-color: white;
+  }
+
+  /* 게임 컨테이너 */
+  .game-container {
     text-align: center;
     padding: 2rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     max-width: 600px;
     margin: 0 auto;
-    min-height: 100vh;
   }
 
   h1 {
@@ -749,7 +854,8 @@
     color: #555;
   }
 
-  input {
+  input,
+  select {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
@@ -759,14 +865,20 @@
     transition: border-color 0.3s;
   }
 
-  input:focus {
+  input:focus,
+  select:focus {
     outline: none;
     border-color: #ff3e00;
   }
 
-  input:disabled {
+  input:disabled,
+  select:disabled {
     background-color: #f0f0f0;
     cursor: not-allowed;
+  }
+
+  select {
+    cursor: pointer;
   }
 
   button {
