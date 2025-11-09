@@ -28,10 +28,14 @@ export interface GameState {
   currentRound: number;
   totalRounds: number;
   currentTrack: Track | null;
+  nextTrack: Track | null;           // 다음 라운드 트랙 (플레이어 준비용)
   roundStartTime: number;
   answers: Map<string, number>;
   scores: Map<string, number>;
   streaks: Map<string, number>;
+  readyPlayers: Set<string>;          // 준비 완료된 플레이어 ID
+  waitingForReady: boolean;           // 플레이어 준비 대기 중
+  tracks: Track[];                    // 게임의 전체 트랙 목록
 }
 
 export interface Playlist {

@@ -41,10 +41,14 @@ export class RoomService {
       currentRound: 0,
       totalRounds: 0,
       currentTrack: null,
+      nextTrack: null,
       roundStartTime: 0,
       answers: new Map(),
       scores: new Map(),
       streaks: new Map(),
+      readyPlayers: new Set(),
+      waitingForReady: false,
+      tracks: [],
     };
 
     const room: Room = {

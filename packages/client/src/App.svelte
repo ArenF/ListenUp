@@ -16,6 +16,7 @@
   let currentRound = $state(0);
   let totalRounds = $state(0);
   let currentTrack = $state<any>(null);
+  let preparedTrack = $state<any>(null);  // 준비 중인 트랙
   let answer = $state("");
   let gameResult = $state<any>(null);
 
@@ -23,6 +24,12 @@
   let player: any = null;
   let playerReady = $state(false);
   let isMuted = $state(true);
+  let isLoadingTrack = $state(false);  // 트랙 로딩 중
+  let readyPlayers = $state(0);  // 준비된 플레이어 수
+  let volume = $state(50);  // 음량 (0-100)
+
+  // 라운드 종료 상태
+  let roundEnded = $state(false);
 
   onMount(() => {
     // Socket.IO 초기화 및 연결
@@ -84,13 +91,42 @@
       statusMessage = `🎮 게임 시작! (총 ${data.totalRounds}라운드)`;
     });
 
-    // 라운드 시작 알림
+    // 라운드 준비 요청 (새로운 이벤트!)
+    socket.on("prepare-round", (data) => {
+      console.log("📋 라운드 준비 요청:", data);
+      preparedTrack = data.track;
+      currentRound = data.roundNumber;
+      roundEnded = false;
+      readyPlayers = 0;
+      statusMessage = `⏳ Round ${data.roundNumber} - 로딩 중...`;
+      isLoadingTrack = true;
+
+      // YouTube Player에 트랙 로드 (자동으로 $effect 트리거)
+    });
+
+    // 준비 상태 업데이트
+    socket.on("player-ready-status", (data) => {
+      console.log("✅ 플레이어 준비:", data);
+      readyPlayers = data.readyCount;
+      statusMessage = `⏳ 플레이어 준비 중... (${data.readyCount}/${data.totalPlayers})`;
+    });
+
+    // 라운드 시작 알림 (모든 플레이어 준비 완료 후)
     socket.on("round-started", (data) => {
       console.log("🎵 라운드 시작!", data);
-      currentRound = data.roundNumber;
       currentTrack = data.track;
+      preparedTrack = null;
       answer = "";
+      isLoadingTrack = false;
       statusMessage = `🎵 Round ${data.roundNumber}/${totalRounds} - 음악을 듣고 맞춰보세요!`;
+
+      // 음소거 해제하고 재생 시작 (사용자 인터랙션 보장됨)
+      if (player) {
+        player.unMute();
+        isMuted = false;
+        player.setVolume(volume);  // 설정된 음량 적용
+        player.playVideo();
+      }
     });
 
     // 정답 제출 알림
@@ -119,6 +155,12 @@
       console.log("🏁 라운드 종료!", data);
       statusMessage = `🏁 정답: ${data.result.track.name} - ${data.result.track.artist}`;
       currentTrack = null;
+      roundEnded = true;
+
+      // 플레이어 일시정지
+      if (player) {
+        player.pauseVideo();
+      }
     });
 
     // 게임 종료
@@ -139,7 +181,7 @@
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
     (window as any).onYouTubeIframeAPIReady = () => {
-      console.log('YouTube Player API 로드 완료!');
+      console.log('✅ YouTube Player API 로드 완료!');
       playerReady = true;
     };
 
@@ -154,69 +196,93 @@
 
   // YouTube Player 초기화 및 업데이트
   $effect(() => {
-    if (!playerReady || !currentTrack) {
+    if (!playerReady || !preparedTrack || !currentRoom) {
       return;
     }
 
     const YT = (window as any).YT;
     if (!YT || !YT.Player) {
-      console.error('YouTube Player API가 로드되지 않았습니다');
+      console.error('❌ YouTube Player API가 로드되지 않았습니다');
       return;
     }
 
     // 플레이어가 이미 존재하면 비디오만 변경
     if (player && typeof player.loadVideoById === 'function') {
-      console.log('기존 플레이어에 새 비디오 로드:', currentTrack.id);
+      console.log('🔄 기존 플레이어에 새 비디오 로드:', preparedTrack.id);
+
+      // 비디오 로드 (음소거 상태로)
       player.loadVideoById({
-        videoId: currentTrack.id,
-        startSeconds: currentTrack.startSeconds,
-        endSeconds: currentTrack.endSeconds,
+        videoId: preparedTrack.id,
+        startSeconds: preparedTrack.startSeconds,
+        endSeconds: preparedTrack.endSeconds,
       });
-      player.mute(); // 자동 재생을 위해 음소거
+
+      // 음소거로 시작 (자동 재생 허용)
+      player.mute();
       isMuted = true;
+
+      // 플레이어가 준비되면 일시정지하고 서버에 알림
+      setTimeout(() => {
+        player.pauseVideo();
+        notifyPlayerReady();
+      }, 500);
+
       return;
     }
 
     // 새 플레이어 생성
-    console.log('YouTube Player 생성 중...', currentTrack.id);
+    console.log('🎬 YouTube Player 생성 중...', preparedTrack.id);
     player = new YT.Player('youtube-player', {
       height: '300',
       width: '100%',
-      videoId: currentTrack.id,
+      videoId: preparedTrack.id,
       playerVars: {
         autoplay: 1,
-        start: currentTrack.startSeconds,
-        end: currentTrack.endSeconds,
-        controls: 1,
+        start: preparedTrack.startSeconds,
+        end: preparedTrack.endSeconds,
+        controls: 0,  // 컨트롤 숨김
         rel: 0,
         modestbranding: 1,
+        disablekb: 1,  // 키보드 입력 비활성화
       },
       events: {
         onReady: (event: any) => {
-          console.log('YouTube Player 준비 완료!');
-          event.target.mute(); // 자동 재생을 위해 초기에는 음소거
-          event.target.playVideo();
+          console.log('✅ YouTube Player 준비 완료!');
+
+          // 음소거로 시작 (자동 재생 허용)
+          event.target.mute();
           isMuted = true;
+
+          // 일시정지 (준비만 하고 대기)
+          setTimeout(() => {
+            event.target.pauseVideo();
+            notifyPlayerReady();
+          }, 500);
         },
         onError: (event: any) => {
-          console.error('YouTube Player 에러:', event.data);
+          console.error('❌ YouTube Player 에러:', event.data);
           statusMessage = '❌ 영상 재생 오류';
+          isLoadingTrack = false;
         },
       },
     });
   });
 
-  // 음소거 토글
-  function toggleMute() {
-    if (!player) return;
+  // 서버에 플레이어 준비 완료 알림
+  function notifyPlayerReady() {
+    if (!currentRoom) return;
 
-    if (isMuted) {
-      player.unMute();
-      isMuted = false;
-    } else {
-      player.mute();
-      isMuted = true;
-    }
+    console.log('📤 서버에 준비 완료 알림 전송');
+    socket.emit("player-ready", {
+      roomCode: currentRoom.code
+    }, (response: any) => {
+      if (response.success) {
+        console.log('✅ 준비 완료 확인됨');
+        isLoadingTrack = false;
+      } else {
+        console.error('❌ 준비 실패:', response.error);
+      }
+    });
   }
 
   // 방 생성
@@ -345,12 +411,12 @@
   function nextRound() {
     if (!currentRoom) return;
 
-    statusMessage = "⏳ 다음 라운드 시작 중...";
+    statusMessage = "⏳ 다음 라운드 준비 중...";
     socket.emit("next-round", {
       roomCode: currentRoom.code
     }, (response: any) => {
       if (response.success) {
-        console.log("다음 라운드 시작");
+        console.log("다음 라운드 준비");
       } else {
         statusMessage = `❌ 다음 라운드 실패: ${response.error}`;
         console.error("다음 라운드 실패:", response.error);
@@ -372,6 +438,17 @@
         console.error("게임 종료 실패:", response.error);
       }
     });
+  }
+
+  // 음량 조절 함수
+  function handleVolumeChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    volume = parseInt(target.value);
+
+    if (player && typeof player.setVolume === 'function') {
+      player.setVolume(volume);
+      console.log(`🔊 음량 변경: ${volume}%`);
+    }
   }
 
   // 방장 여부 확인
@@ -486,15 +563,39 @@
         <div class="game-controls">
           <h3>🎮 게임 진행 중 (Round {currentRound}/{totalRounds})</h3>
 
-          {#if currentTrack}
-            <!-- YouTube 플레이어 -->
-            <div class="youtube-player">
+          {#if isLoadingTrack}
+            <div class="loading-status">
+              ⏳ 트랙 로딩 중... ({readyPlayers}/{players.length} 플레이어 준비 완료)
+            </div>
+          {/if}
+
+          {#if preparedTrack || currentTrack}
+            <!-- YouTube 플레이어 (화면 숨김) -->
+            <div class="youtube-player-hidden">
               <div id="youtube-player"></div>
-              <button class="mute-button" onclick={toggleMute}>
-                {isMuted ? '🔇 음소거 해제' : '🔊 음소거'}
-              </button>
             </div>
 
+            {/if}
+
+          {#if (preparedTrack || currentTrack) && !isMuted}
+            <!-- 음량 조절 슬라이더 -->
+            <div class="volume-control">
+              <label for="volume-slider">
+                🔊 음량: {volume}%
+              </label>
+              <input
+                id="volume-slider"
+                type="range"
+                min="0"
+                max="100"
+                bind:value={volume}
+                oninput={handleVolumeChange}
+                class="volume-slider"
+              />
+            </div>
+          {/if}
+
+          {#if currentTrack && !roundEnded}
             <!-- 정답 입력 -->
             <div class="answer-input">
               <input
@@ -509,7 +610,7 @@
             </div>
           {/if}
 
-          {#if isHost}
+          {#if isHost && roundEnded}
             <div class="host-controls">
               <button onclick={nextRound}>
                 ⏭️ 다음 라운드
@@ -517,6 +618,10 @@
               <button class="end-button" onclick={endGame}>
                 🛑 게임 종료
               </button>
+            </div>
+          {:else if roundEnded}
+            <div class="waiting-message">
+              ⏳ 방장이 다음 라운드를 시작하기를 기다리는 중...
             </div>
           {/if}
         </div>
@@ -551,7 +656,7 @@
   {/if}
 
   <div class="info">
-    <p>🔧 Socket.IO 연결 테스트 v1.0</p>
+    <p>🔧 Socket.IO 연결 테스트 v2.0</p>
     <p>Backend: Node.js + Socket.IO + TypeScript</p>
     <p>Frontend: Svelte 5 + Socket.IO Client</p>
   </div>
@@ -791,6 +896,15 @@
     font-weight: 500;
   }
 
+  .loading-status {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #e3f2fd;
+    border-radius: 8px;
+    color: #1976d2;
+    font-weight: 500;
+  }
+
   .game-controls {
     margin-top: 1.5rem;
     padding: 1.5rem;
@@ -799,28 +913,75 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  .youtube-player {
-    margin: 1rem 0;
-    border-radius: 8px;
+  /* YouTube 플레이어 숨김 */
+  .youtube-player-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    position: relative;
+    clip: rect(0, 0, 0, 0);
+    opacity: 0;
+    pointer-events: none;
   }
 
-  .youtube-player #youtube-player {
+  /* 음량 조절 */
+  .volume-control {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .volume-control label {
     display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #555;
+    font-size: 1rem;
   }
 
-  .mute-button {
-    width: auto;
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    background-color: #2196f3;
+  .volume-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #ddd 0%, #ff3e00 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
-  .mute-button:hover:not(:disabled) {
-    background-color: #1976d2;
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff3e00;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+  }
+
+  .volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 6px rgba(255, 62, 0, 0.4);
+  }
+
+  .volume-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff3e00;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+  }
+
+  .volume-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 6px rgba(255, 62, 0, 0.4);
   }
 
   .answer-input {

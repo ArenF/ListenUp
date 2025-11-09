@@ -79,10 +79,14 @@ export class GameService {
     room.gameState.currentRound = 0;
     room.gameState.totalRounds = playlist.roundCount;
     room.gameState.currentTrack = null;
+    room.gameState.nextTrack = null;
     room.gameState.roundStartTime = 0;
     room.gameState.answers = new Map();
     room.gameState.scores = new Map();
     room.gameState.streaks = new Map();
+    room.gameState.readyPlayers = new Set();
+    room.gameState.waitingForReady = false;
+    room.gameState.tracks = [];
 
     // 모든 플레이어 점수 초기화
     for (const [playerId] of room.players) {
@@ -463,6 +467,153 @@ export class GameService {
    */
   getGameState(room: Room): GameState {
     return room.gameState;
+  }
+
+  // ============================================================================
+  // 플레이어 준비 상태 관리
+  // ============================================================================
+
+  /**
+   * 게임 트랙 목록 저장
+   *
+   * @param room 방 정보
+   * @param tracks 트랙 목록
+   */
+  setTracks(room: Room, tracks: Track[]): void {
+    room.gameState.tracks = tracks;
+    console.log(`📀 Loaded ${tracks.length} tracks for room ${room.code}`);
+  }
+
+  /**
+   * 다음 라운드 트랙 준비
+   *
+   * @param room 방 정보
+   * @returns 다음 트랙 또는 null
+   */
+  prepareNextRound(room: Room): Track | null {
+    const tracks = room.gameState.tracks;
+
+    if (!tracks || tracks.length === 0) {
+      return null;
+    }
+
+    // 다음 라운드 번호
+    const nextRoundNumber = room.gameState.currentRound + 1;
+
+    if (nextRoundNumber > room.gameState.totalRounds) {
+      return null; // 모든 라운드 완료
+    }
+
+    // 랜덤 트랙 선택 (중복 방지는 추후 개선)
+    const randomIndex = Math.floor(Math.random() * tracks.length);
+    const selectedTrack = tracks[randomIndex];
+
+    room.gameState.nextTrack = selectedTrack;
+    room.gameState.waitingForReady = true;
+    room.gameState.readyPlayers.clear();
+
+    console.log(`🎵 Prepared next track: ${selectedTrack.name} - ${selectedTrack.artist}`);
+
+    return selectedTrack;
+  }
+
+  /**
+   * 플레이어를 준비 완료 상태로 표시
+   *
+   * @param room 방 정보
+   * @param playerId 플레이어 ID
+   * @returns 성공 여부
+   */
+  markPlayerReady(room: Room, playerId: string): { success: boolean; error?: string } {
+    // 검증: 플레이어가 방에 없음
+    if (!room.players.has(playerId)) {
+      return { success: false, error: "방에 존재하지 않는 플레이어입니다" };
+    }
+
+    // 검증: 준비 대기 중이 아님
+    if (!room.gameState.waitingForReady) {
+      return { success: false, error: "현재 준비를 기다리는 상태가 아닙니다" };
+    }
+
+    // 이미 준비된 플레이어
+    if (room.gameState.readyPlayers.has(playerId)) {
+      return { success: true }; // 중복 준비는 무시
+    }
+
+    room.gameState.readyPlayers.add(playerId);
+
+    const player = room.players.get(playerId);
+    console.log(`✅ ${player?.nickname} is ready (${room.gameState.readyPlayers.size}/${room.players.size})`);
+
+    return { success: true };
+  }
+
+  /**
+   * 모든 플레이어가 준비되었는지 확인
+   *
+   * @param room 방 정보
+   * @returns 모든 플레이어 준비 여부
+   */
+  isAllPlayersReady(room: Room): boolean {
+    return room.gameState.readyPlayers.size === room.players.size;
+  }
+
+  /**
+   * 준비 상태 초기화
+   *
+   * @param room 방 정보
+   */
+  resetReadyStatus(room: Room): void {
+    room.gameState.readyPlayers.clear();
+    room.gameState.waitingForReady = false;
+  }
+
+  /**
+   * 준비된 트랙으로 라운드 시작
+   * (prepareNextRound로 준비된 트랙을 currentTrack으로 이동)
+   *
+   * @param room 방 정보
+   * @returns 라운드 정보
+   */
+  activatePreparedRound(room: Room): { success: boolean; error?: string; track?: Track; roundNumber?: number } {
+    // 검증: 게임이 진행 중이 아님
+    if (!room.gameState.isPlaying) {
+      return { success: false, error: "게임이 시작되지 않았습니다" };
+    }
+
+    // 검증: 준비된 트랙이 없음
+    if (!room.gameState.nextTrack) {
+      return { success: false, error: "준비된 트랙이 없습니다" };
+    }
+
+    // 검증: 모든 플레이어가 준비되지 않음
+    if (!this.isAllPlayersReady(room)) {
+      return { success: false, error: "모든 플레이어가 준비되지 않았습니다" };
+    }
+
+    // 라운드 번호 증가
+    room.gameState.currentRound += 1;
+
+    // 이전 라운드 답안 초기화
+    room.gameState.answers.clear();
+
+    // 준비된 트랙을 현재 트랙으로 이동
+    const selectedTrack = room.gameState.nextTrack;
+    room.gameState.currentTrack = selectedTrack;
+    room.gameState.nextTrack = null;
+    room.gameState.roundStartTime = Date.now();
+
+    // 준비 상태 초기화
+    this.resetReadyStatus(room);
+
+    console.log(`🎵 Round ${room.gameState.currentRound}/${room.gameState.totalRounds} activated`);
+    console.log(`🎧 Track: ${selectedTrack.name} - ${selectedTrack.artist}`);
+
+    return {
+      success: true,
+      track: selectedTrack,
+      roundNumber: room.gameState.currentRound,
+    };
   }
 }
 
