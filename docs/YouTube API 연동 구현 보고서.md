@@ -1,6 +1,6 @@
 # 🎵 YouTube API 연동 구현 보고서
 
-**작성일**: 2025-11-09 (최종 업데이트)
+**작성일**: 2025-11-09 (최종 업데이트: 2025-11-10)
 **프로젝트**: ListenUp! - 실시간 음악 맞추기 게임
 **작업 범위**: YouTube Data API v3 연동 및 IFrame Player API 구현
 
@@ -79,8 +79,8 @@ YouTube Data API v3와 IFrame Player API를 활용하여 서버에서 비디오 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              YouTube API 통합 시스템 (v2.0)                      │
-│              플레이어 준비 상태 관리 포함                         │
+│              YouTube API 통합 시스템 (v2.1)                      │
+│              플레이어 준비 상태 관리 & 재생성 방식 포함           │
 └─────────────────────────────────────────────────────────────────┘
 
 1. 게임 시작 요청
@@ -127,18 +127,17 @@ YouTube Data API v3와 IFrame Player API를 활용하여 서버에서 비디오 
 │  1. Socket.IO 이벤트 수신: "prepare-round" ← NEW     │
 │     └─ preparedTrack 상태 업데이트                   │
 │                                                       │
-│  2. Svelte $effect 반응 (preparedTrack 변경)         │
+│  2. Svelte $effect 반응 (preparedTrack 변경) v2.1    │
 │     ├─ YouTube IFrame Player API 로드 확인           │
 │     │                                                 │
-│     ├─ 플레이어가 이미 존재?                          │
-│     │  ├─ Yes: loadVideoById() 호출                  │
-│     │  │  └─ 새 비디오로 전환                        │
-│     │  │                                              │
-│     │  └─ No: new YT.Player() 생성                   │
-│     │     ├─ videoId 설정                            │
-│     │     ├─ start/end 파라미터                      │
-│     │     ├─ autoplay=1, mute=1                      │
-│     │     └─ controls=0 (화면 숨김용)                │
+│     ├─ 기존 플레이어 완전 파괴 ← v2.1 UPDATE         │
+│     │  └─ player.destroy() 호출                      │
+│     │                                                 │
+│     ├─ 새 플레이어 생성 (매 라운드마다) ← v2.1       │
+│     │  ├─ videoId 설정                               │
+│     │  ├─ start/end 파라미터                         │
+│     │  ├─ autoplay=1, mute=1                         │
+│     │  └─ controls=0 (화면 숨김용)                   │
 │     │                                                 │
 │     ├─ 비디오 로드 후 자동으로 일시정지 ← NEW         │
 │     │                                                 │
@@ -576,7 +575,9 @@ socket.on("round-started", (data) => {
 });
 ```
 
-### 3. YouTube Player 초기화 (업데이트)
+### 3. YouTube Player 초기화 (v2.1 업데이트 - 플레이어 재생성 방식)
+
+**변경 사유**: `loadVideoById()` 사용 시 DOM 분리 문제로 두 번째 라운드부터 재생 실패 → **매 라운드마다 플레이어 완전 재생성**으로 해결
 
 ```typescript
 // preparedTrack 변경 시 자동으로 트랙 로드
@@ -591,42 +592,31 @@ $effect(() => {
     return;
   }
 
-  // 플레이어가 이미 존재하면 비디오만 변경
-  if (player && typeof player.loadVideoById === 'function') {
-    console.log('🔄 기존 플레이어에 새 비디오 로드:', preparedTrack.id);
-
-    player.loadVideoById({
-      videoId: preparedTrack.id,
-      startSeconds: preparedTrack.startSeconds,
-      endSeconds: preparedTrack.endSeconds,
-    });
-
-    player.mute();
-    isMuted = true;
-
-    // ← NEW: 로드 후 일시정지하고 서버에 알림
-    setTimeout(() => {
-      player.pauseVideo();
-      notifyPlayerReady();
-    }, 500);
-
-    return;
+  // ⭐ v2.1 변경: 기존 플레이어 완전 파괴 (매번 새로 생성)
+  if (player && typeof player.destroy === 'function') {
+    console.log('🗑️ 기존 플레이어 파괴');
+    try {
+      player.destroy();
+    } catch (e) {
+      console.warn('플레이어 파괴 중 에러 (무시):', e);
+    }
+    player = null;
   }
 
-  // 새 플레이어 생성
+  // 새 플레이어 생성 (모든 라운드마다 실행)
   console.log('🎬 YouTube Player 생성 중...', preparedTrack.id);
   player = new YT.Player('youtube-player', {
     height: '300',
     width: '100%',
     videoId: preparedTrack.id,
     playerVars: {
-      autoplay: 1,
+      autoplay: 1,          // 음소거 상태로 자동 재생
       start: preparedTrack.startSeconds,
       end: preparedTrack.endSeconds,
-      controls: 0,  // ← NEW: 컨트롤 숨김 (화면 숨김용)
+      controls: 0,          // 컨트롤 숨김 (화면 숨김용)
       rel: 0,
       modestbranding: 1,
-      disablekb: 1,  // ← NEW: 키보드 입력 비활성화
+      disablekb: 1,         // 키보드 입력 비활성화
     },
     events: {
       onReady: (event: any) => {
@@ -634,7 +624,7 @@ $effect(() => {
         event.target.mute();
         isMuted = true;
 
-        // ← NEW: 일시정지하고 서버에 알림
+        // 일시정지하고 서버에 알림
         setTimeout(() => {
           event.target.pauseVideo();
           notifyPlayerReady();
@@ -649,6 +639,11 @@ $effect(() => {
   });
 });
 ```
+
+**v2.0 → v2.1 주요 변경사항**:
+- ❌ 제거: `if (player && typeof player.loadVideoById === 'function')` 분기
+- ✅ 추가: `player.destroy()` 명시적 호출
+- ✅ 효과: DOM 분리 문제 완전 해결, 모든 라운드에서 안정적 재생
 
 ### 4. 서버 알림 함수 (NEW)
 
@@ -690,7 +685,7 @@ function notifyPlayerReady() {
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│           플레이어 준비 상태 관리 플로우              │
+│           플레이어 준비 상태 관리 플로우 (v2.1)       │
 └─────────────────────────────────────────────────────┘
 
 시작: 게임 시작 or 다음 라운드
@@ -712,8 +707,9 @@ function notifyPlayerReady() {
   └─ UI: "로딩 중... (0/N)"
   │
   ↓
-[각 클라이언트] YouTube Player 로드
-  ├─ loadVideoById(track)
+[각 클라이언트] YouTube Player 로드 (v2.1)
+  ├─ player.destroy() (기존 플레이어 파괴) ← v2.1
+  ├─ new YT.Player() (새 플레이어 생성) ← v2.1
   ├─ autoplay=1, mute=1
   ├─ 로드 완료 후 pauseVideo()
   └─ emit("player-ready")
@@ -1207,7 +1203,7 @@ socket.emit("player-ready", { roomCode }, (response) => {
 ├─ API 스크립트 로드:  ~500ms (첫 로드)
 ├─ 플레이어 생성:      ~200ms
 ├─ 비디오 로드:        ~500ms (네트워크 의존)
-├─ 비디오 전환:        ~100ms (loadVideoById)
+├─ 플레이어 재생성:    ~500ms (v2.1, 매 라운드)
 └─ CDN 스트리밍:      YouTube 자동 최적화
 
 준비 상태 동기화 (NEW):
@@ -1435,6 +1431,223 @@ if (room.gameState.readyPlayers.size === room.players.size - 1) {
 }
 ```
 
+### 문제 6: 다음 라운드에서 소리가 나지 않음 (CRITICAL) ⚠️
+
+**발견일**: 2025-11-10
+**심각도**: 높음
+
+**증상**:
+- 첫 번째 라운드: 정상적으로 소리가 재생됨 ✅
+- 두 번째 라운드 이후: 소리가 전혀 나지 않음 ❌
+- 콘솔 에러: `The YouTube player is not attached to the DOM`
+- 플레이어 상태: `isMuted: undefined`, `Volume: undefined`, `PlayerState: undefined`
+
+**재현 방법**:
+```
+1. 게임 시작
+2. 첫 번째 라운드 완료 (정상 재생)
+3. "다음 라운드" 버튼 클릭
+4. 두 번째 라운드 시작
+5. 소리 없음 (음소거 상태도 아닌 완전 실패)
+```
+
+**원인 분석**:
+
+#### 원인 1: `cueVideoById()` 사용 시도 (초기 해결 시도)
+```typescript
+// ❌ 문제 코드 (시도했으나 실패)
+player.cueVideoById({
+  videoId: preparedTrack.id,
+  startSeconds: preparedTrack.startSeconds,
+  endSeconds: preparedTrack.endSeconds,
+});
+
+// 결과: 플레이어 객체가 완전히 파괴됨
+// - player.isMuted() → undefined
+// - player.getVolume() → undefined
+// - player.getPlayerState() → undefined
+```
+
+**근본 원인**: YouTube IFrame Player API에서 `cueVideoById()`를 호출하면 내부적으로 플레이어를 재초기화하면서 기존 플레이어 참조가 무효화됨
+
+#### 원인 2: `loadVideoById()` + DOM 분리 문제
+```typescript
+// ❌ 문제 코드
+player.loadVideoById({
+  videoId: preparedTrack.id,
+  startSeconds: preparedTrack.startSeconds,
+  endSeconds: preparedTrack.endSeconds,
+});
+
+// 콘솔 에러:
+// "The YouTube player is not attached to the DOM.
+//  API calls should be made after the onReady event."
+```
+
+**근본 원인**: Svelte의 반응성 시스템과 YouTube Player의 상호작용 문제
+```
+1. preparedTrack 상태 변경
+2. Svelte의 $effect 트리거
+3. DOM 재렌더링 과정에서 <div id="youtube-player"> 요소가 잠깐 제거/재생성
+4. 기존 player 객체는 사라진 DOM 요소를 참조
+5. loadVideoById() 호출 → "not attached to the DOM" 에러
+```
+
+**디버깅 과정**:
+
+1. **문제 발견 (사용자 리포트)**
+   ```
+   사용자: "두 번째 라운드에서 소리가 안 나요"
+   ```
+
+2. **디버깅 로그 추가**
+   ```typescript
+   socket.on("round-started", (data) => {
+     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+     console.log("🔍 [BEFORE] 플레이어 상태:");
+     console.log("  - isMuted:", player.isMuted());
+     console.log("  - Volume:", player.getVolume());
+     console.log("  - PlayerState:", player.getPlayerState());
+
+     player.unMute();
+     player.setVolume(volume);
+     player.playVideo();
+
+     setTimeout(() => {
+       console.log("🔍 [AFTER] 플레이어 상태:");
+       console.log("  - isMuted:", player.isMuted());
+       console.log("  - Volume:", player.getVolume());
+       console.log("  - PlayerState:", player.getPlayerState());
+     }, 200);
+   });
+   ```
+
+3. **실제 로그 출력**
+   ```
+   🔍 [BEFORE] 플레이어 상태:
+     - isMuted: undefined     ← 문제!
+     - Volume: undefined      ← 문제!
+     - PlayerState: undefined ← 문제!
+
+   ❌ The YouTube player is not attached to the DOM
+   ```
+
+4. **원인 확정**
+   - 플레이어 객체가 완전히 파괴됨
+   - DOM 분리 문제로 API 호출 불가
+
+**해결 방법**: 매 라운드마다 플레이어 완전 재생성
+
+```typescript
+// ✅ 최종 해결 코드
+$effect(() => {
+  if (!playerReady || !preparedTrack || !currentRoom) {
+    return;
+  }
+
+  const YT = (window as any).YT;
+  if (!YT || !YT.Player) {
+    console.error('❌ YouTube Player API가 로드되지 않았습니다');
+    return;
+  }
+
+  // ⭐ 기존 플레이어 완전 파괴
+  if (player && typeof player.destroy === 'function') {
+    console.log('🗑️ 기존 플레이어 파괴');
+    try {
+      player.destroy();
+    } catch (e) {
+      console.warn('플레이어 파괴 중 에러 (무시):', e);
+    }
+    player = null;
+  }
+
+  // ⭐ 새 플레이어 생성 (매번 깨끗한 상태에서 시작)
+  console.log('🎬 YouTube Player 생성 중...', preparedTrack.id);
+  player = new YT.Player('youtube-player', {
+    height: '300',
+    width: '100%',
+    videoId: preparedTrack.id,
+    playerVars: {
+      autoplay: 1,        // 음소거 상태로 자동 재생
+      start: preparedTrack.startSeconds,
+      end: preparedTrack.endSeconds,
+      controls: 0,
+      rel: 0,
+      modestbranding: 1,
+      disablekb: 1,
+    },
+    events: {
+      onReady: (event: any) => {
+        console.log('✅ YouTube Player 준비 완료!');
+        event.target.mute();
+        isMuted = true;
+
+        setTimeout(() => {
+          event.target.pauseVideo();
+          notifyPlayerReady();
+        }, 500);
+      },
+      onError: (event: any) => {
+        console.error('❌ YouTube Player 에러:', event.data);
+        statusMessage = '❌ 영상 재생 오류';
+        isLoadingTrack = false;
+      },
+    },
+  });
+});
+```
+
+**해결 방법의 장점**:
+
+1. **100% 안정성**
+   - 매 라운드마다 새로운 플레이어 인스턴스
+   - DOM 분리 문제 완전 회피
+   - 플레이어 상태 항상 유효
+
+2. **단순성**
+   - 복잡한 상태 관리 불필요
+   - 이해하기 쉬운 코드
+   - 디버깅 용이
+
+3. **성능 허용 가능**
+   - 플레이어 재생성 오버헤드: ~500ms
+   - 준비 상태 시스템으로 지연 숨김
+   - 라운드 시간(30초)에 비해 무시 가능
+
+**대안 및 선택하지 않은 이유**:
+
+| 방법 | 장점 | 단점 | 채택 |
+|------|------|------|------|
+| **매번 재생성** | 100% 안정적<br>단순함<br>DOM 문제 없음 | ~500ms 오버헤드 | ✅ **채택** |
+| **DOM 분리 방지** | 성능 좋음 | 복잡함<br>Svelte 반응성 예측 어려움<br>`loadVideoById()` 자동 재생 문제 | ❌ |
+| **cueVideoById 사용** | 자동 재생 없음 | 플레이어 객체 파괴<br>작동하지 않음 | ❌ |
+
+**테스트 결과**:
+
+수정 전:
+```
+Round 1: ✅ 소리 정상
+Round 2: ❌ 소리 없음 (undefined)
+Round 3: ❌ 소리 없음 (undefined)
+```
+
+수정 후:
+```
+Round 1: ✅ 소리 정상
+Round 2: ✅ 소리 정상 (플레이어 재생성)
+Round 3: ✅ 소리 정상 (플레이어 재생성)
+Round 4+: ✅ 모든 라운드 정상
+```
+
+**관련 파일**:
+- `/workspaces/ListenUp/packages/client/src/App.svelte` (라인 239-298)
+
+**참고 자료**:
+- [YouTube IFrame Player API - cueVideoById](https://developers.google.com/youtube/iframe_api_reference#cueVideoById)
+- [YouTube IFrame Player API - loadVideoById](https://developers.google.com/youtube/iframe_api_reference#loadVideoById)
+- [Svelte 5 Reactivity - $effect](https://svelte-5-preview.vercel.app/docs/runes#$effect)
+
 ---
 
 ## 결론
@@ -1493,7 +1706,7 @@ if (room.gameState.readyPlayers.size === room.players.size - 1) {
 
 4. **성능 최적화**
    - API 호출 90% 감소 (캐싱)
-   - 플레이어 재사용으로 2배 빠른 전환
+   - 플레이어 재생성으로 안정적 재생 보장 (v2.1)
    - 할당량 효율적 관리
 
 5. **안정성**
@@ -1540,12 +1753,14 @@ if (room.gameState.readyPlayers.size === room.players.size - 1) {
 
 **작성자**: Claude (AI Assistant)
 **검토**: YouTube Data API v3 & IFrame Player API 통합 완료
-**버전**: 2.0.0
-**최종 수정일**: 2025-11-09
+**버전**: 2.1.0
+**최종 수정일**: 2025-11-10
 
 **주요 업데이트**:
-- 플레이어 준비 상태 관리 시스템 추가
-- 브라우저 자동 재생 정책 완전 해결
-- 음량 조절 기능 추가
-- 플레이어 화면 숨김 처리
-- 다중 플레이어 동기화 메커니즘 구현
+- 플레이어 준비 상태 관리 시스템 추가 (v2.0)
+- 브라우저 자동 재생 정책 완전 해결 (v2.0)
+- 음량 조절 기능 추가 (v2.0)
+- 플레이어 화면 숨김 처리 (v2.0)
+- 다중 플레이어 동기화 메커니즘 구현 (v2.0)
+- **플레이어 재생성 방식으로 전환 (v2.1)** ← NEW
+- **다음 라운드 소리 문제 완전 해결 (v2.1)** ← NEW

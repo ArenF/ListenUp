@@ -131,14 +131,45 @@
       isLoadingTrack = false;
       statusMessage = `🎵 Round ${data.roundNumber}/${totalRounds} - 음악을 듣고 맞춰보세요!`;
 
-      // 음소거 해제하고 재생 시작 (사용자 인터랙션 보장됨)
+      // ⭐ 디버깅: 플레이어 상태 확인
       if (player) {
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log("🔍 [BEFORE] 플레이어 상태:");
+        console.log("  - isMuted:", player.isMuted());
+        console.log("  - Volume:", player.getVolume());
+        console.log("  - PlayerState:", player.getPlayerState(), getPlayerStateName(player.getPlayerState()));
+
+        console.log("\n🎬 [ACTION] 음소거 해제 & 재생 시작...");
         player.unMute();
         isMuted = false;
-        player.setVolume(volume);  // 설정된 음량 적용
+        player.setVolume(volume);
         player.playVideo();
+
+        // 약간의 딜레이 후 다시 확인
+        setTimeout(() => {
+          console.log("\n🔍 [AFTER] 플레이어 상태:");
+          console.log("  - isMuted:", player.isMuted());
+          console.log("  - Volume:", player.getVolume());
+          console.log("  - PlayerState:", player.getPlayerState(), getPlayerStateName(player.getPlayerState()));
+          console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        }, 200);
+      } else {
+        console.error("❌ player 객체가 없습니다!");
       }
     });
+
+    // 플레이어 상태 이름 헬퍼 함수
+    function getPlayerStateName(state: number): string {
+      const states: Record<number, string> = {
+        '-1': 'UNSTARTED',
+        '0': 'ENDED',
+        '1': 'PLAYING',
+        '2': 'PAUSED',
+        '3': 'BUFFERING',
+        '5': 'CUED'
+      };
+      return states[state] || 'UNKNOWN';
+    }
 
     // 정답 제출 알림
     socket.on("answer-submitted", (data) => {
@@ -217,28 +248,15 @@
       return;
     }
 
-    // 플레이어가 이미 존재하면 비디오만 변경
-    if (player && typeof player.loadVideoById === 'function') {
-      console.log('🔄 기존 플레이어에 새 비디오 로드:', preparedTrack.id);
-
-      // 비디오 로드 (음소거 상태로)
-      player.loadVideoById({
-        videoId: preparedTrack.id,
-        startSeconds: preparedTrack.startSeconds,
-        endSeconds: preparedTrack.endSeconds,
-      });
-
-      // 음소거로 시작 (자동 재생 허용)
-      player.mute();
-      isMuted = true;
-
-      // 플레이어가 준비되면 일시정지하고 서버에 알림
-      setTimeout(() => {
-        player.pauseVideo();
-        notifyPlayerReady();
-      }, 500);
-
-      return;
+    // ⭐ 기존 플레이어 파괴 (매번 새로 생성)
+    if (player && typeof player.destroy === 'function') {
+      console.log('🗑️ 기존 플레이어 파괴');
+      try {
+        player.destroy();
+      } catch (e) {
+        console.warn('플레이어 파괴 중 에러 (무시):', e);
+      }
+      player = null;
     }
 
     // 새 플레이어 생성

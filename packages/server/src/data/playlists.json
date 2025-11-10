@@ -83,5 +83,21 @@
       "BQ0mxQXmLsk"
     ],
     "roundCount": 10
+  },
+  "custom-UjYwteDI": {
+    "id": "custom-UjYwteDI",
+    "name": "나의 JPOP",
+    "description": "나만의 JPOP 플레이리스트",
+    "trackIds": [
+      "YLOr1bdTYaM",
+      "TQ8WlA2GXbk",
+      "aRDURmIYBZ4",
+      "UFQEttrn6CQ",
+      "1FIhcdocT-k",
+      "uxYLXaXtH9I",
+      "1FliVTcX8bQ",
+      "65xX7zyr-fA"
+    ],
+    "roundCount": 8
   }
 }
