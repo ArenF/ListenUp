@@ -32,3 +32,6 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Claude AI work files
+claude/
