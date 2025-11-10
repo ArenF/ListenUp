@@ -38,25 +38,31 @@ export interface GameState {
   tracks: Track[];                    // 게임의 전체 트랙 목록
 }
 
+export interface PlaylistTrack {
+  videoId: string;
+  answers: string[];  // 정답 목록 (곡명, 아티스트명 등)
+}
+
 export interface Playlist {
   id: string;
   name: string;
   description: string;
-  trackIds: string[];
+  tracks: PlaylistTrack[];  // trackIds → tracks로 변경
   roundCount: number;
 }
 
 export interface Track {
-  id: string;                   
-  name: string;                  
-  artist: string;                
-  uploadDate: string;            
-  year: string;                  
-  embedUrl: string;              
-  duration: number;            
-  startSeconds: number;          
-  endSeconds: number;            
-  thumbnailUrl?: string;         
+  id: string;
+  name: string;
+  artist: string;
+  uploadDate: string;
+  year: string;
+  embedUrl: string;
+  duration: number;
+  startSeconds: number;
+  endSeconds: number;
+  thumbnailUrl?: string;
+  answers: string[];  // 플레이리스트에서 지정한 정답 목록
 }
 
 export interface YouTubeVideoSnippet {
