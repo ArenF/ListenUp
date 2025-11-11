@@ -1,7 +1,7 @@
 import axios from "axios";
 import NodeCache from "node-cache";
 import { config } from "../config/env.js";
-import type { Track, YouTubeApiResponse } from "../types/index.js";
+import type { Track, YouTubeApiResponse, PlaylistTrack } from "../types/index.js";
 
 // YouTube Data API v3 연동 서비스
 
@@ -32,9 +32,10 @@ export class YouTubeService {
   /**
    * 여러 비디오 정보 한번에 가져오기
    * @param videoIds : YouTube Video ID 배열
+   * @param playlistTracks : 플레이리스트 트랙 정보 (answers 매핑용)
    * @returns Track[]
    */
-  async getTracks(videoIds: string[]): Promise<Track[]> {
+  async getTracks(videoIds: string[], playlistTracks?: PlaylistTrack[]): Promise<Track[]> {
     if (videoIds.length === 0) {
       return [];
     }
@@ -49,7 +50,7 @@ export class YouTubeService {
       console.warn("⚠️  Video IDs exceed 50, splitting into batches");
       const batches = this.chunkArray(videoIds, 50);
       const results = await Promise.all(
-        batches.map((batch) => this.getTracks(batch))
+        batches.map((batch) => this.getTracks(batch, playlistTracks))
       );
       return results.flat();
     }
@@ -96,6 +97,11 @@ export class YouTubeService {
           const publishedAt = item.snippet.publishedAt;
           const year = publishedAt.substring(0, 4);
 
+          // playlistTracks에서 해당 videoId의 answers 찾기
+          const playlistTrack = playlistTracks?.find(
+            (pt) => pt.videoId === item.id
+          );
+
           return {
             id: item.id,
             name: item.snippet.title,
@@ -107,6 +113,7 @@ export class YouTubeService {
             startSeconds,
             endSeconds,
             thumbnailUrl: item.snippet.thumbnails.high.url,
+            answers: playlistTrack?.answers || [], // answers 필드 추가
           };
         });
 

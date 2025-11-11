@@ -6,23 +6,44 @@
     "tracks": [
       {
         "videoId": "dQw4w9WgXcQ",
-        "answers": ["Never Gonna Give You Up", "Rick Astley", "릭 애슬리"]
+        "answers": [
+          "Never Gonna Give You Up",
+          "Rick Astley",
+          "릭 애슬리"
+        ]
       },
       {
         "videoId": "kJQP7kiw5Fk",
-        "answers": ["Despacito", "Luis Fonsi", "데스파시토"]
+        "answers": [
+          "Despacito",
+          "Luis Fonsi",
+          "데스파시토"
+        ]
       },
       {
         "videoId": "9bZkp7q19f0",
-        "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"]
+        "answers": [
+          "Gangnam Style",
+          "PSY",
+          "강남스타일",
+          "싸이"
+        ]
       },
       {
         "videoId": "fJ9rUzIMcZQ",
-        "answers": ["Bohemian Rhapsody", "Queen", "보헤미안 랩소디"]
+        "answers": [
+          "Bohemian Rhapsody",
+          "Queen",
+          "보헤미안 랩소디"
+        ]
       },
       {
         "videoId": "2Vv-BfVoq4g",
-        "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"]
+        "answers": [
+          "Ed Sheeran",
+          "Shape of You",
+          "셰이프 오브 유"
+        ]
       }
     ],
     "roundCount": 5
@@ -82,7 +103,12 @@
     "tracks": [
       {
         "videoId": "9bZkp7q19f0",
-        "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"]
+        "answers": [
+          "Gangnam Style",
+          "PSY",
+          "강남스타일",
+          "싸이"
+        ]
       },
       {
         "videoId": "IHNzOHi8sJs",
@@ -130,19 +156,35 @@
     "tracks": [
       {
         "videoId": "dQw4w9WgXcQ",
-        "answers": ["Never Gonna Give You Up", "Rick Astley", "릭 애슬리"]
+        "answers": [
+          "Never Gonna Give You Up",
+          "Rick Astley",
+          "릭 애슬리"
+        ]
       },
       {
         "videoId": "kJQP7kiw5Fk",
-        "answers": ["Despacito", "Luis Fonsi", "데스파시토"]
+        "answers": [
+          "Despacito",
+          "Luis Fonsi",
+          "데스파시토"
+        ]
       },
       {
         "videoId": "fJ9rUzIMcZQ",
-        "answers": ["Bohemian Rhapsody", "Queen", "보헤미안 랩소디"]
+        "answers": [
+          "Bohemian Rhapsody",
+          "Queen",
+          "보헤미안 랩소디"
+        ]
       },
       {
         "videoId": "2Vv-BfVoq4g",
-        "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"]
+        "answers": [
+          "Ed Sheeran",
+          "Shape of You",
+          "셰이프 오브 유"
+        ]
       },
       {
         "videoId": "rY0WxgSXdEE",
@@ -219,44 +261,20 @@
     ],
     "roundCount": 10
   },
-  "custom-UjYwteDI": {
-    "id": "custom-UjYwteDI",
-    "name": "나의 JPOP",
-    "description": "나만의 JPOP 플레이리스트",
+  "custom-AbElHunK": {
+    "id": "custom-AbElHunK",
+    "name": "나의 JPOP 플레이리스트",
+    "description": "내가 설정하는 커스텀 JPOP 플레이리스트",
     "tracks": [
       {
-        "videoId": "YLOr1bdTYaM",
-        "answers": []
-      },
-      {
-        "videoId": "TQ8WlA2GXbk",
-        "answers": []
-      },
-      {
-        "videoId": "aRDURmIYBZ4",
-        "answers": []
-      },
-      {
         "videoId": "UFQEttrn6CQ",
-        "answers": []
-      },
-      {
-        "videoId": "1FIhcdocT-k",
-        "answers": []
-      },
-      {
-        "videoId": "uxYLXaXtH9I",
-        "answers": []
-      },
-      {
-        "videoId": "1FliVTcX8bQ",
-        "answers": []
-      },
-      {
-        "videoId": "65xX7zyr-fA",
-        "answers": []
+        "answers": [
+          "감전",
+          "KANDEN",
+          "칸덴"
+        ]
       }
     ],
-    "roundCount": 8
+    "roundCount": 1
   }
 }

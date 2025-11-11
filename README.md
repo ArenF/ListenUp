@@ -234,7 +234,7 @@ tsconfig.base.json (공통 설정)
 
 1. **packages/client** 폴더에 Svelte 앱 설정
 2. **packages/server** 폴더에 Express 서버 설정
-3. Spotify API 연동 및 테스트
+3. Youtube Data V3 API 연동 및 테스트
 4. Socket.IO 기본 통신 구현
 
 자세한 개발 로드맵은 `ListenUp! 기획서.md`를 참조하세요.
@@ -253,7 +253,7 @@ test: 테스트 코드
 chore: 빌드 업무, 패키지 관리
 
 예시:
-feat: Spotify API 연동 추가
+feat: YouTube API 연동 추가
 fix: 방장 나갈 시 크래시 수정
 ```
 

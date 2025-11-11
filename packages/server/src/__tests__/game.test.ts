@@ -25,6 +25,7 @@ describe("GameService", () => {
       duration: 199,
       startSeconds: 0,
       endSeconds: 30,
+      answers: ["Dynamite", "다이너마이트"],
     },
     {
       id: "track2",
@@ -36,6 +37,7 @@ describe("GameService", () => {
       duration: 164,
       startSeconds: 0,
       endSeconds: 30,
+      answers: ["Butter", "버터"],
     },
   ];
 

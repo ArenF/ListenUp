@@ -38,7 +38,17 @@ export class GameService {
   private initializePlaylists(): void {
     // playlists.json 파일에서 모든 플레이리스트 로드
     for (const [key, playlist] of Object.entries(playlistsData)) {
-      this.playlists.set(key, playlist as Playlist);
+      // tracks 구조 검증
+      if (playlist && typeof playlist === 'object' && 'tracks' in playlist) {
+        const playlistObj = playlist as any;
+        if (Array.isArray(playlistObj.tracks)) {
+          this.playlists.set(key, playlistObj as Playlist);
+        } else {
+          console.warn(`⚠️ Invalid playlist format (tracks is not array): ${key}`);
+        }
+      } else {
+        console.warn(`⚠️ Invalid playlist format (missing tracks): ${key}`);
+      }
     }
 
     console.log(`✅ Loaded ${this.playlists.size} playlists from data/playlists.json`);
@@ -183,7 +193,7 @@ export class GameService {
     }
 
     // 정답 체크
-    const isCorrect = this.checkAnswer(answer, room.gameState.currentTrack.name);
+    const isCorrect = this.checkAnswer(answer, room.gameState.currentTrack);
 
     // 제출 시간 계산 (밀리초)
     const submissionTime = Date.now();
@@ -230,10 +240,10 @@ export class GameService {
    * 정답 체크 (유사도 기반)
    *
    * @param userAnswer 사용자 답안
-   * @param correctAnswer 정답
+   * @param track 트랙 정보 (answers 배열 포함)
    * @returns 정답 여부
    */
-  private checkAnswer(userAnswer: string, correctAnswer: string): boolean {
+  private checkAnswer(userAnswer: string, track: Track): boolean {
     // 정규화: 소문자 변환, 공백/특수문자 제거
     const normalize = (str: string): string => {
       return str
@@ -243,7 +253,34 @@ export class GameService {
     };
 
     const normalizedUser = normalize(userAnswer);
-    const normalizedCorrect = normalize(correctAnswer);
+
+    // 1. 정답 배열이 있으면 그것과 비교 (우선순위)
+    if (track.answers && track.answers.length > 0) {
+      for (const correctAnswer of track.answers) {
+        const normalizedCorrect = normalize(correctAnswer);
+
+        // 완전 일치
+        if (normalizedUser === normalizedCorrect) {
+          return true;
+        }
+
+        // 부분 일치 (정답이 사용자 답안에 포함)
+        if (normalizedCorrect.includes(normalizedUser) && normalizedUser.length >= 3) {
+          return true;
+        }
+
+        // 유사도 체크 (Levenshtein distance)
+        const similarity = this.calculateSimilarity(normalizedUser, normalizedCorrect);
+        if (similarity > 0.8) {
+          return true; // 80% 이상 유사하면 정답
+        }
+      }
+      // 모든 정답과 매치되지 않음
+      return false;
+    }
+
+    // 2. 정답 배열이 비어있으면 기존 방식 (YouTube 제목 사용)
+    const normalizedCorrect = normalize(track.name);
 
     // 완전 일치
     if (normalizedUser === normalizedCorrect) {

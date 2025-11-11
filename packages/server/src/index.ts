@@ -143,7 +143,7 @@ app.get("/api/playlists/:id", (req, res) => {
 // 플레이리스트 생성
 app.post("/api/playlists", async (req, res) => {
   try {
-    const { name, description, trackIds } = req.body;
+    const { name, description, tracks } = req.body;
 
     if (!name || typeof name !== "string") {
       return res.status(400).json({ error: "Playlist name is required" });
@@ -152,7 +152,7 @@ app.post("/api/playlists", async (req, res) => {
     const result = await playlistService.createPlaylist(
       name,
       description || "",
-      trackIds || []
+      tracks || []
     );
 
     if (!result.success) {
@@ -170,12 +170,12 @@ app.post("/api/playlists", async (req, res) => {
 app.put("/api/playlists/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, trackIds } = req.body;
+    const { name, description, tracks } = req.body;
 
     const updates: any = {};
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description;
-    if (trackIds !== undefined) updates.trackIds = trackIds;
+    if (tracks !== undefined) updates.tracks = tracks;
 
     const result = await playlistService.updatePlaylist(id, updates);
 
@@ -212,13 +212,17 @@ app.delete("/api/playlists/:id", async (req, res) => {
 app.post("/api/playlists/:id/tracks", async (req, res) => {
   try {
     const { id } = req.params;
-    const { trackId } = req.body;
+    const { videoId, answers } = req.body;
 
-    if (!trackId || typeof trackId !== "string") {
-      return res.status(400).json({ error: "Track ID is required" });
+    if (!videoId || typeof videoId !== "string") {
+      return res.status(400).json({ error: "Video ID is required" });
     }
 
-    const result = await playlistService.addTrack(id, trackId);
+    const result = await playlistService.addTrack(
+      id,
+      videoId,
+      answers || []
+    );
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
@@ -232,11 +236,11 @@ app.post("/api/playlists/:id/tracks", async (req, res) => {
 });
 
 // 플레이리스트에서 트랙 제거
-app.delete("/api/playlists/:id/tracks/:trackId", async (req, res) => {
+app.delete("/api/playlists/:id/tracks/:videoId", async (req, res) => {
   try {
-    const { id, trackId } = req.params;
+    const { id, videoId } = req.params;
 
-    const result = await playlistService.removeTrack(id, trackId);
+    const result = await playlistService.removeTrack(id, videoId);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
@@ -246,6 +250,29 @@ app.delete("/api/playlists/:id/tracks/:trackId", async (req, res) => {
   } catch (error: any) {
     console.error("Error removing track:", error);
     return res.status(500).json({ error: "Failed to remove track" });
+  }
+});
+
+// 플레이리스트 트랙의 정답 수정
+app.put("/api/playlists/:id/tracks/:videoId", async (req, res) => {
+  try {
+    const { id, videoId } = req.params;
+    const { answers } = req.body;
+
+    if (!answers || !Array.isArray(answers)) {
+      return res.status(400).json({ error: "Answers array is required" });
+    }
+
+    const result = await playlistService.updateTrack(id, videoId, answers);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    return res.json(result.playlist);
+  } catch (error: any) {
+    console.error("Error updating track:", error);
+    return res.status(500).json({ error: "Failed to update track" });
   }
 });
 

@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import type { Playlist } from "../types/index.js";
+import type { Playlist, PlaylistTrack } from "../types/index.js";
 import { nanoid } from "nanoid";
 
 // ES 모듈에서 __dirname 대체
@@ -36,7 +36,17 @@ export class PlaylistService {
       const playlistsData = JSON.parse(data);
 
       for (const [key, playlist] of Object.entries(playlistsData)) {
-        this.playlists.set(key, playlist as Playlist);
+        // tracks 구조 검증
+        if (playlist && typeof playlist === 'object' && 'tracks' in playlist) {
+          const playlistObj = playlist as any;
+          if (Array.isArray(playlistObj.tracks)) {
+            this.playlists.set(key, playlistObj as Playlist);
+          } else {
+            console.warn(`⚠️ Invalid playlist format (tracks is not array): ${key}`);
+          }
+        } else {
+          console.warn(`⚠️ Invalid playlist format (missing tracks): ${key}`);
+        }
       }
 
       console.log(
@@ -93,7 +103,7 @@ export class PlaylistService {
   async createPlaylist(
     name: string,
     description: string,
-    trackIds: string[] = []
+    tracks: PlaylistTrack[] = []
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     // 검증: 이름 중복 체크
     const existingPlaylist = Array.from(this.playlists.values()).find(
@@ -114,8 +124,8 @@ export class PlaylistService {
       id,
       name,
       description,
-      trackIds,
-      roundCount: trackIds.length,
+      tracks,
+      roundCount: tracks.length,
     };
 
     this.playlists.set(id, playlist);
@@ -142,7 +152,7 @@ export class PlaylistService {
     updates: {
       name?: string;
       description?: string;
-      trackIds?: string[];
+      tracks?: PlaylistTrack[];
     }
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(id);
@@ -169,7 +179,7 @@ export class PlaylistService {
     const updatedPlaylist: Playlist = {
       ...playlist,
       ...updates,
-      roundCount: updates.trackIds?.length ?? playlist.roundCount,
+      roundCount: updates.tracks?.length ?? playlist.roundCount,
     };
 
     this.playlists.set(id, updatedPlaylist);
@@ -223,7 +233,8 @@ export class PlaylistService {
    */
   async addTrack(
     playlistId: string,
-    trackId: string
+    videoId: string,
+    answers: string[] = []
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(playlistId);
 
@@ -232,7 +243,7 @@ export class PlaylistService {
     }
 
     // 중복 체크
-    if (playlist.trackIds.includes(trackId)) {
+    if (playlist.tracks.some(t => t.videoId === videoId)) {
       return {
         success: false,
         error: "이미 플레이리스트에 존재하는 트랙입니다",
@@ -241,8 +252,8 @@ export class PlaylistService {
 
     const updatedPlaylist: Playlist = {
       ...playlist,
-      trackIds: [...playlist.trackIds, trackId],
-      roundCount: playlist.trackIds.length + 1,
+      tracks: [...playlist.tracks, { videoId, answers }],
+      roundCount: playlist.tracks.length + 1,
     };
 
     return this.updatePlaylist(playlistId, updatedPlaylist);
@@ -253,7 +264,7 @@ export class PlaylistService {
    */
   async removeTrack(
     playlistId: string,
-    trackId: string
+    videoId: string
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(playlistId);
 
@@ -261,16 +272,45 @@ export class PlaylistService {
       return { success: false, error: "플레이리스트를 찾을 수 없습니다" };
     }
 
-    const updatedTrackIds = playlist.trackIds.filter((id) => id !== trackId);
+    const updatedTracks = playlist.tracks.filter((t) => t.videoId !== videoId);
 
-    if (updatedTrackIds.length === playlist.trackIds.length) {
+    if (updatedTracks.length === playlist.tracks.length) {
       return {
         success: false,
         error: "플레이리스트에 해당 트랙이 없습니다",
       };
     }
 
-    return this.updatePlaylist(playlistId, { trackIds: updatedTrackIds });
+    return this.updatePlaylist(playlistId, { tracks: updatedTracks });
+  }
+
+  /**
+   * 플레이리스트 트랙의 정답 수정
+   */
+  async updateTrack(
+    playlistId: string,
+    videoId: string,
+    answers: string[]
+  ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
+    const playlist = this.playlists.get(playlistId);
+
+    if (!playlist) {
+      return { success: false, error: "플레이리스트를 찾을 수 없습니다" };
+    }
+
+    const trackIndex = playlist.tracks.findIndex((t) => t.videoId === videoId);
+
+    if (trackIndex === -1) {
+      return {
+        success: false,
+        error: "플레이리스트에 해당 트랙이 없습니다",
+      };
+    }
+
+    const updatedTracks = [...playlist.tracks];
+    updatedTracks[trackIndex] = { videoId, answers };
+
+    return this.updatePlaylist(playlistId, { tracks: updatedTracks });
   }
 
   /**
@@ -280,7 +320,7 @@ export class PlaylistService {
     return {
       totalPlaylists: this.playlists.size,
       totalTracks: Array.from(this.playlists.values()).reduce(
-        (sum, playlist) => sum + playlist.trackIds.length,
+        (sum, playlist) => sum + playlist.tracks.length,
         0
       ),
     };

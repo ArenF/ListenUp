@@ -2,11 +2,16 @@
   import { onMount } from "svelte";
 
   // 타입 정의
+  interface PlaylistTrack {
+    videoId: string;
+    answers: string[];
+  }
+
   interface Playlist {
     id: string;
     name: string;
     description: string;
-    trackIds: string[];
+    tracks: PlaylistTrack[];
     roundCount: number;
   }
 
@@ -34,9 +39,15 @@
 
   // 트랙 추가 폼
   let showTrackForm = $state(false);
-  let trackId = $state("");
+  let youtubeUrl = $state("");
+  let videoId = $state("");
   let trackInfo = $state<Track | null>(null);
   let loadingTrack = $state(false);
+  let answers = $state<string[]>([""]); // 정답 목록
+
+  // 트랙 수정 폼
+  let editingTrackId = $state<string | null>(null);
+  let editAnswers = $state<string[]>([]);
 
   onMount(() => {
     loadPlaylists();
@@ -64,10 +75,10 @@
     tracks = [];
 
     // 트랙 정보 로드
-    if (playlist.trackIds.length > 0) {
+    if (playlist.tracks.length > 0) {
       try {
-        const trackPromises = playlist.trackIds.map((id) =>
-          fetch(`/api/youtube/track/${id}`).then((res) =>
+        const trackPromises = playlist.tracks.map((t) =>
+          fetch(`/api/youtube/track/${t.videoId}`).then((res) =>
             res.ok ? res.json() : null
           )
         );
@@ -115,7 +126,7 @@
           body: JSON.stringify({
             name: formName.trim(),
             description: formDescription.trim(),
-            trackIds: [],
+            tracks: [],
           }),
         });
 
@@ -197,9 +208,46 @@
     }
   }
 
+  // YouTube URL에서 비디오 ID 추출
+  function extractVideoId(url: string): string | null {
+    // YouTube URL 패턴들
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+
+    // URL이 아니고 11자리 ID인 경우
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url.trim())) {
+      return url.trim();
+    }
+
+    return null;
+  }
+
+  // URL 입력 시 자동으로 비디오 ID 추출 및 트랙 검색
+  async function handleUrlInput() {
+    const extractedId = extractVideoId(youtubeUrl);
+
+    if (!extractedId) {
+      alert("유효한 YouTube URL 또는 비디오 ID를 입력해주세요");
+      return;
+    }
+
+    videoId = extractedId;
+    await searchTrack();
+  }
+
   // YouTube 트랙 정보 조회
   async function searchTrack() {
-    if (!trackId.trim()) {
+    if (!videoId.trim()) {
       alert("YouTube 비디오 ID를 입력해주세요");
       return;
     }
@@ -207,7 +255,7 @@
     try {
       loadingTrack = true;
       const response = await fetch(
-        `/api/youtube/track/${trackId.trim()}`
+        `/api/youtube/track/${videoId.trim()}`
       );
 
       if (!response.ok) {
@@ -223,9 +271,50 @@
     }
   }
 
+  // 정답 추가
+  function addAnswer() {
+    answers = [...answers, ""];
+  }
+
+  // 정답 제거 (최소 1개 유지, 마지막 하나면 빈 문자열로)
+  function removeAnswer(index: number) {
+    if (answers.length === 1) {
+      answers = [""]; // 마지막 하나면 빈 문자열로
+    } else {
+      answers = answers.filter((_, i) => i !== index);
+    }
+  }
+
+  // 정답 업데이트
+  function updateAnswer(index: number, value: string) {
+    answers[index] = value;
+  }
+
+  // 수정용 정답 추가
+  function addEditAnswer() {
+    editAnswers = [...editAnswers, ""];
+  }
+
+  // 수정용 정답 제거
+  function removeEditAnswer(index: number) {
+    if (editAnswers.length === 1) {
+      editAnswers = [""]; // 마지막 하나면 빈 문자열로
+    } else {
+      editAnswers = editAnswers.filter((_, i) => i !== index);
+    }
+  }
+
+  // 수정용 정답 업데이트
+  function updateEditAnswer(index: number, value: string) {
+    editAnswers[index] = value;
+  }
+
   // 트랙 추가
   async function addTrack() {
     if (!selectedPlaylist || !trackInfo) return;
+
+    // 정답 필터링 (빈 문자열 제거)
+    const filteredAnswers = answers.filter(a => a.trim() !== "");
 
     try {
       loading = true;
@@ -236,7 +325,10 @@
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ trackId: trackInfo.id }),
+          body: JSON.stringify({
+            videoId: trackInfo.id,
+            answers: filteredAnswers
+          }),
         }
       );
 
@@ -254,8 +346,10 @@
 
       // 폼 초기화
       showTrackForm = false;
-      trackId = "";
+      youtubeUrl = "";
+      videoId = "";
       trackInfo = null;
+      answers = [""]; // 정답 초기화
     } catch (err: any) {
       error = err.message;
       alert(err.message);
@@ -296,6 +390,67 @@
       loading = false;
     }
   }
+
+  // 트랙 수정 시작
+  function startEditTrack(videoId: string) {
+    if (!selectedPlaylist) return;
+
+    // 해당 트랙의 정답 가져오기
+    const track = selectedPlaylist.tracks.find((t) => t.videoId === videoId);
+    if (!track) return;
+
+    editingTrackId = videoId;
+    editAnswers = track.answers.length > 0 ? [...track.answers] : [""];
+  }
+
+  // 트랙 수정 취소
+  function cancelEditTrack() {
+    editingTrackId = null;
+    editAnswers = [];
+  }
+
+  // 트랙 정답 업데이트
+  async function updateTrackAnswers(videoId: string) {
+    if (!selectedPlaylist) return;
+
+    // 정답 필터링 (빈 문자열 제거)
+    const filteredAnswers = editAnswers.filter((a) => a.trim() !== "");
+
+    try {
+      loading = true;
+      error = "";
+
+      const response = await fetch(
+        `/api/playlists/${selectedPlaylist.id}/tracks/${videoId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers: filteredAnswers }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update track");
+      }
+
+      const updatedPlaylist = await response.json();
+      playlists = playlists.map((p) =>
+        p.id === updatedPlaylist.id ? updatedPlaylist : p
+      );
+      selectedPlaylist = updatedPlaylist;
+
+      // 수정 모드 종료
+      cancelEditTrack();
+
+      alert("정답이 업데이트되었습니다!");
+    } catch (err: any) {
+      error = err.message;
+      alert(err.message);
+    } finally {
+      loading = false;
+    }
+  }
 </script>
 
 <div class="playlist-manager">
@@ -329,7 +484,7 @@
             >
               <div class="playlist-name">{playlist.name}</div>
               <div class="playlist-info">
-                {playlist.trackIds.length} 트랙
+                {playlist.tracks.length} 트랙
               </div>
             </div>
           {/each}
@@ -345,7 +500,7 @@
             <div>
               <h2>{selectedPlaylist.name}</h2>
               <p class="description">{selectedPlaylist.description}</p>
-              <p class="track-count">{selectedPlaylist.trackIds.length} 트랙</p>
+              <p class="track-count">{selectedPlaylist.tracks.length} 트랙</p>
             </div>
             <div class="actions">
               <button class="btn-secondary" onclick={openEditForm}>
@@ -371,20 +526,28 @@
             {#if showTrackForm}
               <div class="track-form">
                 <h4>YouTube 트랙 추가</h4>
+
+                <!-- YouTube 링크 입력 -->
                 <div class="form-group">
-                  <label>YouTube 비디오 ID</label>
-                  <input
-                    type="text"
-                    bind:value={trackId}
-                    placeholder="예: dQw4w9WgXcQ"
-                  />
-                  <button
-                    class="btn-secondary"
-                    onclick={searchTrack}
-                    disabled={loadingTrack}
-                  >
-                    {loadingTrack ? "검색 중..." : "🔍 검색"}
-                  </button>
+                  <label>YouTube 링크 또는 비디오 ID</label>
+                  <div class="url-input-group">
+                    <input
+                      type="text"
+                      bind:value={youtubeUrl}
+                      placeholder="예: https://youtube.com/watch?v=dQw4w9WgXcQ 또는 dQw4w9WgXcQ"
+                      onkeydown={(e) => e.key === 'Enter' && handleUrlInput()}
+                    />
+                    <button
+                      class="btn-secondary"
+                      onclick={handleUrlInput}
+                      disabled={loadingTrack}
+                    >
+                      {loadingTrack ? "검색 중..." : "🔍 검색"}
+                    </button>
+                  </div>
+                  {#if videoId}
+                    <p class="video-id-display">비디오 ID: <code>{videoId}</code></p>
+                  {/if}
                 </div>
 
                 {#if trackInfo}
@@ -395,18 +558,58 @@
                     <p>
                       <strong>재생 구간:</strong> {trackInfo.startSeconds}s - {trackInfo.endSeconds}s
                     </p>
-                    <button class="btn-primary" onclick={addTrack}>
-                      ✅ 플레이리스트에 추가
-                    </button>
-                    <button
-                      class="btn-secondary"
-                      onclick={() => {
-                        trackInfo = null;
-                        trackId = "";
-                      }}
-                    >
-                      ❌ 취소
-                    </button>
+
+                    <!-- 정답 입력 섹션 -->
+                    <div class="answers-section">
+                      <h5>정답 설정</h5>
+                      <p class="hint">게임에서 인정할 정답을 입력하세요. 비워두면 YouTube 제목으로 체크합니다.</p>
+
+                      <div class="answers-list">
+                        {#each answers as answer, index}
+                          <div class="answer-input-row">
+                            <input
+                              type="text"
+                              bind:value={answers[index]}
+                              placeholder={`정답 ${index + 1}`}
+                              onkeydown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addAnswer();
+                                }
+                              }}
+                            />
+                            <button
+                              class="btn-remove"
+                              onclick={() => removeAnswer(index)}
+                              title="정답 제거"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        {/each}
+
+                        <button class="btn-add-answer" onclick={addAnswer}>
+                          ➕ 정답 추가
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="track-form-actions">
+                      <button class="btn-primary" onclick={addTrack}>
+                        ✅ 플레이리스트에 추가
+                      </button>
+                      <button
+                        class="btn-secondary"
+                        onclick={() => {
+                          trackInfo = null;
+                          youtubeUrl = "";
+                          videoId = "";
+                          answers = [""];
+                        }}
+                      >
+                        ❌ 취소
+                      </button>
+                    </div>
                   </div>
                 {/if}
               </div>
@@ -417,23 +620,83 @@
                 <div class="empty">트랙이 없습니다</div>
               {:else}
                 {#each tracks as track, index}
-                  <div class="track-item">
-                    <div class="track-number">{index + 1}</div>
-                    <div class="track-info">
-                      <div class="track-name">{track.name}</div>
-                      <div class="track-artist">{track.artist}</div>
+                  <div class="track-item-container">
+                    <div class="track-item">
+                      <div class="track-number">{index + 1}</div>
+                      <div class="track-info">
+                        <div class="track-name">{track.name}</div>
+                        <div class="track-artist">{track.artist}</div>
+                      </div>
+                      <div class="track-duration">
+                        {Math.floor(track.duration / 60)}:{String(
+                          track.duration % 60
+                        ).padStart(2, "0")}
+                      </div>
+                      <button
+                        class="btn-edit"
+                        onclick={() => startEditTrack(track.id)}
+                        title="정답 수정"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        class="btn-remove"
+                        onclick={() => removeTrack(track)}
+                        title="트랙 삭제"
+                      >
+                        🗑️
+                      </button>
                     </div>
-                    <div class="track-duration">
-                      {Math.floor(track.duration / 60)}:{String(
-                        track.duration % 60
-                      ).padStart(2, "0")}
-                    </div>
-                    <button
-                      class="btn-remove"
-                      onclick={() => removeTrack(track)}
-                    >
-                      🗑️
-                    </button>
+
+                    <!-- 수정 모드 -->
+                    {#if editingTrackId === track.id}
+                      <div class="track-edit-form">
+                        <h5>정답 수정</h5>
+                        <div class="answers-list">
+                          {#each editAnswers as answer, ansIndex}
+                            <div class="answer-input-row">
+                              <input
+                                type="text"
+                                bind:value={editAnswers[ansIndex]}
+                                placeholder={`정답 ${ansIndex + 1}`}
+                                onkeydown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addEditAnswer();
+                                  }
+                                }}
+                              />
+                              <button
+                                class="btn-remove"
+                                onclick={() => removeEditAnswer(ansIndex)}
+                                title="정답 제거"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          {/each}
+
+                          <button class="btn-add-answer" onclick={addEditAnswer}>
+                            ➕ 정답 추가
+                          </button>
+                        </div>
+
+                        <div class="track-edit-actions">
+                          <button
+                            class="btn-primary"
+                            onclick={() => updateTrackAnswers(track.id)}
+                          >
+                            ✅ 저장
+                          </button>
+                          <button
+                            class="btn-secondary"
+                            onclick={cancelEditTrack}
+                          >
+                            ❌ 취소
+                          </button>
+                        </div>
+                      </div>
+                    {/if}
                   </div>
                 {/each}
               {/if}
@@ -630,6 +893,31 @@
     margin-top: 0;
   }
 
+  /* URL 입력 그룹 */
+  .url-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .url-input-group input {
+    flex: 1;
+  }
+
+  .video-id-display {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .video-id-display code {
+    background-color: #f0f0f0;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #ff3e00;
+  }
+
   .track-preview {
     margin-top: 1rem;
     padding: 1rem;
@@ -641,10 +929,103 @@
     margin-top: 0;
   }
 
+  /* 정답 입력 섹션 */
+  .answers-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+  }
+
+  .answers-section h5 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .hint {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .answers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .answer-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .answer-input-row input {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+
+  .answer-input-row input:focus {
+    outline: none;
+    border-color: #ff3e00;
+  }
+
+  .btn-remove {
+    padding: 0.5rem 0.8rem;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.2s;
+    min-width: 36px;
+  }
+
+  .btn-remove:hover {
+    background-color: #cc0000;
+  }
+
+  .btn-add-answer {
+    margin-top: 0.5rem;
+    padding: 0.6rem 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    align-self: flex-start;
+  }
+
+  .btn-add-answer:hover {
+    background-color: #45a049;
+  }
+
+  /* 트랙 폼 액션 버튼 */
+  .track-form-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .track-form-actions button {
+    flex: 1;
+  }
+
   .tracks-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .track-item-container {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
   }
 
   .track-item {
@@ -652,8 +1033,41 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background-color: white;
-    border-radius: 8px;
+  }
+
+  .btn-edit {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .btn-edit:hover {
+    opacity: 1;
+  }
+
+  .track-edit-form {
+    padding: 1rem;
+    background-color: #f8f8f8;
+    border-top: 1px solid #ddd;
+  }
+
+  .track-edit-form h5 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .track-edit-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .track-edit-actions button {
+    flex: 1;
   }
 
   .track-number {

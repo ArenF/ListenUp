@@ -138,7 +138,9 @@ export function handleStartGame(io: Server, socket: Socket): void {
 
         let tracks: Track[] = [];
         try {
-          tracks = await youtubeService.getTracks(playlist.trackIds);
+          // playlist.tracks에서 videoId 추출 및 answers 매핑
+          const videoIds = playlist.tracks.map((t) => t.videoId);
+          tracks = await youtubeService.getTracks(videoIds, playlist.tracks);
 
           if (tracks.length === 0) {
             callback({

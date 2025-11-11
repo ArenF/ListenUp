@@ -551,7 +551,7 @@
           <label for="playlist">플레이리스트 선택</label>
           <select id="playlist" bind:value={selectedPlaylistId} disabled={!connected}>
             {#each playlists as playlist}
-              <option value={playlist.id}>{playlist.name} ({playlist.trackIds.length} 트랙)</option>
+              <option value={playlist.id}>{playlist.name} ({playlist.tracks?.length || 0} 트랙)</option>
             {/each}
           </select>
         </div>
