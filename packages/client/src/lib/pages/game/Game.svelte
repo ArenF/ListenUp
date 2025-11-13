@@ -1,0 +1,715 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { initSocket } from "../../socket";
+  import type { Socket } from "socket.io-client";
+  import { gameStore, isHost, updateGameStore } from "./gameStore";
+  import GameLobby from "./GameLobby.svelte";
+  import GameRoom from "./GameRoom.svelte";
+
+  // 스토어에서 상태 추출
+  let socket: Socket;
+  let {
+    connected,
+    statusMessage,
+    roomCode,
+    nickname,
+    currentRoom,
+    players,
+    playlists,
+    selectedPlaylistId,
+    gameStarted,
+    currentRound,
+    totalRounds,
+    currentTrack,
+    preparedTrack,
+    answer,
+    gameResult,
+    roundEnded,
+    player,
+    playerReady,
+    isMuted,
+    isLoadingTrack,
+    readyPlayers,
+    volume,
+  } = $derived($gameStore);
+
+  onMount(() => {
+    // 플레이리스트 목록 로드
+    loadPlaylists();
+
+    // Socket.IO 초기화 및 연결
+    socket = initSocket();
+    updateGameStore({ socket });
+
+    // 디버깅용: 콘솔에서 socket 접근 가능하게
+    (window as any).socket = socket;
+
+    // 연결 이벤트
+    socket.on("connect", () => {
+      updateGameStore({
+        connected: true,
+        statusMessage: `✅ 서버 연결 성공! (ID: ${socket.id})`,
+      });
+      console.log("서버 연결:", socket.id);
+    });
+
+    // 연결 해제 이벤트
+    socket.on("disconnect", () => {
+      updateGameStore({
+        connected: false,
+        statusMessage: "❌ 서버 연결 끊김",
+      });
+      console.log("서버 연결 해제");
+    });
+
+    // 연결 에러
+    socket.on("connect_error", (error) => {
+      updateGameStore({
+        statusMessage: `❌ 연결 실패: ${error.message}`,
+      });
+      console.error("연결 에러:", error);
+    });
+
+    // 플레이어 참가 알림
+    socket.on("player-joined", (data) => {
+      console.log("새 플레이어 참가:", data);
+      updateGameStore({
+        statusMessage: `🎮 ${data.player.nickname}님이 입장했습니다!`,
+      });
+      if (currentRoom) {
+        updateGameStore({ players: [...players, data.player] });
+      }
+    });
+
+    // 플레이어 퇴장 알림
+    socket.on("player-left", (data) => {
+      console.log("플레이어 퇴장:", data);
+      updateGameStore({
+        statusMessage: `👋 플레이어가 퇴장했습니다`,
+        players: players.filter((p) => p.id !== data.playerId),
+      });
+    });
+
+    // 설정 업데이트 알림
+    socket.on("settings-updated", (data) => {
+      console.log("설정 업데이트:", data);
+      updateGameStore({
+        statusMessage: "⚙️ 방 설정이 업데이트되었습니다",
+      });
+      if (currentRoom) {
+        updateGameStore({
+          currentRoom: { ...currentRoom, settings: data.settings },
+        });
+      }
+    });
+
+    // 게임 시작 알림
+    socket.on("game-started", (data) => {
+      console.log("🎮 게임 시작!", data);
+      updateGameStore({
+        gameStarted: true,
+        totalRounds: data.totalRounds,
+        statusMessage: `🎮 게임 시작! (총 ${data.totalRounds}라운드)`,
+      });
+    });
+
+    // 라운드 준비 요청
+    socket.on("prepare-round", (data) => {
+      console.log("📋 라운드 준비 요청:", data);
+      updateGameStore({
+        preparedTrack: data.track,
+        currentRound: data.roundNumber,
+        roundEnded: false,
+        readyPlayers: 0,
+        statusMessage: `⏳ Round ${data.roundNumber} - 로딩 중...`,
+        isLoadingTrack: true,
+      });
+    });
+
+    // 준비 상태 업데이트
+    socket.on("player-ready-status", (data) => {
+      console.log("✅ 플레이어 준비:", data);
+      updateGameStore({
+        readyPlayers: data.readyCount,
+        statusMessage: `⏳ 플레이어 준비 중... (${data.readyCount}/${data.totalPlayers})`,
+      });
+    });
+
+    // 라운드 시작 알림
+    socket.on("round-started", (data) => {
+      console.log("🎵 라운드 시작!", data);
+      updateGameStore({
+        currentTrack: data.track,
+        preparedTrack: null,
+        answer: "",
+        isLoadingTrack: false,
+        statusMessage: `🎵 Round ${data.roundNumber}/${totalRounds} - 음악을 듣고 맞춰보세요!`,
+      });
+
+      // YouTube 플레이어 재생
+      if (player) {
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log("🔍 [BEFORE] 플레이어 상태:");
+        console.log("  - isMuted:", player.isMuted());
+        console.log("  - Volume:", player.getVolume());
+        console.log(
+          "  - PlayerState:",
+          player.getPlayerState(),
+          getPlayerStateName(player.getPlayerState())
+        );
+
+        console.log("\n🎬 [ACTION] 음소거 해제 & 재생 시작...");
+        player.unMute();
+        updateGameStore({ isMuted: false });
+        player.setVolume(volume);
+        player.playVideo();
+
+        setTimeout(() => {
+          console.log("\n🔍 [AFTER] 플레이어 상태:");
+          console.log("  - isMuted:", player.isMuted());
+          console.log("  - Volume:", player.getVolume());
+          console.log(
+            "  - PlayerState:",
+            player.getPlayerState(),
+            getPlayerStateName(player.getPlayerState())
+          );
+          console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        }, 200);
+      }
+    });
+
+    // 정답 제출 알림
+    socket.on("answer-submitted", (data) => {
+      console.log("📝 답안 제출됨:", data);
+      updateGameStore({
+        statusMessage: `📝 ${data.nickname}님이 답을 제출했습니다!`,
+      });
+    });
+
+    // 점수 업데이트
+    socket.on("score-updated", (data) => {
+      console.log("📊 점수 업데이트:", data);
+      if (currentRoom) {
+        const updatedPlayers = [...players];
+        data.scores.forEach(([playerId, score]: [string, number]) => {
+          const playerIndex = updatedPlayers.findIndex(
+            (p) => p.id === playerId
+          );
+          if (playerIndex !== -1) {
+            updatedPlayers[playerIndex].score = score;
+          }
+        });
+        updateGameStore({ players: updatedPlayers });
+      }
+    });
+
+    // 라운드 종료
+    socket.on("round-ended", (data) => {
+      console.log("🏁 라운드 종료!", data);
+      updateGameStore({
+        statusMessage: `🏁 정답: ${data.result.track.name} - ${data.result.track.artist}`,
+        currentTrack: null,
+        roundEnded: true,
+      });
+
+      if (player) {
+        player.pauseVideo();
+      }
+    });
+
+    // 게임 종료
+    socket.on("game-end", (data) => {
+      console.log("🎊 게임 종료!", data);
+      updateGameStore({
+        gameStarted: false,
+        gameResult: data.result,
+        statusMessage: `🎊 게임 종료! 우승: ${data.result.winner?.nickname || "없음"}`,
+      });
+    });
+
+    // 서버 연결 시작
+    socket.connect();
+
+    // YouTube API 로드
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    (window as any).onYouTubeIframeAPIReady = () => {
+      console.log("✅ YouTube Player API 로드 완료!");
+      updateGameStore({ playerReady: true });
+    };
+
+    // 컴포넌트 정리
+    return () => {
+      socket.disconnect();
+      if (player) {
+        player.destroy();
+      }
+    };
+  });
+
+  // YouTube Player 초기화 및 업데이트
+  $effect(() => {
+    if (!playerReady || !preparedTrack || !currentRoom) {
+      return;
+    }
+
+    const YT = (window as any).YT;
+    if (!YT || !YT.Player) {
+      console.error("❌ YouTube Player API가 로드되지 않았습니다");
+      return;
+    }
+
+    // 기존 플레이어 파괴
+    if (player && typeof player.destroy === "function") {
+      console.log("🗑️ 기존 플레이어 파괴");
+      try {
+        player.destroy();
+      } catch (e) {
+        console.warn("플레이어 파괴 중 에러 (무시):", e);
+      }
+    }
+
+    // 새 플레이어 생성
+    console.log("🎬 YouTube Player 생성 중...", preparedTrack.id);
+    const newPlayer = new YT.Player("youtube-player", {
+      height: "300",
+      width: "100%",
+      videoId: preparedTrack.id,
+      playerVars: {
+        autoplay: 1,
+        start: preparedTrack.startSeconds,
+        end: preparedTrack.endSeconds,
+        controls: 0,
+        rel: 0,
+        modestbranding: 1,
+        disablekb: 1,
+      },
+      events: {
+        onReady: (event: any) => {
+          console.log("✅ YouTube Player 준비 완료!");
+          event.target.mute();
+          updateGameStore({ isMuted: true });
+
+          setTimeout(() => {
+            event.target.pauseVideo();
+            notifyPlayerReady();
+          }, 500);
+        },
+        onError: (event: any) => {
+          console.error("❌ YouTube Player 에러:", event.data);
+          updateGameStore({
+            statusMessage: "❌ 영상 재생 오류",
+            isLoadingTrack: false,
+          });
+        },
+      },
+    });
+
+    updateGameStore({ player: newPlayer });
+  });
+
+  // 플레이어 상태 이름 헬퍼 함수
+  function getPlayerStateName(state: number): string {
+    const states: Record<number, string> = {
+      "-1": "UNSTARTED",
+      "0": "ENDED",
+      "1": "PLAYING",
+      "2": "PAUSED",
+      "3": "BUFFERING",
+      "5": "CUED",
+    };
+    return states[state] || "UNKNOWN";
+  }
+
+  // 플레이리스트 목록 로드
+  async function loadPlaylists() {
+    try {
+      const response = await fetch("/api/playlists");
+      if (response.ok) {
+        const data = await response.json();
+        updateGameStore({ playlists: data });
+        console.log("✅ Loaded playlists:", data);
+      }
+    } catch (error) {
+      console.error("❌ Failed to load playlists:", error);
+    }
+  }
+
+  // 서버에 플레이어 준비 완료 알림
+  function notifyPlayerReady() {
+    if (!currentRoom) return;
+
+    console.log("📤 서버에 준비 완료 알림 전송");
+    socket.emit(
+      "player-ready",
+      {
+        roomCode: currentRoom.code,
+      },
+      (response: any) => {
+        if (response.success) {
+          console.log("✅ 준비 완료 확인됨");
+          updateGameStore({ isLoadingTrack: false });
+        } else {
+          console.error("❌ 준비 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 방 생성
+  function createRoom() {
+    if (!nickname.trim()) {
+      updateGameStore({ statusMessage: "⚠️ 닉네임을 입력해주세요" });
+      return;
+    }
+
+    updateGameStore({ statusMessage: "⏳ 방 생성 중..." });
+    socket.emit(
+      "create-room",
+      {
+        nickname: nickname.trim(),
+        settings: {
+          maxPlayers: 8,
+          roundInterval: 30,
+          playlistId: selectedPlaylistId,
+        },
+      },
+      (response: any) => {
+        if (response.success) {
+          updateGameStore({
+            currentRoom: response.room,
+            roomCode: response.room.code,
+            players: response.room.players,
+            statusMessage: `✅ 방 생성 완료! 코드: ${response.room.code}`,
+          });
+          console.log("방 생성 성공:", response.room);
+        } else {
+          updateGameStore({
+            statusMessage: `❌ 방 생성 실패: ${response.error}`,
+          });
+          console.error("방 생성 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 방 참가
+  function joinRoom() {
+    if (!nickname.trim()) {
+      updateGameStore({ statusMessage: "⚠️ 닉네임을 입력해주세요" });
+      return;
+    }
+    if (!roomCode.trim()) {
+      updateGameStore({ statusMessage: "⚠️ 방 코드를 입력해주세요" });
+      return;
+    }
+
+    updateGameStore({ statusMessage: "⏳ 방 참가 중..." });
+    socket.emit(
+      "join-room",
+      {
+        code: roomCode.trim().toUpperCase(),
+        nickname: nickname.trim(),
+      },
+      (response: any) => {
+        if (response.success) {
+          updateGameStore({
+            currentRoom: response.room,
+            players: response.room.players,
+            statusMessage: `✅ 방 참가 완료! (${response.room.players.length}명)`,
+          });
+          console.log("방 참가 성공:", response.room);
+        } else {
+          updateGameStore({
+            statusMessage: `❌ 방 참가 실패: ${response.error}`,
+          });
+          console.error("방 참가 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 방 나가기
+  function leaveRoom() {
+    if (!currentRoom) return;
+
+    socket.emit(
+      "leave-room",
+      {
+        code: currentRoom.code,
+      },
+      (response: any) => {
+        if (response.success) {
+          updateGameStore({
+            statusMessage: "👋 방을 나갔습니다",
+            currentRoom: null,
+            players: [],
+            roomCode: "",
+            gameStarted: false,
+            gameResult: null,
+          });
+          console.log("방 나가기 성공");
+        } else {
+          updateGameStore({ statusMessage: "❌ 방 나가기 실패" });
+          console.error("방 나가기 실패");
+        }
+      }
+    );
+  }
+
+  // 게임 시작 (방장만)
+  function startGame() {
+    if (!currentRoom) return;
+
+    updateGameStore({ statusMessage: "⏳ 게임 시작 중..." });
+    socket.emit(
+      "start-game",
+      {
+        roomCode: currentRoom.code,
+      },
+      (response: any) => {
+        if (response.success) {
+          console.log("게임 시작 성공");
+        } else {
+          updateGameStore({
+            statusMessage: `❌ 게임 시작 실패: ${response.error}`,
+          });
+          console.error("게임 시작 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 정답 제출
+  function submitAnswer() {
+    if (!currentRoom || !answer.trim()) return;
+
+    const userAnswer = answer.trim();
+    updateGameStore({ answer: "" });
+
+    socket.emit(
+      "submit-answer",
+      {
+        roomCode: currentRoom.code,
+        answer: userAnswer,
+      },
+      (response: any) => {
+        if (response.success) {
+          const result = response.result;
+          if (result.isCorrect) {
+            updateGameStore({
+              statusMessage: `✅ ${result.message} (스트릭: ${result.streak})`,
+            });
+          } else {
+            updateGameStore({
+              statusMessage: `❌ ${result.message}`,
+            });
+          }
+          console.log("정답 제출 결과:", response);
+        } else {
+          updateGameStore({
+            statusMessage: `❌ 제출 실패: ${response.error}`,
+          });
+          console.error("정답 제출 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 다음 라운드 (방장만)
+  function nextRound() {
+    if (!currentRoom) return;
+
+    updateGameStore({ statusMessage: "⏳ 다음 라운드 준비 중..." });
+    socket.emit(
+      "next-round",
+      {
+        roomCode: currentRoom.code,
+      },
+      (response: any) => {
+        if (response.success) {
+          console.log("다음 라운드 준비");
+        } else {
+          updateGameStore({
+            statusMessage: `❌ 다음 라운드 실패: ${response.error}`,
+          });
+          console.error("다음 라운드 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 게임 종료 (방장만)
+  function endGame() {
+    if (!currentRoom) return;
+
+    socket.emit(
+      "game-end",
+      {
+        roomCode: currentRoom.code,
+      },
+      (response: any) => {
+        if (response.success) {
+          console.log("게임 강제 종료");
+        } else {
+          updateGameStore({
+            statusMessage: `❌ 게임 종료 실패: ${response.error}`,
+          });
+          console.error("게임 종료 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 음량 조절 함수
+  function handleVolumeChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const newVolume = parseInt(target.value);
+    updateGameStore({ volume: newVolume });
+
+    if (player && typeof player.setVolume === "function") {
+      player.setVolume(newVolume);
+      console.log(`🔊 음량 변경: ${newVolume}%`);
+    }
+  }
+
+  // 입력 업데이트 핸들러들
+  function handleNicknameChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    updateGameStore({ nickname: target.value });
+  }
+
+  function handleRoomCodeChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    updateGameStore({ roomCode: target.value });
+  }
+
+  function handlePlaylistChange(e: Event) {
+    const target = e.target as HTMLSelectElement;
+    updateGameStore({ selectedPlaylistId: target.value });
+  }
+
+  function handleAnswerChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    updateGameStore({ answer: target.value });
+  }
+</script>
+
+<div class="game-container">
+  <!-- 연결 상태 -->
+  <div class="status-bar" class:connected={connected}>
+    <div class="status-indicator"></div>
+    <span>{statusMessage}</span>
+  </div>
+
+  {#if !currentRoom}
+    <GameLobby
+      {connected}
+      {nickname}
+      {roomCode}
+      {selectedPlaylistId}
+      {playlists}
+      onCreateRoom={createRoom}
+      onJoinRoom={joinRoom}
+      onNicknameChange={handleNicknameChange}
+      onRoomCodeChange={handleRoomCodeChange}
+      onPlaylistChange={handlePlaylistChange}
+    />
+  {:else}
+    <GameRoom
+      {currentRoom}
+      {players}
+      {gameStarted}
+      {gameResult}
+      isHost={$isHost}
+      {currentRound}
+      {totalRounds}
+      {isLoadingTrack}
+      {readyPlayers}
+      {preparedTrack}
+      {currentTrack}
+      {isMuted}
+      {volume}
+      {roundEnded}
+      {answer}
+      onStartGame={startGame}
+      onLeaveRoom={leaveRoom}
+      onVolumeChange={handleVolumeChange}
+      onAnswerChange={handleAnswerChange}
+      onSubmitAnswer={submitAnswer}
+      onNextRound={nextRound}
+      onEndGame={endGame}
+    />
+  {/if}
+
+  <div class="info">
+    <p>🔧 Socket.IO 연결 테스트 v2.0</p>
+    <p>Backend: Node.js + Socket.IO + TypeScript</p>
+    <p>Frontend: Svelte 5 + Socket.IO Client</p>
+  </div>
+</div>
+
+<style>
+  .game-container {
+    text-align: center;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* 상태바 */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: #ffebee;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    transition: background-color 0.3s;
+  }
+
+  .status-bar.connected {
+    background-color: #e8f5e9;
+  }
+
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #f44336;
+    animation: pulse 2s infinite;
+  }
+
+  .status-bar.connected .status-indicator {
+    background-color: #4caf50;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* 하단 정보 */
+  .info {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .info p {
+    margin: 0.5rem 0;
+  }
+</style>
