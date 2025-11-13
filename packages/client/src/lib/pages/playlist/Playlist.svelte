@@ -73,13 +73,9 @@
   }
 
   // 플레이리스트 선택
-  async function selectPlaylist(playlist: Playlist | null) {
+  async function selectPlaylist(playlist: Playlist) {
     selectedPlaylist = playlist;
     tracks = [];
-
-    // selectPlaylist 함수를 불러올 때 접근성(a11y) 경고가 표시됨으로
-    // 임시방편으로 오류를 불러옴
-    if (playlist === null) throw new Error("플레이리스트 값이 null입니다.");
 
     if (playlist.tracks.length > 0) {
       try {
