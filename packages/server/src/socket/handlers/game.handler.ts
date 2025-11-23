@@ -132,6 +132,8 @@ export function handleStartGame(io: Server, socket: Socket): void {
         // YouTube 트랙 로드
         const playlist = gameService.getPlaylist(room.settings.playlistId);
         if (!playlist) {
+          // 게임 상태 롤백
+          room.gameState.isPlaying = false;
           callback({ success: false, error: "플레이리스트를 찾을 수 없습니다" });
           return;
         }
@@ -143,6 +145,8 @@ export function handleStartGame(io: Server, socket: Socket): void {
           tracks = await youtubeService.getTracks(videoIds, playlist.tracks);
 
           if (tracks.length === 0) {
+            // 게임 상태 롤백
+            room.gameState.isPlaying = false;
             callback({
               success: false,
               error: "트랙을 로드할 수 없습니다",
@@ -151,6 +155,8 @@ export function handleStartGame(io: Server, socket: Socket): void {
           }
         } catch (error) {
           console.error("Failed to load tracks from YouTube:", error);
+          // 게임 상태 롤백
+          room.gameState.isPlaying = false;
           callback({
             success: false,
             error: "YouTube 트랙을 로드하는 데 실패했습니다",

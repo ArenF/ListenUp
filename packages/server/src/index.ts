@@ -45,7 +45,7 @@ app.get("/api/test/playlist/:playlistId", async (req, res) => {
       return res.status(404).json({ error: "Playlist not found" });
     }
 
-    if (playlist.trackIds.length === 0) {
+    if (!playlist.tracks || playlist.tracks.length === 0) {
       return res.json({
         playlist: {
           id: playlist.id,
@@ -57,7 +57,9 @@ app.get("/api/test/playlist/:playlistId", async (req, res) => {
       });
     }
 
-    const tracks = await youtubeService.getTracks(playlist.trackIds);
+    // playlist.tracks 배열에서 videoId만 추출
+    const videoIds = playlist.tracks.map((track: any) => track.videoId);
+    const tracks = await youtubeService.getTracks(videoIds);
 
     return res.json({
       playlist: {
@@ -67,9 +69,9 @@ app.get("/api/test/playlist/:playlistId", async (req, res) => {
       },
       tracks,
       stats: {
-        total: playlist.trackIds.length,
+        total: playlist.tracks.length,
         retrieved: tracks.length,
-        filtered: playlist.trackIds.length - tracks.length,
+        filtered: playlist.tracks.length - tracks.length,
       },
     });
   } catch (err: any) {

@@ -55,7 +55,8 @@ export class YouTubeService {
       return results.flat();
     }
 
-    const cacheKey = videoIds.sort().join(",");
+    // side effect 방지를 위해 배열 복사 후 정렬
+    const cacheKey = [...videoIds].sort().join(",");
     const cached = this.videoCache.get<Track[]>(cacheKey);
 
     if (cached) {

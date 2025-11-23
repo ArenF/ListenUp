@@ -213,8 +213,15 @@ export class GameService {
     const totalScore = currentScore + score + streakBonus;
     room.gameState.scores.set(playerId, totalScore);
 
-    // 답안 기록
-    room.gameState.answers.set(playerId, submissionTime);
+    // 답안 기록 (AnswerSubmission 객체로 저장)
+    const answerSubmission: AnswerSubmission = {
+      playerId,
+      answer,
+      timestamp: elapsedTime,
+      isCorrect,
+      score: score + streakBonus,
+    };
+    room.gameState.answers.set(playerId, answerSubmission);
 
     const player = room.players.get(playerId);
     const resultMessage = isCorrect
@@ -384,29 +391,21 @@ export class GameService {
 
     const currentTrack = room.gameState.currentTrack;
 
-    // 모든 플레이어의 답안 수집
+    // 모든 플레이어의 답안 수집 (이제 AnswerSubmission 객체가 저장되어 있음)
     const answers: AnswerSubmission[] = [];
     const correctAnswers: AnswerSubmission[] = [];
 
-    for (const [playerId, submissionTime] of room.gameState.answers.entries()) {
+    for (const [playerId, submission] of room.gameState.answers.entries()) {
       const player = room.players.get(playerId);
       if (!player) continue;
 
-      // 답안 정보 구성 (실제 답안 텍스트는 submitAnswer에서 저장해야 함)
-      // 현재는 제출 여부만 기록하므로 간소화
-      const elapsedTime = submissionTime - room.gameState.roundStartTime;
-      const score = room.gameState.scores.get(playerId) || 0;
-
-      const submission: AnswerSubmission = {
-        playerId,
-        answer: "", // TODO: 실제 답안 텍스트 저장 필요
-        timestamp: elapsedTime,
-        isCorrect: true, // TODO: 정답 여부 저장 필요
-        score,
-      };
-
+      // 답안 추가
       answers.push(submission);
-      correctAnswers.push(submission);
+
+      // 정답만 별도 수집
+      if (submission.isCorrect) {
+        correctAnswers.push(submission);
+      }
     }
 
     const result: RoundResult = {

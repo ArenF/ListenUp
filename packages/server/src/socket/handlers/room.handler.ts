@@ -24,7 +24,7 @@ interface SerializedRoom {
     totalRounds: number;
     currentTrack: any;
     roundStartTime: number;
-    answers: [string, number][];
+    answers: any[];  // AnswerSubmission 배열로 변경
     scores: [string, number][];
     streaks: [string, number][];
   };
@@ -47,7 +47,8 @@ function serializeRoom(room: Room): SerializedRoom {
     settings: room.settings,
     gameState: {
       ...room.gameState,
-      answers: Array.from(room.gameState.answers.entries()),
+      // AnswerSubmission 객체만 배열로 변환
+      answers: Array.from(room.gameState.answers.values()),
       scores: Array.from(room.gameState.scores.entries()),
       streaks: Array.from(room.gameState.streaks.entries()),
     },

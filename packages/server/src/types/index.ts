@@ -30,7 +30,7 @@ export interface GameState {
   currentTrack: Track | null;
   nextTrack: Track | null;           // 다음 라운드 트랙 (플레이어 준비용)
   roundStartTime: number;
-  answers: Map<string, number>;
+  answers: Map<string, AnswerSubmission>;  // 타입 변경: number → AnswerSubmission
   scores: Map<string, number>;
   streaks: Map<string, number>;
   readyPlayers: Set<string>;          // 준비 완료된 플레이어 ID
