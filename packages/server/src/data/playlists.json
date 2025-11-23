@@ -109,42 +109,6 @@
           "강남스타일",
           "싸이"
         ]
-      },
-      {
-        "videoId": "IHNzOHi8sJs",
-        "answers": []
-      },
-      {
-        "videoId": "jeqdYqsrsA0",
-        "answers": []
-      },
-      {
-        "videoId": "bw9CALKOvAI",
-        "answers": []
-      },
-      {
-        "videoId": "J_CFBjAyPWE",
-        "answers": []
-      },
-      {
-        "videoId": "UwuAPyOImoI",
-        "answers": []
-      },
-      {
-        "videoId": "kTlv5_Bs8aw",
-        "answers": []
-      },
-      {
-        "videoId": "7Zfx8GMa8qc",
-        "answers": []
-      },
-      {
-        "videoId": "cwPdPTl8lKM",
-        "answers": []
-      },
-      {
-        "videoId": "pIgZ7gMze7A",
-        "answers": []
       }
     ],
     "roundCount": 10
@@ -185,78 +149,6 @@
           "Shape of You",
           "셰이프 오브 유"
         ]
-      },
-      {
-        "videoId": "rY0WxgSXdEE",
-        "answers": []
-      },
-      {
-        "videoId": "A_MjCqQoLLA",
-        "answers": []
-      },
-      {
-        "videoId": "hTWKbfoikeg",
-        "answers": []
-      },
-      {
-        "videoId": "CevxZvSJLk8",
-        "answers": []
-      },
-      {
-        "videoId": "djV11Xbc914",
-        "answers": []
-      },
-      {
-        "videoId": "CD-E-LDc384",
-        "answers": []
-      }
-    ],
-    "roundCount": 10
-  },
-  "latest-chart": {
-    "id": "latest-chart",
-    "name": "최신 차트",
-    "description": "지금 핫한 최신 곡",
-    "tracks": [
-      {
-        "videoId": "5Eqb_-j3FDA",
-        "answers": []
-      },
-      {
-        "videoId": "3JZ4pnNtyxQ",
-        "answers": []
-      },
-      {
-        "videoId": "pBk4NYhWNMM",
-        "answers": []
-      },
-      {
-        "videoId": "ulsOkf0k1Uc",
-        "answers": []
-      },
-      {
-        "videoId": "IxuThNgl3YA",
-        "answers": []
-      },
-      {
-        "videoId": "BBJa32lCaaY",
-        "answers": []
-      },
-      {
-        "videoId": "aAkMkVFwAoo",
-        "answers": []
-      },
-      {
-        "videoId": "WAtNXdGEV3E",
-        "answers": []
-      },
-      {
-        "videoId": "ewLpXw6uN28",
-        "answers": []
-      },
-      {
-        "videoId": "BQ0mxQXmLsk",
-        "answers": []
       }
     ],
     "roundCount": 10

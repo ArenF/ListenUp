@@ -5,7 +5,10 @@
       "Bash(timeout 30 bash -c \"cd ''d:\\vscode_workspace\\ListenUp\\packages\\server'' && npm run build 2>&1\")",
       "Bash(npx tsc:*)",
       "Bash(timeout 10 npm run dev:*)",
-      "Bash(timeout 5 npm start:*)"
+      "Bash(timeout 5 npm start:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []

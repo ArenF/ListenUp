@@ -251,8 +251,16 @@
   });
 
   // YouTube Player 초기화 및 업데이트
+  // preparedTrack의 id만 추적하여 무한 루프 방지
+  let lastLoadedTrackId: string | null = null;
+
   $effect(() => {
     if (!playerReady || !preparedTrack || !currentRoom) {
+      return;
+    }
+
+    // 같은 트랙이면 재생성하지 않음 (무한 루프 방지)
+    if (lastLoadedTrackId === preparedTrack.id) {
       return;
     }
 
@@ -274,6 +282,8 @@
 
     // 새 플레이어 생성
     console.log("🎬 YouTube Player 생성 중...", preparedTrack.id);
+    lastLoadedTrackId = preparedTrack.id;  // 현재 로드된 트랙 ID 저장
+
     const newPlayer = new YT.Player("youtube-player", {
       height: "300",
       width: "100%",
@@ -308,6 +318,7 @@
       },
     });
 
+    // untrack을 사용하여 player 업데이트가 이 effect를 다시 트리거하지 않도록 함
     updateGameStore({ player: newPlayer });
   });
 

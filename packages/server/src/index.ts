@@ -17,6 +17,9 @@ const io = new Server(httpServer, {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
   },
+  pingTimeout: 60000,        // 60초 타임아웃
+  pingInterval: 25000,       // 25초마다 핑
+  transports: ["websocket", "polling"],  // WebSocket 우선, 폴백으로 polling
 });
 
 app.use(cors());
