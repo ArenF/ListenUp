@@ -27,54 +27,6 @@
     ],
     "roundCount": 5
   },
-  "kpop-2000s": {
-    "id": "kpop-2000s",
-    "name": "2000년대 K-POP",
-    "description": "추억의 2000년대 히트곡",
-    "tracks": [
-      {
-        "videoId": "WkdtmT8A2iY",
-        "answers": []
-      },
-      {
-        "videoId": "HG6Zye_S7zw",
-        "answers": []
-      },
-      {
-        "videoId": "q3xy4p2JTfU",
-        "answers": []
-      },
-      {
-        "videoId": "U7mPqycQ0tQ",
-        "answers": []
-      },
-      {
-        "videoId": "1k_BO5KUBUE",
-        "answers": []
-      },
-      {
-        "videoId": "T_3LZuT2LFw",
-        "answers": []
-      },
-      {
-        "videoId": "zYoYoBtLqOY",
-        "answers": []
-      },
-      {
-        "videoId": "Dww9UjJ4Dt8",
-        "answers": []
-      },
-      {
-        "videoId": "TGbwL8kSpEk",
-        "answers": []
-      },
-      {
-        "videoId": "vBVnN90Tg4s",
-        "answers": []
-      }
-    ],
-    "roundCount": 10
-  },
   "kpop-2010s": {
     "id": "kpop-2010s",
     "name": "2010년대 K-POP",
