@@ -165,8 +165,78 @@
           "KANDEN",
           "칸덴"
         ]
+      },
+      {
+        "videoId": "p3aVaChXrMI",
+        "answers": [
+          "레이와의 레이나",
+          "레이와의레이나",
+          "令和のれいな"
+        ]
+      },
+      {
+        "videoId": "M4EJqcTjNcY",
+        "answers": [
+          "인페르노",
+          "インフェルノ",
+          "inferno"
+        ]
+      },
+      {
+        "videoId": "m34DPnRUfMU",
+        "answers": [
+          "푸름과 여름",
+          "青と夏"
+        ]
+      },
+      {
+        "videoId": "zry-FErubKQ",
+        "answers": [
+          "커튼콜",
+          "Curtain Call"
+        ]
+      },
+      {
+        "videoId": "bGT9kcD9Fz0",
+        "answers": [
+          "신시대",
+          "新時代",
+          "New Genesis"
+        ]
+      },
+      {
+        "videoId": "TSUAXnRpNSQ",
+        "answers": [
+          "역몽",
+          "逆夢",
+          "Sakayume"
+        ]
+      },
+      {
+        "videoId": "2C3CuRQcBuM",
+        "answers": [
+          "선잠",
+          "utatane",
+          "うたたね"
+        ]
+      },
+      {
+        "videoId": "gCyjdA3ulJM",
+        "answers": [
+          "하이 요로콘테",
+          "はいよろこんで",
+          "네, 기꺼이",
+          "네 기꺼이"
+        ]
+      },
+      {
+        "videoId": "hA1RtBgMFn0",
+        "answers": [
+          "밤을 달리다",
+          "夜に駆ける"
+        ]
       }
     ],
-    "roundCount": 1
+    "roundCount": 10
   }
 }
