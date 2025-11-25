@@ -6,44 +6,23 @@
     "tracks": [
       {
         "videoId": "dQw4w9WgXcQ",
-        "answers": [
-          "Never Gonna Give You Up",
-          "Rick Astley",
-          "릭 애슬리"
-        ]
+        "answers": ["Never Gonna Give You Up", "Rick Astley", "릭 애슬리"]
       },
       {
         "videoId": "kJQP7kiw5Fk",
-        "answers": [
-          "Despacito",
-          "Luis Fonsi",
-          "데스파시토"
-        ]
+        "answers": ["Despacito", "Luis Fonsi", "데스파시토"]
       },
       {
         "videoId": "9bZkp7q19f0",
-        "answers": [
-          "Gangnam Style",
-          "PSY",
-          "강남스타일",
-          "싸이"
-        ]
+        "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"]
       },
       {
         "videoId": "fJ9rUzIMcZQ",
-        "answers": [
-          "Bohemian Rhapsody",
-          "Queen",
-          "보헤미안 랩소디"
-        ]
+        "answers": ["Bohemian Rhapsody", "Queen", "보헤미안 랩소디"]
       },
       {
         "videoId": "2Vv-BfVoq4g",
-        "answers": [
-          "Ed Sheeran",
-          "Shape of You",
-          "셰이프 오브 유"
-        ]
+        "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"]
       }
     ],
     "roundCount": 5
@@ -103,12 +82,7 @@
     "tracks": [
       {
         "videoId": "9bZkp7q19f0",
-        "answers": [
-          "Gangnam Style",
-          "PSY",
-          "강남스타일",
-          "싸이"
-        ]
+        "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"]
       }
     ],
     "roundCount": 10
@@ -120,35 +94,19 @@
     "tracks": [
       {
         "videoId": "dQw4w9WgXcQ",
-        "answers": [
-          "Never Gonna Give You Up",
-          "Rick Astley",
-          "릭 애슬리"
-        ]
+        "answers": ["Never Gonna Give You Up", "Rick Astley", "릭 애슬리"]
       },
       {
         "videoId": "kJQP7kiw5Fk",
-        "answers": [
-          "Despacito",
-          "Luis Fonsi",
-          "데스파시토"
-        ]
+        "answers": ["Despacito", "Luis Fonsi", "데스파시토"]
       },
       {
         "videoId": "fJ9rUzIMcZQ",
-        "answers": [
-          "Bohemian Rhapsody",
-          "Queen",
-          "보헤미안 랩소디"
-        ]
+        "answers": ["Bohemian Rhapsody", "Queen", "보헤미안 랩소디"]
       },
       {
         "videoId": "2Vv-BfVoq4g",
-        "answers": [
-          "Ed Sheeran",
-          "Shape of You",
-          "셰이프 오브 유"
-        ]
+        "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"]
       }
     ],
     "roundCount": 10
@@ -160,65 +118,35 @@
     "tracks": [
       {
         "videoId": "UFQEttrn6CQ",
-        "answers": [
-          "감전",
-          "KANDEN",
-          "칸덴"
-        ]
+        "answers": ["감전", "KANDEN", "칸덴"]
       },
       {
         "videoId": "p3aVaChXrMI",
-        "answers": [
-          "레이와의 레이나",
-          "레이와의레이나",
-          "令和のれいな"
-        ]
+        "answers": ["레이와의 레이나", "레이와의레이나", "令和のれいな"]
       },
       {
         "videoId": "M4EJqcTjNcY",
-        "answers": [
-          "인페르노",
-          "インフェルノ",
-          "inferno"
-        ]
+        "answers": ["인페르노", "インフェルノ", "inferno"]
       },
       {
         "videoId": "m34DPnRUfMU",
-        "answers": [
-          "푸름과 여름",
-          "青と夏"
-        ]
+        "answers": ["푸름과 여름", "青と夏"]
       },
       {
         "videoId": "zry-FErubKQ",
-        "answers": [
-          "커튼콜",
-          "Curtain Call"
-        ]
+        "answers": ["커튼콜", "Curtain Call"]
       },
       {
         "videoId": "bGT9kcD9Fz0",
-        "answers": [
-          "신시대",
-          "新時代",
-          "New Genesis"
-        ]
+        "answers": ["신시대", "新時代", "New Genesis"]
       },
       {
         "videoId": "TSUAXnRpNSQ",
-        "answers": [
-          "역몽",
-          "逆夢",
-          "Sakayume"
-        ]
+        "answers": ["역몽", "逆夢", "Sakayume"]
       },
       {
         "videoId": "2C3CuRQcBuM",
-        "answers": [
-          "선잠",
-          "utatane",
-          "うたたね"
-        ]
+        "answers": ["선잠", "utatane", "うたたね"]
       },
       {
         "videoId": "gCyjdA3ulJM",
@@ -231,10 +159,7 @@
       },
       {
         "videoId": "hA1RtBgMFn0",
-        "answers": [
-          "밤을 달리다",
-          "夜に駆ける"
-        ]
+        "answers": ["밤을 달리다", "夜に駆ける"]
       }
     ],
     "roundCount": 10
