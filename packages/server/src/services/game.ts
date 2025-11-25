@@ -540,9 +540,10 @@ export class GameService {
       return null; // 모든 라운드 완료
     }
 
-    // 랜덤 트랙 선택 (중복 방지는 추후 개선)
-    const randomIndex = Math.floor(Math.random() * tracks.length);
-    const selectedTrack = tracks[randomIndex];
+    // 순차적 트랙 선택 (라운드 번호에 맞춰 순서대로)
+    // nextRoundNumber는 1부터 시작하므로 인덱스는 0부터 시작하도록 -1
+    const trackIndex = (nextRoundNumber - 1) % tracks.length;
+    const selectedTrack = tracks[trackIndex];
 
     room.gameState.nextTrack = selectedTrack;
     room.gameState.waitingForReady = true;

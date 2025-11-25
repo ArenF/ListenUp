@@ -146,6 +146,32 @@
         statusMessage: `🎵 Round ${data.roundNumber}/${totalRounds} - 음악을 듣고 맞춰보세요!`,
       });
 
+      // 재생 에러가 있었다면 자동으로 다음 라운드로 스킵
+      if (hasPlaybackError) {
+        console.warn("⚠️ 재생 불가능한 트랙 - 3초 후 자동 스킵");
+        updateGameStore({
+          statusMessage: "⚠️ 재생 불가능한 트랙입니다. 곧 다음 라운드로 넘어갑니다...",
+        });
+
+        setTimeout(() => {
+          console.log("⏭️ 다음 라운드로 자동 스킵");
+          hasPlaybackError = false; // 플래그 리셋
+
+          if (currentRoom) {
+            socket.emit(
+              "next-round",
+              { roomCode: currentRoom.code },
+              (response: any) => {
+                if (!response.success) {
+                  console.error("❌ 다음 라운드 실패:", response.error);
+                }
+              }
+            );
+          }
+        }, 3000);
+        return;
+      }
+
       // YouTube 플레이어 재생
       if (player) {
         console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -253,6 +279,7 @@
   // YouTube Player 초기화 및 업데이트
   // preparedTrack의 id만 추적하여 무한 루프 방지
   let lastLoadedTrackId: string | null = null;
+  let hasPlaybackError = false; // 재생 에러 플래그
 
   $effect(() => {
     if (!playerReady || !preparedTrack || !currentRoom) {
@@ -283,6 +310,10 @@
     // 새 플레이어 생성
     console.log("🎬 YouTube Player 생성 중...", preparedTrack.id);
     lastLoadedTrackId = preparedTrack.id;  // 현재 로드된 트랙 ID 저장
+    hasPlaybackError = false; // 새 트랙 로드 시 에러 플래그 리셋
+
+    // onReady의 setTimeout을 저장하기 위한 변수
+    let readyTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const newPlayer = new YT.Player("youtube-player", {
       height: "300",
@@ -303,17 +334,53 @@
           event.target.mute();
           updateGameStore({ isMuted: true });
 
-          setTimeout(() => {
+          readyTimeoutId = setTimeout(() => {
             event.target.pauseVideo();
             notifyPlayerReady();
           }, 500);
         },
         onError: (event: any) => {
-          console.error("❌ YouTube Player 에러:", event.data);
+          const errorCode = event.data;
+          console.error("❌ YouTube Player 에러:", errorCode);
+
+          // onReady의 setTimeout 취소 (중복 호출 방지)
+          if (readyTimeoutId) {
+            clearTimeout(readyTimeoutId);
+            readyTimeoutId = null;
+            console.log("🚫 onReady의 준비 알림 예약 취소됨");
+          }
+
+          // 재생 에러 플래그 설정
+          hasPlaybackError = true;
+
+          // 에러 코드별 메시지
+          let errorMessage = "❌ 영상 재생 오류";
+          switch (errorCode) {
+            case 2:
+              errorMessage = "❌ 잘못된 비디오 설정";
+              break;
+            case 5:
+              errorMessage = "❌ 비디오 재생 불가 (HTML5 오류)";
+              break;
+            case 100:
+              errorMessage = "❌ 비디오를 찾을 수 없음";
+              break;
+            case 101:
+            case 150:
+              errorMessage = "❌ 이 비디오는 임베드 재생이 제한되어 있습니다";
+              break;
+            default:
+              errorMessage = `❌ 영상 재생 오류 (코드: ${errorCode})`;
+          }
+
           updateGameStore({
-            statusMessage: "❌ 영상 재생 오류",
+            statusMessage: errorMessage,
             isLoadingTrack: false,
           });
+
+          // 에러 발생 시에도 다른 플레이어들이 대기하지 않도록 준비 완료 알림
+          console.warn("⚠️ 에러 발생으로 인한 강제 준비 완료 처리");
+          notifyPlayerReady();
         },
       },
     });

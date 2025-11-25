@@ -37,7 +37,7 @@
         "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"]
       }
     ],
-    "roundCount": 10
+    "roundCount": 1
   },
   "pop-classics": {
     "id": "pop-classics",
@@ -61,7 +61,7 @@
         "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"]
       }
     ],
-    "roundCount": 10
+    "roundCount": 4
   },
   "custom-AbElHunK": {
     "id": "custom-AbElHunK",
