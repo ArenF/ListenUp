@@ -1,6 +1,7 @@
 <script lang="ts">
   import Game from "./lib/pages/game/Game.svelte";
   import Playlist from "./lib/pages/playlist/Playlist.svelte";
+  import Toast from "./lib/components/common/Toast.svelte";
 
   // 페이지 라우팅
   let currentPage = $state<"game" | "playlist">("game");
@@ -34,6 +35,9 @@
   {:else}
     <Game />
   {/if}
+
+  <!-- Toast 알림 -->
+  <Toast />
 </main>
 
 <style>

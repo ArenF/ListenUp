@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { initSocket } from "../../socket";
   import type { Socket } from "socket.io-client";
-  import { gameStore, isHost, updateGameStore } from "./gameStore";
+  import { gameStore, isHost, updateGameStore } from "../../stores/gameStore";
   import GameLobby from "./GameLobby.svelte";
   import GameRoom from "./GameRoom.svelte";
 
@@ -77,7 +77,11 @@
         statusMessage: `🎮 ${data.player.nickname}님이 입장했습니다!`,
       });
       if (currentRoom) {
-        updateGameStore({ players: [...players, data.player] });
+        // 중복 체크: 이미 있는 플레이어는 추가하지 않음
+        const existingPlayer = players.find((p) => p.id === data.player.id);
+        if (!existingPlayer) {
+          updateGameStore({ players: [...players, data.player] });
+        }
       }
     });
 
@@ -304,6 +308,22 @@
         player.destroy();
       } catch (e) {
         console.warn("플레이어 파괴 중 에러 (무시):", e);
+      }
+    }
+
+    // DOM 요소 확인 및 재생성
+    let playerElement = document.getElementById("youtube-player");
+    if (!playerElement) {
+      console.log("🔨 YouTube Player DOM 요소 재생성");
+      const container = document.querySelector(".youtube-player-hidden");
+      if (container) {
+        const newDiv = document.createElement("div");
+        newDiv.id = "youtube-player";
+        container.appendChild(newDiv);
+        playerElement = newDiv;
+      } else {
+        console.error("❌ YouTube Player 컨테이너를 찾을 수 없습니다");
+        return;
       }
     }
 

@@ -3,6 +3,7 @@
   import PlaylistForm from "./PlaylistForm.svelte";
   import TrackForm from "./TrackForm.svelte";
   import TrackList from "./TrackList.svelte";
+  import { logger } from "../../utils/logger";
 
   // 타입 정의
   interface PlaylistTrack {
@@ -113,7 +114,7 @@
   async function savePlaylist() {
     try {
       if (!formName.trim()) {
-        alert("플레이리스트 이름을 입력해주세요");
+        logger.warn('PLAYLIST', 'NAME_REQUIRED');
         return;
       }
 
@@ -168,7 +169,7 @@
       formDescription = "";
     } catch (err: any) {
       error = err.message;
-      alert(err.message);
+      logger.error('PLAYLIST', 'SAVE_FAILED', { details: err });
     } finally {
       loading = false;
     }
@@ -198,7 +199,7 @@
       tracks = [];
     } catch (err: any) {
       error = err.message;
-      alert(err.message);
+      logger.error('PLAYLIST', 'DELETE_FAILED', { details: err });
     } finally {
       loading = false;
     }
@@ -229,7 +230,7 @@
     const extractedId = extractVideoId(youtubeUrl);
 
     if (!extractedId) {
-      alert("유효한 YouTube URL 또는 비디오 ID를 입력해주세요");
+      logger.warn('PLAYLIST', 'INVALID_URL');
       return;
     }
 
@@ -240,7 +241,7 @@
   // YouTube 트랙 정보 조회
   async function searchTrack() {
     if (!videoId.trim()) {
-      alert("YouTube 비디오 ID를 입력해주세요");
+      logger.warn('PLAYLIST', 'VIDEO_ID_REQUIRED');
       return;
     }
 
@@ -254,7 +255,7 @@
 
       trackInfo = await response.json();
     } catch (err: any) {
-      alert(err.message);
+      logger.error('PLAYLIST', 'TRACK_FETCH_FAILED', { details: err });
       trackInfo = null;
     } finally {
       loadingTrack = false;
@@ -341,7 +342,7 @@
       answers = [""];
     } catch (err: any) {
       error = err.message;
-      alert(err.message);
+      logger.error('PLAYLIST', 'TRACK_ADD_FAILED', { details: err });
     } finally {
       loading = false;
     }
@@ -375,7 +376,7 @@
       tracks = tracks.filter((t) => t.id !== videoId);
     } catch (err: any) {
       error = err.message;
-      alert(err.message);
+      logger.error('PLAYLIST', 'TRACK_REMOVE_FAILED', { details: err });
     } finally {
       loading = false;
     }
@@ -429,10 +430,10 @@
       selectedPlaylist = updatedPlaylist;
 
       cancelEditTrack();
-      alert("정답이 업데이트되었습니다!");
+      logger.success('SUCCESS', 'PLAYLIST_SAVED');
     } catch (err: any) {
       error = err.message;
-      alert(err.message);
+      logger.error('PLAYLIST', 'SAVE_FAILED', { details: err });
     } finally {
       loading = false;
     }
