@@ -2,6 +2,8 @@
   import GamePlayer from "./GamePlayer.svelte";
   import GameResult from "./GameResult.svelte";
 
+  import type { AnimationType } from "../../stores/gameStore";
+
   interface Props {
     currentRoom: any;
     players: any[];
@@ -18,6 +20,10 @@
     volume: number;
     roundEnded: boolean;
     answer: string;
+    playerAnimations: Record<string, AnimationType>;
+    previousScores: Record<string, number>;
+    answeredCorrectly: Set<string>;
+    answeredWrong: Set<string>;
     onStartGame: () => void;
     onLeaveRoom: () => void;
     onVolumeChange: (e: Event) => void;
@@ -43,6 +49,10 @@
     volume,
     roundEnded,
     answer,
+    playerAnimations,
+    previousScores,
+    answeredCorrectly,
+    answeredWrong,
     onStartGame,
     onLeaveRoom,
     onVolumeChange,
@@ -75,7 +85,20 @@
   <h3>👥 참가자 목록</h3>
   <div class="players-list">
     {#each players as player}
-      <div class="player-card">
+      {@const animationType = playerAnimations[player.id]}
+      {@const previousScore = previousScores[player.id] || 0}
+      {@const scoreDiff = (player.score || 0) - previousScore}
+      {@const hasAnsweredCorrect = answeredCorrectly.has(player.id)}
+      {@const hasAnsweredWrong = answeredWrong.has(player.id)}
+      <div
+        class="player-card"
+        class:anim-correct={animationType === 'correct'}
+        class:anim-wrong={animationType === 'wrong'}
+        class:anim-submitted={animationType === 'submitted'}
+        class:anim-score-up={animationType === 'score-up'}
+        class:answered-correct={hasAnsweredCorrect && !animationType}
+        class:answered-wrong={hasAnsweredWrong && !animationType && !hasAnsweredCorrect}
+      >
         <span class="avatar">{player.avatar}</span>
         <span class="player-name">
           {player.nickname}
@@ -84,6 +107,9 @@
           {/if}
           {#if player.score !== undefined}
             <span class="score">({player.score}점)</span>
+            {#if animationType === 'score-up' && scoreDiff > 0}
+              <span class="score-popup">+{scoreDiff}</span>
+            {/if}
           {/if}
         </span>
       </div>
@@ -207,6 +233,120 @@
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  /* 정답 애니메이션 - 초록색으로 물들기 */
+  .player-card.anim-correct {
+    background-color: #4caf50 !important;
+    color: white;
+    animation: correctPulse 1s ease;
+  }
+
+  @keyframes correctPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.5);
+    }
+  }
+
+  /* 오답 애니메이션 - 빨간색 + shake */
+  .player-card.anim-wrong {
+    background-color: #f44336 !important;
+    color: white;
+    animation: wrongShake 0.6s ease;
+  }
+
+  @keyframes wrongShake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(5px);
+    }
+  }
+
+  /* 답안 제출 애니메이션 - bounce */
+  .player-card.anim-submitted {
+    animation: submitBounce 0.6s ease;
+  }
+
+  @keyframes submitBounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(-10px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+    75% {
+      transform: translateY(-2px);
+    }
+  }
+
+  /* 점수 증가 애니메이션 - 강조 */
+  .player-card.anim-score-up {
+    animation: scoreHighlight 1.5s ease;
+  }
+
+  @keyframes scoreHighlight {
+    0%, 100% {
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    }
+  }
+
+  /* 점수 증가 팝업 */
+  .score-popup {
+    position: absolute;
+    right: 1rem;
+    top: -0.5rem;
+    background-color: #ffc107;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    animation: scorePopup 1.5s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes scorePopup {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-10px) scale(1.1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.8);
+    }
+  }
+
+  /* 정답 맞춘 상태 유지 (연한 초록색) */
+  .player-card.answered-correct {
+    background-color: #c8e6c9 !important;
+    border-left: 4px solid #4caf50;
+  }
+
+  /* 오답 제출한 상태 유지 (연한 빨간색) */
+  .player-card.answered-wrong {
+    background-color: #ffcdd2 !important;
+    border-left: 4px solid #f44336;
   }
 
   .avatar {

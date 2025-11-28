@@ -1,6 +1,9 @@
 import { writable, derived } from 'svelte/store';
 import type { Socket } from 'socket.io-client';
 
+// 애니메이션 타입
+export type AnimationType = 'correct' | 'wrong' | 'submitted' | 'score-up' | null;
+
 // 타입 정의
 export interface GameState {
   socket: Socket | null;
@@ -34,6 +37,15 @@ export interface GameState {
   isLoadingTrack: boolean;
   readyPlayers: number;
   volume: number;
+
+  // UI 애니메이션 (플레이어별 애니메이션 상태)
+  playerAnimations: Record<string, AnimationType>;
+  // 점수 증가 추적 (이전 점수 저장)
+  previousScores: Record<string, number>;
+  // 정답을 맞춘 플레이어 추적 (라운드별)
+  answeredCorrectly: Set<string>;
+  // 오답을 제출한 플레이어 추적 (라운드별)
+  answeredWrong: Set<string>;
 }
 
 // 초기 상태
@@ -65,6 +77,11 @@ const initialState: GameState = {
   isLoadingTrack: false,
   readyPlayers: 0,
   volume: 50,
+
+  playerAnimations: {},
+  previousScores: {},
+  answeredCorrectly: new Set(),
+  answeredWrong: new Set(),
 };
 
 // 메인 스토어
@@ -85,4 +102,80 @@ export function updateGameStore(updates: Partial<GameState>) {
 
 export function resetGameStore() {
   gameStore.set(initialState);
+}
+
+// 플레이어 애니메이션 트리거
+export function triggerPlayerAnimation(playerId: string, animationType: AnimationType, duration: number = 1000) {
+  // 애니메이션 설정
+  gameStore.update(state => ({
+    ...state,
+    playerAnimations: {
+      ...state.playerAnimations,
+      [playerId]: animationType
+    }
+  }));
+
+  // duration 후 애니메이션 초기화
+  setTimeout(() => {
+    gameStore.update(state => ({
+      ...state,
+      playerAnimations: {
+        ...state.playerAnimations,
+        [playerId]: null
+      }
+    }));
+  }, duration);
+}
+
+// 점수 업데이트 시 이전 점수 저장 및 애니메이션 트리거
+export function updatePlayerScore(playerId: string, newScore: number) {
+  gameStore.update(state => {
+    const previousScore = state.previousScores[playerId] || 0;
+
+    // 점수가 증가했다면 score-up 애니메이션 트리거
+    if (newScore > previousScore) {
+      triggerPlayerAnimation(playerId, 'score-up', 1500);
+    }
+
+    return {
+      ...state,
+      previousScores: {
+        ...state.previousScores,
+        [playerId]: newScore
+      }
+    };
+  });
+}
+
+// 정답 맞춘 플레이어 추가
+export function markPlayerCorrect(playerId: string) {
+  gameStore.update(state => {
+    const newSet = new Set(state.answeredCorrectly);
+    newSet.add(playerId);
+    return {
+      ...state,
+      answeredCorrectly: newSet
+    };
+  });
+}
+
+// 오답 제출한 플레이어 추가
+export function markPlayerWrong(playerId: string) {
+  gameStore.update(state => {
+    const newSet = new Set(state.answeredWrong);
+    newSet.add(playerId);
+    return {
+      ...state,
+      answeredWrong: newSet
+    };
+  });
+}
+
+// 라운드 초기화 (정답/오답 상태 초기화)
+export function resetRoundState() {
+  gameStore.update(state => ({
+    ...state,
+    answeredCorrectly: new Set(),
+    answeredWrong: new Set(),
+  }));
 }

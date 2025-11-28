@@ -317,11 +317,12 @@ export function handleSubmitAnswer(io: Server, socket: Socket): void {
           `📝 ${player.nickname} submitted: "${answer}" - ${result.result.isCorrect ? "✅ Correct" : "❌ Wrong"} (${result.result.score} points)`
         );
 
-        // 다른 플레이어들에게 제출 알림 (정답 숨김)
+        // 다른 플레이어들에게 제출 알림 (정답 여부 포함)
         socket.to(roomCode).emit(events.ANSWER_SUBMITTED, {
           playerId: socket.id,
           nickname: player.nickname,
           hasAnswered: true,
+          isCorrect: result.result.isCorrect,
           timestamp: Date.now(),
         });
 

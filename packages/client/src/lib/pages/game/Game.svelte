@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { initSocket } from "../../socket";
   import type { Socket } from "socket.io-client";
-  import { gameStore, isHost, updateGameStore } from "../../stores/gameStore";
+  import { gameStore, isHost, updateGameStore, triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState } from "../../stores/gameStore";
   import GameLobby from "./GameLobby.svelte";
   import GameRoom from "./GameRoom.svelte";
 
@@ -31,6 +31,10 @@
     isLoadingTrack,
     readyPlayers,
     volume,
+    playerAnimations,
+    previousScores,
+    answeredCorrectly,
+    answeredWrong,
   } = $derived($gameStore);
 
   onMount(() => {
@@ -110,9 +114,15 @@
     // 게임 시작 알림
     socket.on("game-started", (data) => {
       console.log("🎮 게임 시작!", data);
+      // players 데이터를 업데이트하여 점수 초기화 (score: 0)
+      const playersWithScore = data.players.map((p: any) => ({
+        ...p,
+        score: p.score || 0,
+      }));
       updateGameStore({
         gameStarted: true,
         totalRounds: data.totalRounds,
+        players: playersWithScore,
         statusMessage: `🎮 게임 시작! (총 ${data.totalRounds}라운드)`,
       });
     });
@@ -120,6 +130,8 @@
     // 라운드 준비 요청
     socket.on("prepare-round", (data) => {
       console.log("📋 라운드 준비 요청:", data);
+      // 라운드 시작 시 정답 상태 초기화
+      resetRoundState();
       updateGameStore({
         preparedTrack: data.track,
         currentRound: data.roundNumber,
@@ -211,31 +223,70 @@
     // 정답 제출 알림
     socket.on("answer-submitted", (data) => {
       console.log("📝 답안 제출됨:", data);
-      updateGameStore({
-        statusMessage: `📝 ${data.nickname}님이 답을 제출했습니다!`,
-      });
+      // 다른 플레이어가 제출한 경우
+      if (data.playerId) {
+        if (data.isCorrect) {
+          // 정답인 경우: 초록색 애니메이션 + 정답 상태로 마킹
+          triggerPlayerAnimation(data.playerId, 'correct', 1000);
+          markPlayerCorrect(data.playerId);
+          updateGameStore({
+            statusMessage: `✅ ${data.nickname}님이 정답을 맞췄습니다!`,
+          });
+        } else {
+          // 오답인 경우: 빨간색 shake 애니메이션 + 오답 상태로 마킹
+          triggerPlayerAnimation(data.playerId, 'wrong', 600);
+          markPlayerWrong(data.playerId);
+          updateGameStore({
+            statusMessage: `❌ ${data.nickname}님이 오답을 제출했습니다!`,
+          });
+        }
+      }
     });
 
     // 점수 업데이트
     socket.on("score-updated", (data) => {
       console.log("📊 점수 업데이트:", data);
-      if (currentRoom) {
-        const updatedPlayers = [...players];
-        data.scores.forEach(([playerId, score]: [string, number]) => {
-          const playerIndex = updatedPlayers.findIndex(
-            (p) => p.id === playerId
-          );
-          if (playerIndex !== -1) {
-            updatedPlayers[playerIndex].score = score;
+      console.log("  현재 players:", players);
+      console.log("  받은 scores:", data.scores);
+
+      // 점수 맵 생성
+      const scoresMap = new Map(data.scores);
+
+      // 모든 플레이어의 점수를 업데이트 (새로운 객체 생성으로 reactivity 보장)
+      const updatedPlayers = players.map((p) => {
+        const newScore = scoresMap.get(p.id);
+        if (typeof newScore === 'number') {
+          const oldScore = p.score || 0;
+
+          // 점수가 증가한 경우 애니메이션 및 이전 점수 저장
+          if (newScore > oldScore) {
+            updatePlayerScore(p.id, newScore);
           }
-        });
-        updateGameStore({ players: updatedPlayers });
-      }
+
+          return { ...p, score: newScore };
+        }
+        return p;
+      });
+
+      console.log("  업데이트된 players:", updatedPlayers);
+      updateGameStore({ players: updatedPlayers });
     });
 
     // 라운드 종료
     socket.on("round-ended", (data) => {
       console.log("🏁 라운드 종료!", data);
+
+      // 정답을 맞춘 플레이어들에게 초록색 애니메이션 트리거
+      if (data.result && data.result.correctAnswers) {
+        data.result.correctAnswers.forEach((answer: any) => {
+          const playerId = answer.playerId;
+          // 정답 맞춘 플레이어로 마킹
+          markPlayerCorrect(playerId);
+          // 초록색 애니메이션 (이미 자신은 submitAnswer에서 트리거했을 수 있지만 중복 트리거해도 괜찮음)
+          triggerPlayerAnimation(playerId, 'correct', 1000);
+        });
+      }
+
       updateGameStore({
         statusMessage: `🏁 정답: ${data.result.track.name} - ${data.result.track.artist}`,
         currentTrack: null,
@@ -583,10 +634,13 @@
 
   // 정답 제출
   function submitAnswer() {
-    if (!currentRoom || !answer.trim()) return;
+    if (!currentRoom || !answer.trim() || !socket) return;
 
     const userAnswer = answer.trim();
     updateGameStore({ answer: "" });
+
+    // 제출 애니메이션 트리거 (자신의 네임바)
+    triggerPlayerAnimation(socket.id!, 'submitted', 600);
 
     socket.emit(
       "submit-answer",
@@ -598,10 +652,17 @@
         if (response.success) {
           const result = response.result;
           if (result.isCorrect) {
+            // 정답 애니메이션 트리거
+            triggerPlayerAnimation(socket.id!, 'correct', 1000);
+            // 정답 맞춘 플레이어로 마킹
+            markPlayerCorrect(socket.id!);
             updateGameStore({
               statusMessage: `✅ ${result.message} (스트릭: ${result.streak})`,
             });
           } else {
+            // 오답 애니메이션 트리거 (shake) + 오답 상태로 마킹
+            triggerPlayerAnimation(socket.id!, 'wrong', 600);
+            markPlayerWrong(socket.id!);
             updateGameStore({
               statusMessage: `❌ ${result.message}`,
             });
@@ -733,6 +794,10 @@
       {volume}
       {roundEnded}
       {answer}
+      {playerAnimations}
+      {previousScores}
+      {answeredCorrectly}
+      {answeredWrong}
       onStartGame={startGame}
       onLeaveRoom={leaveRoom}
       onVolumeChange={handleVolumeChange}
