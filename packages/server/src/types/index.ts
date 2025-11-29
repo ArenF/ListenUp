@@ -36,11 +36,18 @@ export interface GameState {
   readyPlayers: Set<string>;          // 준비 완료된 플레이어 ID
   waitingForReady: boolean;           // 플레이어 준비 대기 중
   tracks: Track[];                    // 게임의 전체 트랙 목록
+  hintTimers: NodeJS.Timeout[];       // 힌트 타이머 배열 (라운드 종료 시 정리용)
+}
+
+export interface Hint {
+  showAtSeconds: number;  // 힌트를 보여줄 시간 (라운드 시작 후 경과 시간, 초 단위)
+  text: string;           // 힌트 텍스트
 }
 
 export interface PlaylistTrack {
   videoId: string;
   answers: string[];  // 정답 목록 (곡명, 아티스트명 등)
+  hints?: Hint[];     // 힌트 목록 (선택적)
 }
 
 export interface Playlist {
@@ -63,6 +70,7 @@ export interface Track {
   endSeconds: number;
   thumbnailUrl?: string;
   answers: string[];  // 플레이리스트에서 지정한 정답 목록
+  hints?: Hint[];     // 힌트 목록 (선택적)
 }
 
 export interface YouTubeVideoSnippet {

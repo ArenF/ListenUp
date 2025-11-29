@@ -98,7 +98,7 @@ export class YouTubeService {
           const publishedAt = item.snippet.publishedAt;
           const year = publishedAt.substring(0, 4);
 
-          // playlistTracks에서 해당 videoId의 answers 찾기
+          // playlistTracks에서 해당 videoId의 answers, hints 찾기
           const playlistTrack = playlistTracks?.find(
             (pt) => pt.videoId === item.id
           );
@@ -115,6 +115,7 @@ export class YouTubeService {
             endSeconds,
             thumbnailUrl: item.snippet.thumbnails.high.url,
             answers: playlistTrack?.answers || [], // answers 필드 추가
+            hints: playlistTrack?.hints,           // hints 필드 추가 (선택적)
           };
         });
 

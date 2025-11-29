@@ -46,6 +46,9 @@ export interface GameState {
   answeredCorrectly: Set<string>;
   // 오답을 제출한 플레이어 추적 (라운드별)
   answeredWrong: Set<string>;
+
+  // 힌트 시스템
+  currentHint: { text: string; index: number; total: number } | null;
 }
 
 // 초기 상태
@@ -82,6 +85,7 @@ const initialState: GameState = {
   previousScores: {},
   answeredCorrectly: new Set(),
   answeredWrong: new Set(),
+  currentHint: null,
 };
 
 // 메인 스토어

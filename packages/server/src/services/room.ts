@@ -49,6 +49,7 @@ export class RoomService {
       readyPlayers: new Set(),
       waitingForReady: false,
       tracks: [],
+      hintTimers: [],
     };
 
     const room: Room = {

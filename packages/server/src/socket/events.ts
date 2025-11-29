@@ -27,6 +27,7 @@ export const SCORE_UPDATED = "score-updated";
 export const PREPARE_ROUND = "prepare-round";  // 라운드 준비 (트랙 로드 요청)
 export const PLAYER_READY_STATUS = "player-ready-status";  // 준비 상태 업데이트
 export const ALL_PLAYERS_READY = "all-players-ready";  // 모든 플레이어 준비 완료
+export const HINT_SHOWN = "hint-shown";  // 힌트 표시
 
 // 채팅 이벤트
 export const SEND_MESSAGE = "send-message";

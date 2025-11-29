@@ -5,6 +5,7 @@
   import { gameStore, isHost, updateGameStore, triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState } from "../../stores/gameStore";
   import GameLobby from "./GameLobby.svelte";
   import GameRoom from "./GameRoom.svelte";
+  import Hint from "../../components/common/Hint.svelte";
 
   // 스토어에서 상태 추출
   let socket: Socket;
@@ -35,6 +36,7 @@
     previousScores,
     answeredCorrectly,
     answeredWrong,
+    currentHint,
   } = $derived($gameStore);
 
   onMount(() => {
@@ -306,6 +308,19 @@
         gameResult: data.result,
         statusMessage: `🎊 게임 종료! 우승: ${data.result.winner?.nickname || "없음"}`,
       });
+    });
+
+    // 힌트 표시
+    socket.on("hint-shown", (data) => {
+      console.log("💡 힌트 표시:", data);
+      updateGameStore({
+        currentHint: data.hint,
+      });
+
+      // 5초 후 힌트 자동 숨김
+      setTimeout(() => {
+        updateGameStore({ currentHint: null });
+      }, 5000);
     });
 
     // 서버 연결 시작
@@ -813,6 +828,16 @@
     <p>Backend: Node.js + Socket.IO + TypeScript</p>
     <p>Frontend: Svelte 5 + Socket.IO Client</p>
   </div>
+
+  <!-- 힌트 표시 -->
+  {#if currentHint}
+    <Hint
+      text={currentHint.text}
+      index={currentHint.index}
+      total={currentHint.total}
+      onDismiss={() => updateGameStore({ currentHint: null })}
+    />
+  {/if}
 </div>
 
 <style>

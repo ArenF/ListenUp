@@ -2,7 +2,7 @@ import type { Server, Socket } from "socket.io";
 import { gameService } from "../../services/game.js";
 import { roomService } from "../../services/room.js";
 import { youtubeService } from "../../services/youtube.js";
-import type { Track, RoundResult } from "../../types/index.js";
+import type { Track, RoundResult, Room } from "../../types/index.js";
 import * as events from "../events.js";
 
 // ============================================================================
@@ -76,6 +76,54 @@ function serializeRoundResult(result: RoundResult): SerializedRoundResult {
     scores: Array.from(result.scores.entries()),
     streaks: Array.from(result.streaks.entries()),
   };
+}
+
+/**
+ * 힌트 타이머 설정
+ * 트랙에 힌트가 있으면 지정된 시간에 힌트를 전송
+ */
+function setupHintTimers(io: Server, roomCode: string, room: Room, track: Track): void {
+  // 기존 힌트 타이머 정리
+  clearHintTimers(room);
+
+  // 힌트가 없으면 종료
+  if (!track.hints || track.hints.length === 0) {
+    return;
+  }
+
+  console.log(`💡 Setting up ${track.hints.length} hint timer(s) for track: ${track.name}`);
+
+  // 각 힌트에 대해 타이머 설정
+  track.hints.forEach((hint, index) => {
+    const timer = setTimeout(() => {
+      // 힌트 전송
+      io.to(roomCode).emit(events.HINT_SHOWN, {
+        roundNumber: room.gameState.currentRound,
+        hint: {
+          text: hint.text,
+          index: index + 1,
+          total: track.hints!.length,
+        },
+      });
+
+      console.log(`💡 Hint ${index + 1}/${track.hints!.length} shown in room ${roomCode}: "${hint.text}"`);
+    }, hint.showAtSeconds * 1000); // 초 단위를 밀리초로 변환
+
+    // 타이머 저장 (라운드 종료 시 정리용)
+    room.gameState.hintTimers.push(timer);
+  });
+}
+
+/**
+ * 힌트 타이머 정리
+ * 라운드 종료 시 모든 힌트 타이머를 취소
+ */
+function clearHintTimers(room: Room): void {
+  if (room.gameState.hintTimers.length > 0) {
+    room.gameState.hintTimers.forEach(timer => clearTimeout(timer));
+    room.gameState.hintTimers = [];
+    console.log(`✅ Cleared ${room.gameState.hintTimers.length} hint timer(s)`);
+  }
 }
 
 /**
@@ -256,6 +304,9 @@ export function handlePlayerReady(io: Server, socket: Socket): void {
             console.log(
               `🎵 Round ${roundResult.roundNumber} started with track: ${roundResult.track.name}`
             );
+
+            // 힌트 타이머 설정
+            setupHintTimers(io, roomCode, room, roundResult.track);
           }
         }
       } catch (error) {
@@ -340,6 +391,9 @@ export function handleSubmitAnswer(io: Server, socket: Socket): void {
 
           // 2초 후에 라운드 종료
           setTimeout(() => {
+            // 힌트 타이머 정리
+            clearHintTimers(room);
+
             const endResult = gameService.endRound(room);
             if (endResult.success && endResult.result) {
               // 라운드 종료 브로드캐스트

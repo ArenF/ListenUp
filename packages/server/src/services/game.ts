@@ -97,6 +97,7 @@ export class GameService {
     room.gameState.readyPlayers = new Set();
     room.gameState.waitingForReady = false;
     room.gameState.tracks = [];
+    room.gameState.hintTimers = [];
 
     // 모든 플레이어 점수 초기화
     for (const [playerId] of room.players) {

@@ -1,8 +1,8 @@
 # UI/UX 실시간 반응 시스템 구현 보고서
 
-**작성일**: 2025-11-28
+**작성일**: 2025-11-28 (최종 업데이트: 2025-11-29)
 **프로젝트**: ListenUp! - 실시간 음악 맞추기 게임
-**작업 범위**: 플레이어 네임바 실시간 애니메이션 피드백 시스템
+**작업 범위**: 플레이어 네임바 실시간 애니메이션 피드백 시스템 + 정답/오답 상태 지속 표시
 
 ---
 
@@ -30,11 +30,16 @@
 
 기존에는 플레이어가 답안을 제출하거나 정답/오답 여부를 확인할 때 시각적 피드백이 없어 사용자 경험이 단조로웠습니다. 이를 개선하기 위해 다음과 같은 실시간 애니메이션 시스템을 구현했습니다:
 
-1. **정답 시 피드백**: 네임바가 초록색으로 변하며 부드럽게 확대/축소 + 연한 초록색 상태 유지
-2. **오답 시 피드백**: 네임바가 빨간색으로 변하며 shake 효과 + 연한 빨간색 상태 유지
-3. **답안 제출 애니메이션**: 네임바가 튀어오르는 bounce 효과
-4. **점수 증가 애니메이션**: 네임바 강조 + 점수 증가량 팝업 표시
+1. **정답 시 피드백**:
+   - 즉시: 네임바가 초록색으로 변하며 부드럽게 확대/축소 애니메이션 (1초)
+   - 지속: 애니메이션 종료 후 연한 초록색 배경 + 초록색 왼쪽 테두리로 정답 상태 유지
+2. **오답 시 피드백**:
+   - 즉시: 네임바가 빨간색으로 변하며 shake 효과 (0.6초)
+   - 지속: 애니메이션 종료 후 연한 빨간색 배경 + 빨간색 왼쪽 테두리로 오답 상태 유지
+3. **답안 제출 애니메이션**: 네임바가 튀어오르는 bounce 효과 (0.6초)
+4. **점수 증가 애니메이션**: 네임바 강조 + 점수 증가량 팝업 표시 (1.5초)
 5. **실시간 동기화**: 모든 플레이어에게 정답/오답 상태와 점수가 실시간으로 동기화
+6. **라운드별 상태 관리**: 각 라운드 시작 시 정답/오답 상태 자동 초기화
 
 ---
 
@@ -173,9 +178,33 @@ socket.on("game-started", (data) => {
 - 서버에서 보내는 players 데이터를 받아서 점수 필드 초기화
 - 모든 플레이어가 동일한 상태(score: 0)에서 시작하도록 보장
 
+#### 2.1.5 라운드 준비 (prepare-round) - NEW!
+
+**위치**: `/packages/client/src/lib/pages/game/Game.svelte:131-143`
+
+```typescript
+socket.on("prepare-round", (data) => {
+  console.log("📋 라운드 준비 요청:", data);
+  // ✨ 라운드 시작 시 정답/오답 상태 초기화
+  resetRoundState();
+  updateGameStore({
+    preparedTrack: data.track,
+    currentRound: data.roundNumber,
+    roundEnded: false,
+    readyPlayers: 0,
+    statusMessage: `⏳ Round ${data.roundNumber} - 로딩 중...`,
+    isLoadingTrack: true,
+  });
+});
+```
+
+**변경 사항**:
+- **✨ `resetRoundState()` 호출**: 새 라운드 시작 시 `answeredCorrectly`와 `answeredWrong` Set을 초기화
+- 이전 라운드의 정답/오답 상태를 지우고 깨끗한 상태로 시작
+
 #### 2.2 답안 제출 함수 (submitAnswer)
 
-**위치**: `/packages/client/src/lib/pages/game/Game.svelte:585-625`
+**위치**: `/packages/client/src/lib/pages/game/Game.svelte:636-667`
 
 ```typescript
 function submitAnswer() {
@@ -192,15 +221,17 @@ function submitAnswer() {
       if (response.success) {
         const result = response.result;
         if (result.isCorrect) {
-          // ✨ 정답 애니메이션 트리거 + 정답 상태로 마킹
+          // ✨ 정답 애니메이션 트리거
           triggerPlayerAnimation(socket.id!, 'correct', 1000);
+          // ✨ 정답 맞춘 플레이어로 마킹 (상태 지속 표시)
           markPlayerCorrect(socket.id!);
           updateGameStore({
             statusMessage: `✅ ${result.message} (스트릭: ${result.streak})`,
           });
         } else {
-          // ✨ 오답 애니메이션 트리거 (shake) + 오답 상태로 마킹
+          // ✨ 오답 애니메이션 트리거 (shake)
           triggerPlayerAnimation(socket.id!, 'wrong', 600);
+          // ✨ 오답 제출한 플레이어로 마킹 (상태 지속 표시)
           markPlayerWrong(socket.id!);
           updateGameStore({
             statusMessage: `❌ ${result.message}`,
@@ -214,12 +245,16 @@ function submitAnswer() {
 
 **변경 사항**:
 - 답안 제출 시 `submitted` 애니메이션 즉시 트리거 (600ms)
-- 서버 응답에서 정답이면 `correct` 애니메이션 (1000ms) + `markPlayerCorrect()` 호출
-- 오답이면 `wrong` 애니메이션 (600ms) + `markPlayerWrong()` 호출
+- 서버 응답에서 정답이면:
+  - `correct` 애니메이션 (1000ms) 트리거
+  - **✨ `markPlayerCorrect()` 호출**: `answeredCorrectly` Set에 추가하여 상태 지속 표시
+- 오답이면:
+  - `wrong` 애니메이션 (600ms) 트리거
+  - **✨ `markPlayerWrong()` 호출**: `answeredWrong` Set에 추가하여 상태 지속 표시
 
 #### 2.3 다른 플레이어 답안 제출 알림 (answer-submitted)
 
-**위치**: `/packages/client/src/lib/pages/game/Game.svelte:217-238`
+**위치**: `/packages/client/src/lib/pages/game/Game.svelte:224-244`
 
 ```typescript
 socket.on("answer-submitted", (data) => {
@@ -246,21 +281,28 @@ socket.on("answer-submitted", (data) => {
 ```
 
 **변경 사항**:
-- 서버에서 `isCorrect` 플래그를 받아서 정답/오답 구분
-- 정답: 초록색 애니메이션 + `markPlayerCorrect()` 호출
-- 오답: 빨간색 shake 애니메이션 + `markPlayerWrong()` 호출
-- 모든 플레이어에게 실시간으로 정답/오답 상태 동기화
+- **✨ 서버에서 `isCorrect` 플래그를 받아서 정답/오답 구분**
+- 정답인 경우:
+  - 초록색 애니메이션 트리거
+  - **✨ `markPlayerCorrect()` 호출**: 정답 상태 지속 표시
+- 오답인 경우:
+  - 빨간색 shake 애니메이션 트리거
+  - **✨ `markPlayerWrong()` 호출**: 오답 상태 지속 표시
+- **모든 플레이어에게 실시간으로 정답/오답 상태 동기화**
 
-**서버 수정** (`game.handler.ts:321`):
+**서버 수정** (`game.handler.ts:320-327`):
 ```typescript
+// 다른 플레이어들에게 제출 알림 (정답 여부 포함)
 socket.to(roomCode).emit(events.ANSWER_SUBMITTED, {
   playerId: socket.id,
   nickname: player.nickname,
   hasAnswered: true,
-  isCorrect: result.result.isCorrect,  // ← 추가
+  isCorrect: result.result.isCorrect,  // ✨ 추가: 정답 여부 전달
   timestamp: Date.now(),
 });
 ```
+
+**중요**: 이 수정으로 다른 플레이어의 정답/오답 상태가 실시간으로 모든 클라이언트에 동기화됩니다.
 
 #### 2.4 점수 업데이트 (score-updated)
 
@@ -318,13 +360,15 @@ interface Props {
   // ... 기존 props
   playerAnimations: Record<string, AnimationType>;
   previousScores: Record<string, number>;
+  answeredCorrectly: Set<string>;  // ✨ 정답 맞춘 플레이어 추적
+  answeredWrong: Set<string>;      // ✨ 오답 제출한 플레이어 추적
   // ... 이벤트 핸들러들
 }
 ```
 
 #### 3.2 플레이어 카드 렌더링
 
-**위치**: `/packages/client/src/lib/pages/game/GameRoom.svelte:83-109`
+**위치**: `/packages/client/src/lib/pages/game/GameRoom.svelte:86-116`
 
 ```svelte
 <div class="players-list">
@@ -332,12 +376,16 @@ interface Props {
     {@const animationType = playerAnimations[player.id]}
     {@const previousScore = previousScores[player.id] || 0}
     {@const scoreDiff = (player.score || 0) - previousScore}
+    {@const hasAnsweredCorrect = answeredCorrectly.has(player.id)}
+    {@const hasAnsweredWrong = answeredWrong.has(player.id)}
     <div
       class="player-card"
       class:anim-correct={animationType === 'correct'}
       class:anim-wrong={animationType === 'wrong'}
       class:anim-submitted={animationType === 'submitted'}
       class:anim-score-up={animationType === 'score-up'}
+      class:answered-correct={hasAnsweredCorrect && !animationType}
+      class:answered-wrong={hasAnsweredWrong && !animationType && !hasAnsweredCorrect}
     >
       <span class="avatar">{player.avatar}</span>
       <span class="player-name">
@@ -360,8 +408,17 @@ interface Props {
 **변경 사항**:
 - `playerAnimations`에서 현재 애니메이션 타입 가져오기
 - 점수 증가량 계산 (`scoreDiff`)
+- **✨ 정답/오답 상태 확인**: `hasAnsweredCorrect`, `hasAnsweredWrong` 변수로 Set에서 상태 조회
 - 동적 클래스 바인딩으로 애니메이션 적용
+  - `anim-*`: 일시적인 애니메이션 (자동 해제)
+  - **✨ `answered-correct`**: 정답 상태 지속 표시 (애니메이션 없을 때만)
+  - **✨ `answered-wrong`**: 오답 상태 지속 표시 (애니메이션 없을 때만, 정답 우선)
 - 점수 증가 시 `+점수` 팝업 표시
+
+**상태 우선순위**:
+1. 애니메이션 실행 중 → 애니메이션 스타일 적용
+2. 정답 맞춤 → 연한 초록색 배경 유지
+3. 오답 제출 (정답 아님) → 연한 빨간색 배경 유지
 
 ---
 
@@ -490,6 +547,29 @@ interface Props {
 - 네임바에 노란색 그림자가 깜박이며 점수 증가 강조
 - `+점수` 텍스트가 위로 떠오르며 사라짐
 
+#### 4.5 정답/오답 상태 지속 표시 (NEW!)
+
+**위치**: `/packages/client/src/lib/pages/game/GameRoom.svelte:341-350`
+
+```css
+/* 정답 맞춘 상태 유지 (연한 초록색) */
+.player-card.answered-correct {
+  background-color: #c8e6c9 !important;
+  border-left: 4px solid #4caf50;
+}
+
+/* 오답 제출한 상태 유지 (연한 빨간색) */
+.player-card.answered-wrong {
+  background-color: #ffcdd2 !important;
+  border-left: 4px solid #f44336;
+}
+```
+
+**효과**:
+- **정답 상태**: 애니메이션 종료 후에도 연한 초록색 배경과 왼쪽 초록색 테두리로 정답 상태 유지
+- **오답 상태**: 애니메이션 종료 후에도 연한 빨간색 배경과 왼쪽 빨간색 테두리로 오답 상태 유지
+- 라운드가 종료될 때까지 상태 유지, 다음 라운드 시작 시 자동 초기화
+
 ---
 
 ## 기술적 상세
@@ -546,6 +626,67 @@ scoreDiff = newScore - previousScore
 {/if}
 ```
 
+### 정답/오답 상태 관리 흐름 (NEW!)
+
+```
+[라운드 시작]
+    ↓
+prepare-round 이벤트 수신
+    ↓
+resetRoundState() 호출
+    ↓
+answeredCorrectly.clear()
+answeredWrong.clear()
+    ↓
+[플레이어 답안 제출]
+    ↓
+submitAnswer() 호출
+    ↓
+서버 응답 수신
+    ↓
+if (isCorrect) {
+    ↓
+  markPlayerCorrect(playerId)
+    ↓
+  answeredCorrectly.add(playerId)
+    ↓
+  triggerPlayerAnimation('correct', 1000)
+    ↓
+  [1초 후] animationType = null
+    ↓
+  answered-correct 클래스 활성화
+    ↓
+  연한 초록색 배경 유지 (라운드 끝까지)
+}
+else {
+    ↓
+  markPlayerWrong(playerId)
+    ↓
+  answeredWrong.add(playerId)
+    ↓
+  triggerPlayerAnimation('wrong', 600)
+    ↓
+  [0.6초 후] animationType = null
+    ↓
+  answered-wrong 클래스 활성화
+    ↓
+  연한 빨간색 배경 유지 (라운드 끝까지)
+}
+    ↓
+[다음 라운드]
+    ↓
+prepare-round 이벤트
+    ↓
+resetRoundState() 호출
+    ↓
+모든 상태 초기화 (처음으로)
+```
+
+**주요 특징**:
+- **Set 자료구조 사용**: 중복 방지 및 O(1) 조회 성능
+- **상태 우선순위**: 정답 > 오답 (한 플레이어가 오답 후 정답 맞추면 정답 상태만 표시)
+- **라운드별 격리**: 각 라운드마다 독립적인 상태 관리
+
 ### 타이밍 설계
 
 | 애니메이션 타입 | 지속 시간 | 이유 |
@@ -559,15 +700,20 @@ scoreDiff = newScore - previousScore
 
 ## 파일 변경 사항
 
-### 수정된 파일 (3개)
+### 수정된 파일 (4개)
 
 | 파일 | 변경 내용 | 라인 수 변화 |
 |-----|---------|------------|
-| `lib/stores/gameStore.ts` | AnimationType 추가, playerAnimations/previousScores 필드 추가, 헬퍼 함수 추가 | +57줄 |
-| `lib/pages/game/Game.svelte` | Socket.IO 이벤트 핸들러 수정, triggerPlayerAnimation 호출 추가 | +20줄 |
-| `lib/pages/game/GameRoom.svelte` | Props 확장, 플레이어 카드 동적 클래스 바인딩, CSS 애니메이션 추가 | +120줄 |
+| `packages/client/src/lib/stores/gameStore.ts` | AnimationType 추가, playerAnimations/previousScores/answeredCorrectly/answeredWrong 필드 추가, 헬퍼 함수 5개 추가 (triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState) | +93줄 |
+| `packages/client/src/lib/pages/game/Game.svelte` | Socket.IO 이벤트 핸들러 수정 (prepare-round, answer-submitted, round-ended), submitAnswer 함수 수정, resetRoundState 호출 추가 | +97줄 |
+| `packages/client/src/lib/pages/game/GameRoom.svelte` | Props 확장 (answeredCorrectly, answeredWrong 추가), 플레이어 카드 동적 클래스 바인딩 확장, CSS 애니메이션 + 상태 지속 스타일 추가 | +142줄 |
+| `packages/server/src/socket/handlers/game.handler.ts` | answer-submitted 이벤트에 isCorrect 필드 추가 | +1줄 |
 
-**총 변경**: 3개 파일, +197줄
+**총 변경**: 4개 파일 (클라이언트 3개, 서버 1개), +333줄
+
+**커밋 정보**:
+- 커밋 해시: `0ea8042`
+- 커밋 메시지: "실시간 반응형 UI/UX 시스템 구현 - 정답 실시간 반영, 답 입력 시 정답, 오답 애니메이션 추가 및 서버간 동기화 기능 추가 및 확인 완료"
 
 ---
 
@@ -648,13 +794,22 @@ dist/assets/index-2FMnPt24.js   119.72 kB │ gzip: 40.43 kB
 | | 다른 플레이어 제출 시 bounce 표시 | ✅ 통과 |
 | **정답 애니메이션** | 정답 시 초록색 + pulse 효과 | ✅ 통과 |
 | | 1초 후 자동 초기화 | ✅ 통과 |
+| | **애니메이션 후 연한 초록색 상태 유지** | ✅ 통과 |
 | **오답 애니메이션** | 오답 시 빨간색 + shake 효과 | ✅ 통과 |
 | | 0.6초 후 자동 초기화 | ✅ 통과 |
+| | **애니메이션 후 연한 빨간색 상태 유지** | ✅ 통과 |
 | **점수 증가 애니메이션** | 점수 증가 시 강조 효과 | ✅ 통과 |
 | | +점수 팝업 표시 및 사라짐 | ✅ 통과 |
 | | 점수 증가량 정확 계산 | ✅ 통과 |
+| **상태 지속 표시** | 정답 맞춘 플레이어 초록색 유지 | ✅ 통과 |
+| | 오답 제출한 플레이어 빨간색 유지 | ✅ 통과 |
+| | 정답 > 오답 우선순위 적용 | ✅ 통과 |
+| **라운드 관리** | 새 라운드 시작 시 상태 초기화 | ✅ 통과 |
+| | 라운드 종료까지 상태 유지 | ✅ 통과 |
 | **다중 플레이어** | 여러 플레이어 동시 애니메이션 | ✅ 통과 |
+| | 실시간 정답/오답 상태 동기화 | ✅ 통과 |
 | **애니메이션 충돌** | 여러 애니메이션 순차 적용 | ✅ 통과 |
+| | 애니메이션 → 상태 유지 전환 | ✅ 통과 |
 
 ### ✅ 성능 테스트
 
@@ -754,10 +909,17 @@ class AnimationQueue {
 
 ### 달성한 목표
 
-1. ✅ **정답 시 피드백**: 초록색 + pulse 애니메이션 (1s)
-2. ✅ **오답 시 피드백**: 빨간색 + shake 애니메이션 (0.6s)
+1. ✅ **정답 시 피드백**:
+   - 초록색 + pulse 애니메이션 (1s)
+   - **애니메이션 후 연한 초록색 상태 지속 표시**
+2. ✅ **오답 시 피드백**:
+   - 빨간색 + shake 애니메이션 (0.6s)
+   - **애니메이션 후 연한 빨간색 상태 지속 표시**
 3. ✅ **답안 제출 애니메이션**: bounce 효과 (0.6s)
 4. ✅ **점수 증가 애니메이션**: 강조 + 팝업 표시 (1.5s)
+5. ✅ **상태 지속 시스템**: 정답/오답 상태를 라운드 종료까지 유지
+6. ✅ **라운드 관리**: 새 라운드 시작 시 자동 상태 초기화
+7. ✅ **실시간 동기화**: 모든 플레이어에게 정답/오답 상태 실시간 전달
 
 ### 개선된 사용자 경험
 
@@ -765,14 +927,22 @@ class AnimationQueue {
 - **직관적 이해**: 색상(초록=정답, 빨강=오답)과 움직임으로 상태 전달
 - **몰입감 향상**: 애니메이션이 게임 재미를 증폭
 - **경쟁 요소 강화**: 점수 증가 팝업이 순위 경쟁 자극
+- **✨ 상태 가시성**: 누가 정답을 맞췄고 누가 오답을 제출했는지 한눈에 파악 가능
+- **✨ 게임 흐름 파악**: 라운드 진행 상황과 플레이어별 성과를 실시간으로 확인
+- **✨ 투명한 게임 진행**: 모든 플레이어가 동일한 정보를 실시간으로 공유
 
 ### 기술적 성과
 
 - **타입 안전성**: TypeScript로 모든 애니메이션 상태 타입 정의
 - **상태 관리**: Svelte Store로 중앙 집중식 관리
-- **성능 최적화**: setTimeout 정리로 메모리 누수 방지
+- **성능 최적화**:
+  - setTimeout 정리로 메모리 누수 방지
+  - **Set 자료구조 사용으로 O(1) 조회 성능**
 - **확장성**: 새로운 애니메이션 타입 쉽게 추가 가능
 - **유지보수성**: 애니메이션 로직과 UI 분리
+- **✨ 상태 격리**: 라운드별 독립적인 상태 관리로 사이드 이펙트 최소화
+- **✨ 우선순위 시스템**: CSS 클래스 조건부 적용으로 상태 충돌 방지
+- **✨ 실시간 동기화**: 서버-클라이언트 양방향 통신으로 일관된 상태 유지
 
 ### 다음 단계
 
@@ -785,6 +955,13 @@ class AnimationQueue {
 ---
 
 **작성 완료**: 2025-11-28
-**총 작업 시간**: 약 2시간
-**파일 변경**: 3개 (수정 3개)
-**코드 추가**: +197줄
+**최종 업데이트**: 2025-11-29
+**총 작업 시간**: 약 3시간
+**파일 변경**: 4개 (클라이언트 3개, 서버 1개)
+**코드 추가**: +333줄
+
+**주요 추가 기능**:
+- ✨ 정답/오답 상태 지속 표시 (애니메이션 후 연한 색상 유지)
+- ✨ 라운드별 상태 관리 (`answeredCorrectly`, `answeredWrong` Set 사용)
+- ✨ 자동 상태 초기화 (`resetRoundState()` - prepare-round 이벤트 시)
+- ✨ 실시간 정답/오답 동기화 (서버 `isCorrect` 필드 추가)
