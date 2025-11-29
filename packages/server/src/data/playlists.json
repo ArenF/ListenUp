@@ -6,42 +6,93 @@
     "tracks": [
       {
         "videoId": "dQw4w9WgXcQ",
-        "answers": ["Never Gonna Give You Up", "Rick Astley", "릭 애슬리"],
+        "answers": [
+          "Never Gonna Give You Up",
+          "Rick Astley",
+          "릭 애슬리"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 1987년에 발매된 곡입니다" },
-          { "showAtSeconds": 15, "text": "💡 인터넷 밈으로 유명한 곡이에요" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 1987년에 발매된 곡입니다"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 인터넷 밈으로 유명한 곡이에요"
+          }
         ]
       },
       {
         "videoId": "kJQP7kiw5Fk",
-        "answers": ["Despacito", "Luis Fonsi", "데스파시토"],
+        "answers": [
+          "Despacito",
+          "Luis Fonsi",
+          "데스파시토"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 스페인어로 '천천히'라는 뜻입니다" },
-          { "showAtSeconds": 15, "text": "💡 2017년 전 세계를 강타한 라틴 팝" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 스페인어로 '천천히'라는 뜻입니다"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 2017년 전 세계를 강타한 라틴 팝"
+          }
         ]
       },
       {
         "videoId": "9bZkp7q19f0",
-        "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"],
+        "answers": [
+          "Gangnam Style",
+          "PSY",
+          "강남스타일",
+          "싸이"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 말춤으로 유명한 K-POP" },
-          { "showAtSeconds": 15, "text": "💡 서울의 한 지역 이름이 들어갑니다" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 말춤으로 유명한 K-POP"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 서울의 한 지역 이름이 들어갑니다"
+          }
         ]
       },
       {
         "videoId": "fJ9rUzIMcZQ",
-        "answers": ["Bohemian Rhapsody", "Queen", "보헤미안 랩소디"],
+        "answers": [
+          "Bohemian Rhapsody",
+          "Queen",
+          "보헤미안 랩소디"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 6분 가까이 되는 긴 곡입니다" },
-          { "showAtSeconds": 15, "text": "💡 영국의 전설적인 록 밴드의 대표곡" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 6분 가까이 되는 긴 곡입니다"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 영국의 전설적인 록 밴드의 대표곡"
+          }
         ]
       },
       {
         "videoId": "2Vv-BfVoq4g",
-        "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"],
+        "answers": [
+          "Ed Sheeran",
+          "Shape of You",
+          "셰이프 오브 유"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 2017년 빌보드 1위를 차지한 곡" },
-          { "showAtSeconds": 15, "text": "💡 붉은 머리의 영국 싱어송라이터" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 2017년 빌보드 1위를 차지한 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 붉은 머리의 영국 싱어송라이터"
+          }
         ]
       }
     ],
@@ -54,14 +105,42 @@
     "tracks": [
       {
         "videoId": "9bZkp7q19f0",
-        "answers": ["Gangnam Style", "PSY", "강남스타일", "싸이"],
+        "answers": [
+          "Gangnam Style",
+          "PSY",
+          "강남스타일",
+          "싸이"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 2012년 유튜브 최초 10억 뷰 돌파" },
-          { "showAtSeconds": 15, "text": "💡 오빤 _____ 스타일!" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 2012년 유튜브 최초 10억 뷰 돌파"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 오빤 _____ 스타일!"
+          }
+        ]
+      },
+      {
+        "videoId": "n7kFRxFIPrI",
+        "answers": [
+          "스타일",
+          "STYLE"
+        ],
+        "hints": [
+          {
+            "showAtSeconds": 8,
+            "text": "하츠투하츠"
+          },
+          {
+            "showAtSeconds": 8,
+            "text": "멋져, 너의"
+          }
         ]
       }
     ],
-    "roundCount": 1
+    "roundCount": 2
   },
   "pop-classics": {
     "id": "pop-classics",
@@ -70,34 +149,74 @@
     "tracks": [
       {
         "videoId": "dQw4w9WgXcQ",
-        "answers": ["Never Gonna Give You Up", "Rick Astley", "릭 애슬리"],
+        "answers": [
+          "Never Gonna Give You Up",
+          "Rick Astley",
+          "릭 애슬리"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 1987년 발매, 80년대 대표곡" },
-          { "showAtSeconds": 15, "text": "💡 Rick Roll 밈의 주인공" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 1987년 발매, 80년대 대표곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 Rick Roll 밈의 주인공"
+          }
         ]
       },
       {
         "videoId": "kJQP7kiw5Fk",
-        "answers": ["Despacito", "Luis Fonsi", "데스파시토"],
+        "answers": [
+          "Despacito",
+          "Luis Fonsi",
+          "데스파시토"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 라틴 팝의 전설적인 곡" },
-          { "showAtSeconds": 15, "text": "💡 저스틴 비버가 리믹스 버전 참여" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 라틴 팝의 전설적인 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 저스틴 비버가 리믹스 버전 참여"
+          }
         ]
       },
       {
         "videoId": "fJ9rUzIMcZQ",
-        "answers": ["Bohemian Rhapsody", "Queen", "보헤미안 랩소디"],
+        "answers": [
+          "Bohemian Rhapsody",
+          "Queen",
+          "보헤미안 랩소디"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 오페라, 발라드, 록이 혼합된 곡" },
-          { "showAtSeconds": 15, "text": "💡 'Is this the real life?'로 시작" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 오페라, 발라드, 록이 혼합된 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 'Is this the real life?'로 시작"
+          }
         ]
       },
       {
         "videoId": "2Vv-BfVoq4g",
-        "answers": ["Ed Sheeran", "Shape of You", "셰이프 오브 유"],
+        "answers": [
+          "Ed Sheeran",
+          "Shape of You",
+          "셰이프 오브 유"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 2017년 가장 많이 스트리밍된 곡" },
-          { "showAtSeconds": 15, "text": "💡 'I'm in love with your body'" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 2017년 가장 많이 스트리밍된 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 'I'm in love with your body'"
+          }
         ]
       }
     ],
@@ -110,66 +229,144 @@
     "tracks": [
       {
         "videoId": "UFQEttrn6CQ",
-        "answers": ["감전", "KANDEN", "칸덴"],
+        "answers": [
+          "감전",
+          "KANDEN",
+          "칸덴"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 米津玄師(요네즈 켄시)의 곡" },
-          { "showAtSeconds": 15, "text": "💡 파지지지지직" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 米津玄師(요네즈 켄시)의 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 파지지지지직"
+          }
         ]
       },
       {
         "videoId": "p3aVaChXrMI",
-        "answers": ["레이와의 레이나", "레이와의레이나", "令和のれいな"],
+        "answers": [
+          "레이와의 레이나",
+          "레이와의레이나",
+          "令和のれいな"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 일본의 새로운 연호가 제목에" },
-          { "showAtSeconds": 15, "text": "💡 공주님!" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 일본의 새로운 연호가 제목에"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 공주님!"
+          }
         ]
       },
       {
         "videoId": "M4EJqcTjNcY",
-        "answers": ["인페르노", "インフェルノ", "inferno"],
+        "answers": [
+          "인페르노",
+          "インフェルノ",
+          "inferno"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 애니메이션 주제가" },
-          { "showAtSeconds": 15, "text": "💡 '지옥'을 의미하는 단어" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 애니메이션 주제가"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 '지옥'을 의미하는 단어"
+          }
         ]
       },
       {
         "videoId": "m34DPnRUfMU",
-        "answers": ["푸름과 여름", "青と夏"],
+        "answers": [
+          "푸름과 여름",
+          "青と夏"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 Mrs. GREEN APPLE의 곡" },
-          { "showAtSeconds": 15, "text": "💡 청춘을 의미하는..." }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 Mrs. GREEN APPLE의 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 청춘을 의미하는..."
+          }
         ]
       },
       {
         "videoId": "zry-FErubKQ",
-        "answers": ["커튼콜", "Curtain Call"],
+        "answers": [
+          "커튼콜",
+          "Curtain Call"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 유우리의 곡" },
-          { "showAtSeconds": 15, "text": "💡 나히아" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 유우리의 곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 나히아"
+          }
         ]
       },
       {
         "videoId": "bGT9kcD9Fz0",
-        "answers": ["신시대", "新時代", "New Genesis"],
+        "answers": [
+          "신시대",
+          "新時代",
+          "New Genesis"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 Ado의 대표곡" },
-          { "showAtSeconds": 15, "text": "💡 원피스 극장판 주제가" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 Ado의 대표곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 원피스 극장판 주제가"
+          }
         ]
       },
       {
         "videoId": "TSUAXnRpNSQ",
-        "answers": ["역몽", "逆夢", "Sakayume"],
+        "answers": [
+          "역몽",
+          "逆夢",
+          "Sakayume"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 '꿈'의 반대 개념" },
-          { "showAtSeconds": 15, "text": "💡 킹누의 노래" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 '꿈'의 반대 개념"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 킹누의 노래"
+          }
         ]
       },
       {
         "videoId": "2C3CuRQcBuM",
-        "answers": ["선잠", "utatane", "うたたね"],
+        "answers": [
+          "선잠",
+          "utatane",
+          "うたたね"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 낮에 잠깐 자는 것" },
-          { "showAtSeconds": 15, "text": "💡 일본어로 'うたたね'" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 낮에 잠깐 자는 것"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 일본어로 'うたたね'"
+          }
         ]
       },
       {
@@ -181,16 +378,31 @@
           "네 기꺼이"
         ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 식당에서 주문받을 때 하는 말" },
-          { "showAtSeconds": 15, "text": "💡 스다 마사키의 동생이 지은 노래" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 식당에서 주문받을 때 하는 말"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 스다 마사키의 동생이 지은 노래"
+          }
         ]
       },
       {
         "videoId": "hA1RtBgMFn0",
-        "answers": ["밤을 달리다", "夜に駆ける"],
+        "answers": [
+          "밤을 달리다",
+          "夜に駆ける"
+        ],
         "hints": [
-          { "showAtSeconds": 8, "text": "💡 YOASOBI의 데뷔곡" },
-          { "showAtSeconds": 15, "text": "💡 소설 '탕수육과 마요네즈' 원작" }
+          {
+            "showAtSeconds": 8,
+            "text": "💡 YOASOBI의 데뷔곡"
+          },
+          {
+            "showAtSeconds": 15,
+            "text": "💡 소설 '탕수육과 마요네즈' 원작"
+          }
         ]
       }
     ],

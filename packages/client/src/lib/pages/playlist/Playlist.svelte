@@ -6,9 +6,15 @@
   import { logger } from "../../utils/logger";
 
   // 타입 정의
+  interface Hint {
+    showAtSeconds: number;
+    text: string;
+  }
+
   interface PlaylistTrack {
     videoId: string;
     answers: string[];
+    hints?: Hint[];
   }
 
   interface Playlist {
@@ -48,10 +54,12 @@
   let trackInfo = $state<Track | null>(null);
   let loadingTrack = $state(false);
   let answers = $state<string[]>([""]); // 정답 목록
+  let hints = $state<Hint[]>([]); // 힌트 목록
 
   // 트랙 수정 폼
   let editingTrackId = $state<string | null>(null);
   let editAnswers = $state<string[]>([]);
+  let editHints = $state<Hint[]>([]);
 
   onMount(() => {
     loadPlaylists();
@@ -281,6 +289,26 @@
     answers[index] = value;
   }
 
+  // 힌트 추가
+  function addHint() {
+    hints = [...hints, { showAtSeconds: 8, text: "" }];
+  }
+
+  // 힌트 제거
+  function removeHint(index: number) {
+    hints = hints.filter((_, i) => i !== index);
+  }
+
+  // 힌트 시간 업데이트
+  function updateHintTime(index: number, value: number) {
+    hints[index] = { ...hints[index], showAtSeconds: value };
+  }
+
+  // 힌트 텍스트 업데이트
+  function updateHintText(index: number, value: string) {
+    hints[index] = { ...hints[index], text: value };
+  }
+
   // 수정용 정답 추가
   function addEditAnswer() {
     editAnswers = [...editAnswers, ""];
@@ -300,11 +328,32 @@
     editAnswers[index] = value;
   }
 
+  // 수정용 힌트 추가
+  function addEditHint() {
+    editHints = [...editHints, { showAtSeconds: 8, text: "" }];
+  }
+
+  // 수정용 힌트 제거
+  function removeEditHint(index: number) {
+    editHints = editHints.filter((_, i) => i !== index);
+  }
+
+  // 수정용 힌트 업데이트 (시간)
+  function updateEditHintTime(index: number, value: number) {
+    editHints[index] = { ...editHints[index], showAtSeconds: value };
+  }
+
+  // 수정용 힌트 업데이트 (텍스트)
+  function updateEditHintText(index: number, value: string) {
+    editHints[index] = { ...editHints[index], text: value };
+  }
+
   // 트랙 추가
   async function addTrack() {
     if (!selectedPlaylist || !trackInfo) return;
 
     const filteredAnswers = answers.filter((a) => a.trim() !== "");
+    const filteredHints = hints.filter((h) => h.text.trim() !== "");
 
     try {
       loading = true;
@@ -318,6 +367,7 @@
           body: JSON.stringify({
             videoId: trackInfo.id,
             answers: filteredAnswers,
+            hints: filteredHints.length > 0 ? filteredHints : undefined,
           }),
         }
       );
@@ -340,6 +390,7 @@
       videoId = "";
       trackInfo = null;
       answers = [""];
+      hints = [];
     } catch (err: any) {
       error = err.message;
       logger.error('PLAYLIST', 'TRACK_ADD_FAILED', { details: err });
@@ -391,19 +442,22 @@
 
     editingTrackId = videoId;
     editAnswers = track.answers.length > 0 ? [...track.answers] : [""];
+    editHints = track.hints && track.hints.length > 0 ? [...track.hints] : [];
   }
 
   // 트랙 수정 취소
   function cancelEditTrack() {
     editingTrackId = null;
     editAnswers = [];
+    editHints = [];
   }
 
-  // 트랙 정답 업데이트
-  async function updateTrackAnswers(videoId: string) {
+  // 트랙 정답 및 힌트 업데이트
+  async function updateTrack(videoId: string) {
     if (!selectedPlaylist) return;
 
     const filteredAnswers = editAnswers.filter((a) => a.trim() !== "");
+    const filteredHints = editHints.filter((h) => h.text.trim() !== "");
 
     try {
       loading = true;
@@ -414,7 +468,10 @@
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: filteredAnswers }),
+          body: JSON.stringify({
+            answers: filteredAnswers,
+            hints: filteredHints.length > 0 ? filteredHints : undefined
+          }),
         }
       );
 
@@ -509,13 +566,18 @@
           playlistTracks={selectedPlaylist.tracks}
           {editingTrackId}
           {editAnswers}
+          {editHints}
           onStartEdit={startEditTrack}
           onCancelEdit={cancelEditTrack}
-          onUpdateTrack={updateTrackAnswers}
+          onUpdateTrack={updateTrack}
           onRemoveTrack={removeTrack}
           onAddEditAnswer={addEditAnswer}
           onRemoveEditAnswer={removeEditAnswer}
           onUpdateEditAnswer={updateEditAnswer}
+          onAddEditHint={addEditHint}
+          onRemoveEditHint={removeEditHint}
+          onUpdateEditHintTime={updateEditHintTime}
+          onUpdateEditHintText={updateEditHintText}
         />
       {:else}
         <div class="empty-state">
@@ -546,12 +608,14 @@
   {trackInfo}
   {loadingTrack}
   {answers}
+  {hints}
   onClose={() => {
     showTrackForm = false;
     youtubeUrl = "";
     videoId = "";
     trackInfo = null;
     answers = [""];
+    hints = [];
   }}
   onUrlInput={handleUrlInput}
   onYoutubeUrlChange={(value) => (youtubeUrl = value)}
@@ -559,6 +623,10 @@
   onAddAnswer={addAnswer}
   onRemoveAnswer={removeAnswer}
   onUpdateAnswer={updateAnswer}
+  onAddHint={addHint}
+  onRemoveHint={removeHint}
+  onUpdateHintTime={updateHintTime}
+  onUpdateHintText={updateHintText}
 />
 
 <style>

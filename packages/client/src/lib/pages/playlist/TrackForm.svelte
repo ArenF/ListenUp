@@ -8,6 +8,11 @@
     endSeconds: number;
   }
 
+  interface Hint {
+    showAtSeconds: number;
+    text: string;
+  }
+
   interface Props {
     show: boolean;
     youtubeUrl: string;
@@ -15,6 +20,7 @@
     trackInfo: Track | null;
     loadingTrack: boolean;
     answers: string[];
+    hints: Hint[];
     onClose: () => void;
     onUrlInput: () => void;
     onYoutubeUrlChange: (value: string) => void;
@@ -22,6 +28,10 @@
     onAddAnswer: () => void;
     onRemoveAnswer: (index: number) => void;
     onUpdateAnswer: (index: number, value: string) => void;
+    onAddHint: () => void;
+    onRemoveHint: (index: number) => void;
+    onUpdateHintTime: (index: number, value: number) => void;
+    onUpdateHintText: (index: number, value: string) => void;
   }
 
   let {
@@ -31,6 +41,7 @@
     trackInfo,
     loadingTrack,
     answers,
+    hints,
     onClose,
     onUrlInput,
     onYoutubeUrlChange,
@@ -38,6 +49,10 @@
     onAddAnswer,
     onRemoveAnswer,
     onUpdateAnswer,
+    onAddHint,
+    onRemoveHint,
+    onUpdateHintTime,
+    onUpdateHintText,
   }: Props = $props();
 </script>
 
@@ -79,7 +94,7 @@
 
           <div class="answers-section">
             <h4>정답 입력</h4>
-            <p class="hint">
+            <p class="hint-text">
               게임에서 인정할 정답을 입력하세요. 비워두면 YouTube 제목으로
               체크합니다.
             </p>
@@ -105,6 +120,46 @@
             </div>
             <button class="btn-add-answer" onclick={onAddAnswer}>
               ➕ 정답 추가
+            </button>
+          </div>
+
+          <div class="hints-section">
+            <h4>힌트 입력</h4>
+            <p class="hint-text">
+              게임 중 나타날 힌트를 입력하세요. 왼쪽에 시간(초), 오른쪽에 힌트
+              내용을 입력합니다.
+            </p>
+            <div class="hints-list">
+              {#each hints as hint, index}
+                <div class="hint-input-row">
+                  <input
+                    type="number"
+                    value={hint.showAtSeconds}
+                    oninput={(e) =>
+                      onUpdateHintTime(index, parseInt(e.currentTarget.value) || 0)}
+                    placeholder="시간(초)"
+                    min="0"
+                    class="hint-time-input"
+                  />
+                  <input
+                    type="text"
+                    value={hint.text}
+                    oninput={(e) => onUpdateHintText(index, e.currentTarget.value)}
+                    placeholder="힌트 내용"
+                    class="hint-text-input"
+                  />
+                  <button
+                    class="btn-remove"
+                    onclick={() => onRemoveHint(index)}
+                    title="힌트 제거"
+                  >
+                    ✕
+                  </button>
+                </div>
+              {/each}
+            </div>
+            <button class="btn-add-hint" onclick={onAddHint}>
+              ➕ 힌트 추가
             </button>
           </div>
 
@@ -235,10 +290,18 @@
     padding: 1rem;
     background-color: #f9f9f9;
     border-radius: 8px;
-    border-top: 3px solid #ff3e00;
+    border-top: 3px solid #4caf50;
   }
 
-  .hint {
+  .hints-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-top: 3px solid #9c27b0;
+  }
+
+  .hint-text {
     font-size: 0.9rem;
     color: #666;
     font-style: italic;
@@ -289,6 +352,58 @@
 
   .btn-add-answer:hover {
     background-color: #45a049;
+  }
+
+  .hints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .hint-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .hint-time-input {
+    width: 100px;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .hint-text-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .hint-time-input:focus,
+  .hint-text-input:focus {
+    outline: none;
+    border-color: #9c27b0;
+  }
+
+  .btn-add-hint {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #9c27b0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-add-hint:hover {
+    background-color: #7b1fa2;
   }
 
   .track-form-actions {

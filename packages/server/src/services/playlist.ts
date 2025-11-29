@@ -234,7 +234,8 @@ export class PlaylistService {
   async addTrack(
     playlistId: string,
     videoId: string,
-    answers: string[] = []
+    answers: string[] = [],
+    hints?: { showAtSeconds: number; text: string }[]
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(playlistId);
 
@@ -250,9 +251,16 @@ export class PlaylistService {
       };
     }
 
+    const newTrack: PlaylistTrack = { videoId, answers };
+
+    // hints가 제공되면 추가
+    if (hints !== undefined && hints.length > 0) {
+      newTrack.hints = hints;
+    }
+
     const updatedPlaylist: Playlist = {
       ...playlist,
-      tracks: [...playlist.tracks, { videoId, answers }],
+      tracks: [...playlist.tracks, newTrack],
       roundCount: playlist.tracks.length + 1,
     };
 
@@ -285,12 +293,13 @@ export class PlaylistService {
   }
 
   /**
-   * 플레이리스트 트랙의 정답 수정
+   * 플레이리스트 트랙의 정답 및 힌트 수정
    */
   async updateTrack(
     playlistId: string,
     videoId: string,
-    answers: string[]
+    answers: string[],
+    hints?: { showAtSeconds: number; text: string }[]
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(playlistId);
 
@@ -308,7 +317,14 @@ export class PlaylistService {
     }
 
     const updatedTracks = [...playlist.tracks];
-    updatedTracks[trackIndex] = { videoId, answers };
+    const updatedTrack: PlaylistTrack = { videoId, answers };
+
+    // hints가 제공되면 추가
+    if (hints !== undefined) {
+      updatedTrack.hints = hints;
+    }
+
+    updatedTracks[trackIndex] = updatedTrack;
 
     return this.updatePlaylist(playlistId, { tracks: updatedTracks });
   }

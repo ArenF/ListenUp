@@ -8,9 +8,15 @@
     endSeconds: number;
   }
 
+  interface Hint {
+    showAtSeconds: number;
+    text: string;
+  }
+
   interface PlaylistTrack {
     videoId: string;
     answers: string[];
+    hints?: Hint[];
   }
 
   interface Props {
@@ -18,6 +24,7 @@
     playlistTracks: PlaylistTrack[];
     editingTrackId: string | null;
     editAnswers: string[];
+    editHints: Hint[];
     onStartEdit: (videoId: string) => void;
     onCancelEdit: () => void;
     onUpdateTrack: (videoId: string) => void;
@@ -25,6 +32,10 @@
     onAddEditAnswer: () => void;
     onRemoveEditAnswer: (index: number) => void;
     onUpdateEditAnswer: (index: number, value: string) => void;
+    onAddEditHint: () => void;
+    onRemoveEditHint: (index: number) => void;
+    onUpdateEditHintTime: (index: number, value: number) => void;
+    onUpdateEditHintText: (index: number, value: string) => void;
   }
 
   let {
@@ -32,6 +43,7 @@
     playlistTracks,
     editingTrackId,
     editAnswers,
+    editHints,
     onStartEdit,
     onCancelEdit,
     onUpdateTrack,
@@ -39,10 +51,18 @@
     onAddEditAnswer,
     onRemoveEditAnswer,
     onUpdateEditAnswer,
+    onAddEditHint,
+    onRemoveEditHint,
+    onUpdateEditHintTime,
+    onUpdateEditHintText,
   }: Props = $props();
 
   function getTrackAnswers(videoId: string): string[] {
     return playlistTracks.find((t) => t.videoId === videoId)?.answers || [];
+  }
+
+  function getTrackHints(videoId: string): Hint[] {
+    return playlistTracks.find((t) => t.videoId === videoId)?.hints || [];
   }
 </script>
 
@@ -56,6 +76,7 @@
   {:else}
     {#each tracks as track}
       {@const answers = getTrackAnswers(track.id)}
+      {@const hints = getTrackHints(track.id)}
       <div class="track-item-container">
         <div class="track-item">
           <div class="track-info">
@@ -72,6 +93,12 @@
                 <span class="no-answers">(YouTube 제목)</span>
               {/if}
             </div>
+            {#if hints.length > 0}
+              <div class="track-hints">
+                <strong>힌트:</strong>
+                {hints.map((h) => `${h.showAtSeconds}초 - ${h.text}`).join(" | ")}
+              </div>
+            {/if}
           </div>
           <div class="track-actions">
             <button
@@ -93,30 +120,72 @@
 
         {#if editingTrackId === track.id}
           <div class="track-edit-form">
-            <h4>정답 수정</h4>
-            <div class="answers-list">
-              {#each editAnswers as answer, index}
-                <div class="answer-input-row">
-                  <input
-                    type="text"
-                    value={answer}
-                    oninput={(e) =>
-                      onUpdateEditAnswer(index, e.currentTarget.value)}
-                    placeholder="정답 {index + 1}"
-                  />
-                  <button
-                    class="btn-remove"
-                    onclick={() => onRemoveEditAnswer(index)}
-                    title="정답 제거"
-                  >
-                    ✕
-                  </button>
-                </div>
-              {/each}
+            <!-- 정답 섹션 -->
+            <div class="edit-section">
+              <h4>정답 수정</h4>
+              <div class="answers-list">
+                {#each editAnswers as answer, index}
+                  <div class="answer-input-row">
+                    <input
+                      type="text"
+                      value={answer}
+                      oninput={(e) =>
+                        onUpdateEditAnswer(index, e.currentTarget.value)}
+                      placeholder="정답 {index + 1}"
+                    />
+                    <button
+                      class="btn-remove"
+                      onclick={() => onRemoveEditAnswer(index)}
+                      title="정답 제거"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                {/each}
+              </div>
+              <button class="btn-add-answer" onclick={onAddEditAnswer}>
+                ➕ 정답 추가
+              </button>
             </div>
-            <button class="btn-add-answer" onclick={onAddEditAnswer}>
-              ➕ 정답 추가
-            </button>
+
+            <!-- 힌트 섹션 -->
+            <div class="edit-section">
+              <h4>힌트 수정</h4>
+              <div class="hints-list">
+                {#each editHints as hint, index}
+                  <div class="hint-input-row">
+                    <input
+                      type="number"
+                      value={hint.showAtSeconds}
+                      oninput={(e) =>
+                        onUpdateEditHintTime(index, parseInt(e.currentTarget.value) || 0)}
+                      placeholder="시간(초)"
+                      min="0"
+                      class="hint-time-input"
+                    />
+                    <input
+                      type="text"
+                      value={hint.text}
+                      oninput={(e) =>
+                        onUpdateEditHintText(index, e.currentTarget.value)}
+                      placeholder="힌트 내용"
+                      class="hint-text-input"
+                    />
+                    <button
+                      class="btn-remove"
+                      onclick={() => onRemoveEditHint(index)}
+                      title="힌트 제거"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                {/each}
+              </div>
+              <button class="btn-add-hint" onclick={onAddEditHint}>
+                ➕ 힌트 추가
+              </button>
+            </div>
+
             <div class="track-edit-actions">
               <button
                 class="btn-save"
@@ -205,6 +274,12 @@
   .track-answers {
     font-size: 0.9rem;
     color: #555;
+    margin-bottom: 0.25rem;
+  }
+
+  .track-hints {
+    font-size: 0.85rem;
+    color: #666;
   }
 
   .no-answers {
@@ -251,6 +326,20 @@
     background-color: #f0f7ff;
     border-radius: 8px;
     border: 2px solid #2196f3;
+  }
+
+  .edit-section {
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    margin-bottom: 1rem;
+  }
+
+  .edit-section h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #333;
   }
 
   .answers-list {
@@ -300,6 +389,52 @@
 
   .btn-add-answer:hover {
     background-color: #45a049;
+  }
+
+  .hints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .hint-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .hint-time-input {
+    width: 100px;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  .hint-text-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  .hint-time-input:focus,
+  .hint-text-input:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+
+  .btn-add-hint {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #9c27b0;
+    color: white;
+  }
+
+  .btn-add-hint:hover {
+    background-color: #7b1fa2;
   }
 
   .track-edit-actions {
