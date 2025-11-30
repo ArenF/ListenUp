@@ -21,6 +21,8 @@
     loadingTrack: boolean;
     answers: string[];
     hints: Hint[];
+    startSeconds?: number;
+    endSeconds?: number;
     onClose: () => void;
     onUrlInput: () => void;
     onYoutubeUrlChange: (value: string) => void;
@@ -32,6 +34,8 @@
     onRemoveHint: (index: number) => void;
     onUpdateHintTime: (index: number, value: number) => void;
     onUpdateHintText: (index: number, value: string) => void;
+    onUpdateStartSeconds: (value: number | undefined) => void;
+    onUpdateEndSeconds: (value: number | undefined) => void;
   }
 
   let {
@@ -42,6 +46,8 @@
     loadingTrack,
     answers,
     hints,
+    startSeconds,
+    endSeconds,
     onClose,
     onUrlInput,
     onYoutubeUrlChange,
@@ -53,6 +59,8 @@
     onRemoveHint,
     onUpdateHintTime,
     onUpdateHintText,
+    onUpdateStartSeconds,
+    onUpdateEndSeconds,
   }: Props = $props();
 </script>
 
@@ -161,6 +169,43 @@
             <button class="btn-add-hint" onclick={onAddHint}>
               ➕ 힌트 추가
             </button>
+          </div>
+
+          <div class="playback-section">
+            <h4>재생 구간 설정 (선택사항)</h4>
+            <p class="hint-text">
+              게임에서 재생할 구간을 초 단위로 지정하세요. 비워두면 자동으로 중간 30초 구간이 선택됩니다.
+            </p>
+            <div class="playback-inputs">
+              <div class="playback-input-group">
+                <label>시작 시간 (초)</label>
+                <input
+                  type="number"
+                  value={startSeconds ?? ""}
+                  oninput={(e) => {
+                    const val = e.currentTarget.value;
+                    onUpdateStartSeconds(val ? parseInt(val) : undefined);
+                  }}
+                  placeholder={trackInfo ? `자동: ${trackInfo.startSeconds}` : "예: 30"}
+                  min="0"
+                  max={trackInfo?.duration}
+                />
+              </div>
+              <div class="playback-input-group">
+                <label>종료 시간 (초)</label>
+                <input
+                  type="number"
+                  value={endSeconds ?? ""}
+                  oninput={(e) => {
+                    const val = e.currentTarget.value;
+                    onUpdateEndSeconds(val ? parseInt(val) : undefined);
+                  }}
+                  placeholder={trackInfo ? `자동: ${trackInfo.endSeconds}` : "예: 60"}
+                  min="0"
+                  max={trackInfo?.duration}
+                />
+              </div>
+            </div>
           </div>
 
           <div class="track-form-actions">
@@ -400,6 +445,46 @@
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+  }
+
+  .playback-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-top: 3px solid #ff9800;
+  }
+
+  .playback-inputs {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .playback-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .playback-input-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .playback-input-group input {
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .playback-input-group input:focus {
+    outline: none;
+    border-color: #ff9800;
   }
 
   .btn-add-hint:hover {

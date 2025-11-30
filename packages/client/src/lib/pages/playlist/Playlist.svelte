@@ -15,6 +15,8 @@
     videoId: string;
     answers: string[];
     hints?: Hint[];
+    startSeconds?: number;
+    endSeconds?: number;
   }
 
   interface Playlist {
@@ -55,11 +57,15 @@
   let loadingTrack = $state(false);
   let answers = $state<string[]>([""]); // 정답 목록
   let hints = $state<Hint[]>([]); // 힌트 목록
+  let startSeconds = $state<number | undefined>(undefined); // 시작 시간 (초)
+  let endSeconds = $state<number | undefined>(undefined); // 종료 시간 (초)
 
   // 트랙 수정 폼
   let editingTrackId = $state<string | null>(null);
   let editAnswers = $state<string[]>([]);
   let editHints = $state<Hint[]>([]);
+  let editStartSeconds = $state<number | undefined>(undefined); // 수정용 시작 시간
+  let editEndSeconds = $state<number | undefined>(undefined); // 수정용 종료 시간
 
   onMount(() => {
     loadPlaylists();
@@ -368,6 +374,8 @@
             videoId: trackInfo.id,
             answers: filteredAnswers,
             hints: filteredHints.length > 0 ? filteredHints : undefined,
+            startSeconds,
+            endSeconds,
           }),
         }
       );
@@ -391,6 +399,8 @@
       trackInfo = null;
       answers = [""];
       hints = [];
+      startSeconds = undefined;
+      endSeconds = undefined;
     } catch (err: any) {
       error = err.message;
       logger.error('PLAYLIST', 'TRACK_ADD_FAILED', { details: err });
@@ -443,6 +453,8 @@
     editingTrackId = videoId;
     editAnswers = track.answers.length > 0 ? [...track.answers] : [""];
     editHints = track.hints && track.hints.length > 0 ? [...track.hints] : [];
+    editStartSeconds = track.startSeconds;
+    editEndSeconds = track.endSeconds;
   }
 
   // 트랙 수정 취소
@@ -450,6 +462,8 @@
     editingTrackId = null;
     editAnswers = [];
     editHints = [];
+    editStartSeconds = undefined;
+    editEndSeconds = undefined;
   }
 
   // 트랙 정답 및 힌트 업데이트
@@ -470,7 +484,9 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             answers: filteredAnswers,
-            hints: filteredHints.length > 0 ? filteredHints : undefined
+            hints: filteredHints.length > 0 ? filteredHints : undefined,
+            startSeconds: editStartSeconds,
+            endSeconds: editEndSeconds,
           }),
         }
       );
@@ -567,6 +583,8 @@
           {editingTrackId}
           {editAnswers}
           {editHints}
+          {editStartSeconds}
+          {editEndSeconds}
           onStartEdit={startEditTrack}
           onCancelEdit={cancelEditTrack}
           onUpdateTrack={updateTrack}
@@ -578,6 +596,8 @@
           onRemoveEditHint={removeEditHint}
           onUpdateEditHintTime={updateEditHintTime}
           onUpdateEditHintText={updateEditHintText}
+          onUpdateEditStartSeconds={(value) => (editStartSeconds = value)}
+          onUpdateEditEndSeconds={(value) => (editEndSeconds = value)}
         />
       {:else}
         <div class="empty-state">
@@ -609,6 +629,8 @@
   {loadingTrack}
   {answers}
   {hints}
+  {startSeconds}
+  {endSeconds}
   onClose={() => {
     showTrackForm = false;
     youtubeUrl = "";
@@ -616,6 +638,8 @@
     trackInfo = null;
     answers = [""];
     hints = [];
+    startSeconds = undefined;
+    endSeconds = undefined;
   }}
   onUrlInput={handleUrlInput}
   onYoutubeUrlChange={(value) => (youtubeUrl = value)}
@@ -627,6 +651,8 @@
   onRemoveHint={removeHint}
   onUpdateHintTime={updateHintTime}
   onUpdateHintText={updateHintText}
+  onUpdateStartSeconds={(value) => (startSeconds = value)}
+  onUpdateEndSeconds={(value) => (endSeconds = value)}
 />
 
 <style>

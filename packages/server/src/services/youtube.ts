@@ -82,14 +82,21 @@ export class YouTubeService {
         .map((item) => {
           const duration = this.parseDuration(item.contentDetails.duration);
 
-          // 30초 미리듣기 구간 계산 (전체 곡의 중간 30초)
+          // playlistTracks에서 해당 videoId의 정보 찾기
+          const playlistTrack = playlistTracks?.find(
+            (pt) => pt.videoId === item.id
+          );
+
+          // 재생 구간 결정: 커스텀 구간이 있으면 사용, 없으면 자동 계산
           const totalDuration = duration;
           const previewDuration = 30;
-          const startSeconds = Math.max(
+
+          // 커스텀 구간 우선, 없으면 자동 계산 (전체 곡의 중간 30초)
+          const startSeconds = playlistTrack?.startSeconds ?? Math.max(
             0,
             Math.floor((totalDuration - previewDuration) / 2)
           );
-          const endSeconds = Math.min(
+          const endSeconds = playlistTrack?.endSeconds ?? Math.min(
             totalDuration,
             startSeconds + previewDuration
           );
@@ -97,11 +104,6 @@ export class YouTubeService {
           // 발매년도 추출 (YYYY-MM-DD 형식에서 YYYY만)
           const publishedAt = item.snippet.publishedAt;
           const year = publishedAt.substring(0, 4);
-
-          // playlistTracks에서 해당 videoId의 answers, hints 찾기
-          const playlistTrack = playlistTracks?.find(
-            (pt) => pt.videoId === item.id
-          );
 
           return {
             id: item.id,

@@ -217,7 +217,7 @@ app.delete("/api/playlists/:id", async (req, res) => {
 app.post("/api/playlists/:id/tracks", async (req, res) => {
   try {
     const { id } = req.params;
-    const { videoId, answers, hints } = req.body;
+    const { videoId, answers, hints, startSeconds, endSeconds } = req.body;
 
     if (!videoId || typeof videoId !== "string") {
       return res.status(400).json({ error: "Video ID is required" });
@@ -227,7 +227,9 @@ app.post("/api/playlists/:id/tracks", async (req, res) => {
       id,
       videoId,
       answers || [],
-      hints
+      hints,
+      startSeconds,
+      endSeconds
     );
 
     if (!result.success) {
@@ -259,17 +261,24 @@ app.delete("/api/playlists/:id/tracks/:videoId", async (req, res) => {
   }
 });
 
-// 플레이리스트 트랙의 정답 및 힌트 수정
+// 플레이리스트 트랙의 정답, 힌트, 재생 구간 수정
 app.put("/api/playlists/:id/tracks/:videoId", async (req, res) => {
   try {
     const { id, videoId } = req.params;
-    const { answers, hints } = req.body;
+    const { answers, hints, startSeconds, endSeconds } = req.body;
 
     if (!answers || !Array.isArray(answers)) {
       return res.status(400).json({ error: "Answers array is required" });
     }
 
-    const result = await playlistService.updateTrack(id, videoId, answers, hints);
+    const result = await playlistService.updateTrack(
+      id,
+      videoId,
+      answers,
+      hints,
+      startSeconds,
+      endSeconds
+    );
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });

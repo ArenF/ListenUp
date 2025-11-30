@@ -17,6 +17,8 @@
     videoId: string;
     answers: string[];
     hints?: Hint[];
+    startSeconds?: number;
+    endSeconds?: number;
   }
 
   interface Props {
@@ -25,6 +27,8 @@
     editingTrackId: string | null;
     editAnswers: string[];
     editHints: Hint[];
+    editStartSeconds?: number;
+    editEndSeconds?: number;
     onStartEdit: (videoId: string) => void;
     onCancelEdit: () => void;
     onUpdateTrack: (videoId: string) => void;
@@ -36,6 +40,8 @@
     onRemoveEditHint: (index: number) => void;
     onUpdateEditHintTime: (index: number, value: number) => void;
     onUpdateEditHintText: (index: number, value: string) => void;
+    onUpdateEditStartSeconds: (value: number | undefined) => void;
+    onUpdateEditEndSeconds: (value: number | undefined) => void;
   }
 
   let {
@@ -44,6 +50,8 @@
     editingTrackId,
     editAnswers,
     editHints,
+    editStartSeconds,
+    editEndSeconds,
     onStartEdit,
     onCancelEdit,
     onUpdateTrack,
@@ -55,6 +63,8 @@
     onRemoveEditHint,
     onUpdateEditHintTime,
     onUpdateEditHintText,
+    onUpdateEditStartSeconds,
+    onUpdateEditEndSeconds,
   }: Props = $props();
 
   function getTrackAnswers(videoId: string): string[] {
@@ -184,6 +194,44 @@
               <button class="btn-add-hint" onclick={onAddEditHint}>
                 ➕ 힌트 추가
               </button>
+            </div>
+
+            <!-- 재생 구간 섹션 -->
+            <div class="edit-section playback-section">
+              <h4>재생 구간 설정 (선택사항)</h4>
+              <p class="hint-text">
+                게임에서 재생할 구간을 초 단위로 지정하세요. 비워두면 자동으로 중간 30초 구간이 선택됩니다.
+              </p>
+              <div class="playback-inputs">
+                <div class="playback-input-group">
+                  <label>시작 시간 (초)</label>
+                  <input
+                    type="number"
+                    value={editStartSeconds ?? ""}
+                    oninput={(e) => {
+                      const val = e.currentTarget.value;
+                      onUpdateEditStartSeconds(val ? parseInt(val) : undefined);
+                    }}
+                    placeholder={`자동: ${track.startSeconds}`}
+                    min="0"
+                    max={track.duration}
+                  />
+                </div>
+                <div class="playback-input-group">
+                  <label>종료 시간 (초)</label>
+                  <input
+                    type="number"
+                    value={editEndSeconds ?? ""}
+                    oninput={(e) => {
+                      const val = e.currentTarget.value;
+                      onUpdateEditEndSeconds(val ? parseInt(val) : undefined);
+                    }}
+                    placeholder={`자동: ${track.endSeconds}`}
+                    min="0"
+                    max={track.duration}
+                  />
+                </div>
+              </div>
             </div>
 
             <div class="track-edit-actions">
@@ -463,5 +511,43 @@
 
   .btn-cancel:hover {
     background-color: #d0d0d0;
+  }
+
+  .hint-text {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  .playback-inputs {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .playback-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .playback-input-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .playback-input-group input {
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .playback-input-group input:focus {
+    outline: none;
+    border-color: #ff9800;
   }
 </style>

@@ -46,8 +46,10 @@ export interface Hint {
 
 export interface PlaylistTrack {
   videoId: string;
-  answers: string[];  // 정답 목록 (곡명, 아티스트명 등)
-  hints?: Hint[];     // 힌트 목록 (선택적)
+  answers: string[];      // 정답 목록 (곡명, 아티스트명 등)
+  hints?: Hint[];         // 힌트 목록 (선택적)
+  startSeconds?: number;  // 커스텀 시작 시간 (초 단위, 선택적)
+  endSeconds?: number;    // 커스텀 종료 시간 (초 단위, 선택적)
 }
 
 export interface Playlist {

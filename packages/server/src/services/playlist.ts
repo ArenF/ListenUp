@@ -235,7 +235,9 @@ export class PlaylistService {
     playlistId: string,
     videoId: string,
     answers: string[] = [],
-    hints?: { showAtSeconds: number; text: string }[]
+    hints?: { showAtSeconds: number; text: string }[],
+    startSeconds?: number,
+    endSeconds?: number
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(playlistId);
 
@@ -256,6 +258,14 @@ export class PlaylistService {
     // hints가 제공되면 추가
     if (hints !== undefined && hints.length > 0) {
       newTrack.hints = hints;
+    }
+
+    // 커스텀 재생 구간이 제공되면 추가
+    if (startSeconds !== undefined) {
+      newTrack.startSeconds = startSeconds;
+    }
+    if (endSeconds !== undefined) {
+      newTrack.endSeconds = endSeconds;
     }
 
     const updatedPlaylist: Playlist = {
@@ -293,13 +303,15 @@ export class PlaylistService {
   }
 
   /**
-   * 플레이리스트 트랙의 정답 및 힌트 수정
+   * 플레이리스트 트랙의 정답, 힌트, 재생 구간 수정
    */
   async updateTrack(
     playlistId: string,
     videoId: string,
     answers: string[],
-    hints?: { showAtSeconds: number; text: string }[]
+    hints?: { showAtSeconds: number; text: string }[],
+    startSeconds?: number,
+    endSeconds?: number
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     const playlist = this.playlists.get(playlistId);
 
@@ -322,6 +334,14 @@ export class PlaylistService {
     // hints가 제공되면 추가
     if (hints !== undefined) {
       updatedTrack.hints = hints;
+    }
+
+    // 커스텀 재생 구간이 제공되면 추가
+    if (startSeconds !== undefined) {
+      updatedTrack.startSeconds = startSeconds;
+    }
+    if (endSeconds !== undefined) {
+      updatedTrack.endSeconds = endSeconds;
     }
 
     updatedTracks[trackIndex] = updatedTrack;
