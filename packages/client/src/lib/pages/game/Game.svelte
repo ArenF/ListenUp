@@ -26,6 +26,7 @@
     answer,
     gameResult,
     roundEnded,
+    roundResult,
     player,
     playerReady,
     isMuted,
@@ -38,6 +39,12 @@
     answeredWrong,
     currentHint,
   } = $derived($gameStore);
+
+  // 라운드 종료 후 준비 상태
+  let canForceStart = $state(false);
+  let forceStartTimer: NodeJS.Timeout | null = null;
+  let forceStartCountdown: NodeJS.Timeout | null = null;
+  let forceStartRemaining = $state(0);
 
   onMount(() => {
     // 플레이리스트 목록 로드
@@ -132,6 +139,19 @@
     // 라운드 준비 요청
     socket.on("prepare-round", (data) => {
       console.log("📋 라운드 준비 요청:", data);
+
+      // 기존 타이머 정리
+      if (forceStartTimer) {
+        clearTimeout(forceStartTimer);
+        forceStartTimer = null;
+      }
+      if (forceStartCountdown) {
+        clearInterval(forceStartCountdown);
+        forceStartCountdown = null;
+      }
+      canForceStart = false;
+      forceStartRemaining = 0;
+
       // 라운드 시작 시 정답 상태 초기화
       resetRoundState();
       updateGameStore({
@@ -278,6 +298,12 @@
     socket.on("round-ended", (data) => {
       console.log("🏁 라운드 종료!", data);
 
+      // 기존 타이머 정리
+      if (forceStartTimer) {
+        clearTimeout(forceStartTimer);
+        forceStartTimer = null;
+      }
+
       // 정답을 맞춘 플레이어들에게 초록색 애니메이션 트리거
       if (data.result && data.result.correctAnswers) {
         data.result.correctAnswers.forEach((answer: any) => {
@@ -289,15 +315,45 @@
         });
       }
 
+      // 라운드 결과 저장
+      const resultTrack = data.result.track;
+
       updateGameStore({
-        statusMessage: `🏁 정답: ${data.result.track.name} - ${data.result.track.artist}`,
-        currentTrack: null,
+        statusMessage: `🏁 정답: ${resultTrack.name} - ${resultTrack.artist}`,
+        currentTrack: resultTrack,  // 정답 트랙 설정 (GamePlayer 유지용)
         roundEnded: true,
+        roundResult: data.result,
       });
 
-      if (player) {
-        player.pauseVideo();
-      }
+      // 강제 시작 타이머 설정
+      // 타이머 시간 = (endSeconds - startSeconds) / 2
+      const videoDuration = resultTrack.endSeconds - resultTrack.startSeconds;
+      const timerDuration = Math.floor(videoDuration / 2) * 1000; // ms로 변환
+
+      console.log(`⏱️ 강제 시작 타이머 설정: ${timerDuration / 1000}초`);
+      console.log(`🎬 정답 영상은 GameRoom iframe으로 표시됩니다`);
+
+      // 초기 상태 설정
+      canForceStart = false;
+      forceStartRemaining = Math.floor(videoDuration / 2);
+
+      // 카운트다운 타이머 (1초마다)
+      forceStartCountdown = setInterval(() => {
+        forceStartRemaining -= 1;
+        if (forceStartRemaining <= 0) {
+          if (forceStartCountdown) {
+            clearInterval(forceStartCountdown);
+            forceStartCountdown = null;
+          }
+        }
+      }, 1000);
+
+      // 강제 시작 활성화 타이머
+      forceStartTimer = setTimeout(() => {
+        canForceStart = true;
+        forceStartRemaining = 0;
+        console.log("✅ 강제 시작 버튼 활성화");
+      }, timerDuration);
     });
 
     // 게임 종료
@@ -516,6 +572,26 @@
         if (response.success) {
           console.log("✅ 준비 완료 확인됨");
           updateGameStore({ isLoadingTrack: false });
+        } else {
+          console.error("❌ 준비 실패:", response.error);
+        }
+      }
+    );
+  }
+
+  // 라운드 종료 후 준비 완료 알림 (다음 라운드 준비)
+  function markReady() {
+    if (!currentRoom) return;
+
+    console.log("📤 라운드 종료 후 준비 완료 알림 전송");
+    socket.emit(
+      "player-ready",
+      {
+        roomCode: currentRoom.code,
+      },
+      (response: any) => {
+        if (response.success) {
+          console.log("✅ 준비 완료 확인됨");
         } else {
           console.error("❌ 준비 실패:", response.error);
         }
@@ -808,6 +884,9 @@
       {isMuted}
       {volume}
       {roundEnded}
+      {roundResult}
+      {canForceStart}
+      {forceStartRemaining}
       {answer}
       {playerAnimations}
       {previousScores}
@@ -819,6 +898,7 @@
       onAnswerChange={handleAnswerChange}
       onSubmitAnswer={submitAnswer}
       onNextRound={nextRound}
+      onMarkReady={markReady}
       onEndGame={endGame}
     />
   {/if}

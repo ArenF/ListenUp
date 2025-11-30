@@ -291,22 +291,62 @@ export function handlePlayerReady(io: Server, socket: Socket): void {
         if (gameService.isAllPlayersReady(room)) {
           console.log(`✅ All players ready in room ${roomCode}`);
 
-          // 준비된 트랙으로 라운드 활성화
-          const roundResult = gameService.activatePreparedRound(room);
-          if (roundResult.success && roundResult.track) {
-            // 라운드 시작 알림
-            io.to(roomCode).emit(events.ROUND_STARTED, {
-              roundNumber: roundResult.roundNumber,
-              track: hideTrackInfo(roundResult.track),
+          // nextTrack이 없으면 먼저 준비 (round-ended 후 준비 완료 시)
+          if (!room.gameState.nextTrack) {
+            console.log(`📋 Preparing next round after round-ended...`);
+            const nextTrack = gameService.prepareNextRound(room);
+            if (!nextTrack) {
+              console.log(`⚠️ No more tracks available`);
+              return;
+            }
+
+            // PREPARE_ROUND 이벤트 브로드캐스트 (클라이언트가 roundEnded 상태 해제)
+            io.to(roomCode).emit(events.PREPARE_ROUND, {
+              roundNumber: room.gameState.currentRound + 1,
+              track: hideTrackInfo(nextTrack),
               duration: room.settings.roundInterval,
             });
 
             console.log(
-              `🎵 Round ${roundResult.roundNumber} started with track: ${roundResult.track.name}`
+              `📋 Sent PREPARE_ROUND for round ${room.gameState.currentRound + 1}`
             );
 
-            // 힌트 타이머 설정
-            setupHintTimers(io, roomCode, room, roundResult.track);
+            // 잠시 후 라운드 활성화 (플레이어들이 트랙 로드할 시간 필요)
+            setTimeout(() => {
+              // 모든 플레이어가 다시 준비되었는지 확인
+              if (gameService.isAllPlayersReady(room)) {
+                const roundResult = gameService.activatePreparedRound(room);
+                if (roundResult.success && roundResult.track) {
+                  io.to(roomCode).emit(events.ROUND_STARTED, {
+                    roundNumber: roundResult.roundNumber,
+                    track: hideTrackInfo(roundResult.track),
+                    duration: room.settings.roundInterval,
+                  });
+
+                  console.log(
+                    `🎵 Round ${roundResult.roundNumber} started with track: ${roundResult.track.name}`
+                  );
+
+                  setupHintTimers(io, roomCode, room, roundResult.track);
+                }
+              }
+            }, 500);
+          } else {
+            // nextTrack이 이미 있는 경우 (일반적인 게임 시작 시)
+            const roundResult = gameService.activatePreparedRound(room);
+            if (roundResult.success && roundResult.track) {
+              io.to(roomCode).emit(events.ROUND_STARTED, {
+                roundNumber: roundResult.roundNumber,
+                track: hideTrackInfo(roundResult.track),
+                duration: room.settings.roundInterval,
+              });
+
+              console.log(
+                `🎵 Round ${roundResult.roundNumber} started with track: ${roundResult.track.name}`
+              );
+
+              setupHintTimers(io, roomCode, room, roundResult.track);
+            }
           }
         }
       } catch (error) {

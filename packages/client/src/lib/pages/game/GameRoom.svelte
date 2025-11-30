@@ -19,6 +19,9 @@
     isMuted: boolean;
     volume: number;
     roundEnded: boolean;
+    roundResult: any | null;
+    canForceStart: boolean;
+    forceStartRemaining: number;
     answer: string;
     playerAnimations: Record<string, AnimationType>;
     previousScores: Record<string, number>;
@@ -30,6 +33,7 @@
     onAnswerChange: (e: Event) => void;
     onSubmitAnswer: () => void;
     onNextRound: () => void;
+    onMarkReady: () => void;
     onEndGame: () => void;
   }
 
@@ -48,6 +52,9 @@
     isMuted,
     volume,
     roundEnded,
+    roundResult,
+    canForceStart,
+    forceStartRemaining,
     answer,
     playerAnimations,
     previousScores,
@@ -59,8 +66,16 @@
     onAnswerChange,
     onSubmitAnswer,
     onNextRound,
+    onMarkReady,
     onEndGame,
   }: Props = $props();
+
+  // 정답 영상 URL 생성
+  let answerVideoUrl = $derived(
+    roundResult
+      ? `https://www.youtube.com/embed/${roundResult.track.id}?start=${roundResult.track.startSeconds}&end=${roundResult.track.endSeconds}&autoplay=1&mute=0`
+      : ""
+  );
 </script>
 
 <div class="room-info">
@@ -160,14 +175,69 @@
         </div>
       {/if}
 
-      {#if isHost && roundEnded}
-        <div class="host-controls">
-          <button onclick={onNextRound}> ⏭️ 다음 라운드 </button>
-          <button class="end-button" onclick={onEndGame}> 🛑 게임 종료 </button>
-        </div>
-      {:else if roundEnded}
-        <div class="waiting-message">
-          ⏳ 방장이 다음 라운드를 시작하기를 기다리는 중...
+      {#if roundEnded && roundResult}
+        <!-- 라운드 종료 화면 -->
+        <div class="round-result-container">
+          <h3>🏁 라운드 {roundResult.roundNumber} 종료</h3>
+
+          <div class="answer-info">
+            <p class="answer-title">
+              <strong>정답:</strong> {roundResult.track.name}
+            </p>
+            <p class="answer-artist">
+              <strong>아티스트:</strong> {roundResult.track.artist}
+            </p>
+          </div>
+
+          <!-- 정답 영상 플레이어 (실제 화면에 보이도록) -->
+          <div class="video-container">
+            <iframe
+              id="answer-video-player"
+              width="100%"
+              height="315"
+              src={answerVideoUrl}
+              title="정답 영상"
+              style="border: 0;"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+
+          <div class="result-summary">
+            <p>
+              ✅ 정답자: {roundResult.correctAnswers.length}명 /
+              ❌ 오답자: {roundResult.answers.length - roundResult.correctAnswers.length}명
+            </p>
+          </div>
+
+          <!-- 준비 버튼 영역 -->
+          <div class="next-round-controls">
+            <button
+              class="ready-button"
+              onclick={onMarkReady}
+            >
+              ✅ 준비 ({readyPlayers}/{players.length})
+            </button>
+
+            {#if isHost}
+              <button
+                class="force-start-button"
+                onclick={onNextRound}
+                disabled={!canForceStart}
+              >
+                {#if canForceStart}
+                  ⏭️ 강제 라운드 시작
+                {:else}
+                  ⏱️ 강제 시작 ({forceStartRemaining}초)
+                {/if}
+              </button>
+              <button class="end-button" onclick={onEndGame}> 🛑 게임 종료 </button>
+            {/if}
+          </div>
+
+          <p class="hint-text">
+            모든 플레이어가 준비를 누르거나, 방장이 강제 시작을 누르면 다음 라운드로 넘어갑니다.
+          </p>
         </div>
       {/if}
     </div>
@@ -470,21 +540,109 @@
     padding: 0.75rem 1.5rem;
   }
 
-  .host-controls {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-
-  .host-controls button {
-    flex: 1;
-  }
-
   .end-button {
     background-color: #f44336;
   }
 
   .end-button:hover:not(:disabled) {
     background-color: #d32f2f;
+  }
+
+  /* 라운드 종료 화면 */
+  .round-result-container {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: #f0f8ff;
+    border-radius: 12px;
+    border: 2px solid #4caf50;
+  }
+
+  .answer-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    border-left: 4px solid #4caf50;
+  }
+
+  .answer-title {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #333;
+  }
+
+  .answer-artist {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    color: #666;
+  }
+
+  .video-container {
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .video-container iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  .result-summary {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #fff9c4;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
+  .result-summary p {
+    margin: 0;
+  }
+
+  .next-round-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+
+  .next-round-controls button {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .ready-button {
+    background-color: #4caf50;
+  }
+
+  .ready-button:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+
+  .force-start-button {
+    background-color: #ff9800;
+  }
+
+  .force-start-button:hover:not(:disabled) {
+    background-color: #f57c00;
+  }
+
+  .force-start-button:disabled {
+    background-color: #ccc;
+    color: #666;
+  }
+
+  .hint-text {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #e8f5e9;
+    border-radius: 6px;
+    color: #2e7d32;
+    font-size: 0.9rem;
+    text-align: center;
   }
 </style>

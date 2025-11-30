@@ -29,6 +29,7 @@ export interface GameState {
   answer: string;
   gameResult: any | null;
   roundEnded: boolean;
+  roundResult: any | null;  // 라운드 종료 후 결과 (정답 트랙, correctAnswers 등)
 
   // YouTube Player
   player: any | null;
@@ -73,6 +74,7 @@ const initialState: GameState = {
   answer: "",
   gameResult: null,
   roundEnded: false,
+  roundResult: null,
 
   player: null,
   playerReady: false,

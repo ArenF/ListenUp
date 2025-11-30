@@ -424,6 +424,10 @@ export class GameService {
     // 현재 트랙 초기화
     room.gameState.currentTrack = null;
 
+    // 라운드 종료 후 다음 라운드 준비를 위해 대기 상태로 전환
+    room.gameState.waitingForReady = true;
+    room.gameState.readyPlayers.clear();
+
     return { success: true, result };
   }
 
