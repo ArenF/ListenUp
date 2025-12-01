@@ -1,5 +1,6 @@
 <script lang="ts">
   import GamePlayer from "./GamePlayer.svelte";
+  import AnswerPlayer from "./AnswerPlayer.svelte";
   import GameResult from "./GameResult.svelte";
 
   import type { AnimationType } from "../../stores/gameStore";
@@ -69,13 +70,6 @@
     onMarkReady,
     onEndGame,
   }: Props = $props();
-
-  // 정답 영상 URL 생성
-  let answerVideoUrl = $derived(
-    roundResult
-      ? `https://www.youtube.com/embed/${roundResult.track.id}?start=${roundResult.track.startSeconds}&end=${roundResult.track.endSeconds}&autoplay=1&mute=0`
-      : ""
-  );
 </script>
 
 <div class="room-info">
@@ -189,19 +183,8 @@
             </p>
           </div>
 
-          <!-- 정답 영상 플레이어 (실제 화면에 보이도록) -->
-          <div class="video-container">
-            <iframe
-              id="answer-video-player"
-              width="100%"
-              height="315"
-              src={answerVideoUrl}
-              title="정답 영상"
-              style="border: 0;"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </div>
+          <!-- 정답 영상 플레이어 -->
+          <AnswerPlayer track={roundResult.track} />
 
           <div class="result-summary">
             <p>
@@ -575,19 +558,6 @@
     font-size: 1rem;
     margin: 0.5rem 0;
     color: #666;
-  }
-
-  .video-container {
-    margin: 1.5rem 0;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  .video-container iframe {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
   }
 
   .result-summary {

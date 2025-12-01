@@ -304,6 +304,13 @@
         forceStartTimer = null;
       }
 
+      // 게임 플레이어 멈춤
+      if (player && typeof player.pauseVideo === "function") {
+        console.log("⏸️ 게임 플레이어 멈춤");
+        player.pauseVideo();
+        player.mute(); // 음소거도 함께
+      }
+
       // 정답을 맞춘 플레이어들에게 초록색 애니메이션 트리거
       if (data.result && data.result.correctAnswers) {
         data.result.correctAnswers.forEach((answer: any) => {
@@ -325,17 +332,15 @@
         roundResult: data.result,
       });
 
-      // 강제 시작 타이머 설정
-      // 타이머 시간 = (endSeconds - startSeconds) / 2
-      const videoDuration = resultTrack.endSeconds - resultTrack.startSeconds;
-      const timerDuration = Math.floor(videoDuration / 2) * 1000; // ms로 변환
+      // 강제 시작 타이머 설정 (10초 고정)
+      const timerDuration = 10 * 1000; // 10초를 ms로 변환
 
       console.log(`⏱️ 강제 시작 타이머 설정: ${timerDuration / 1000}초`);
       console.log(`🎬 정답 영상은 GameRoom iframe으로 표시됩니다`);
 
       // 초기 상태 설정
       canForceStart = false;
-      forceStartRemaining = Math.floor(videoDuration / 2);
+      forceStartRemaining = 10;
 
       // 카운트다운 타이머 (1초마다)
       forceStartCountdown = setInterval(() => {
