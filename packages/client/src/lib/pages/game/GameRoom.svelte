@@ -145,13 +145,16 @@
         </div>
       {/if}
 
-      <GamePlayer
-        {preparedTrack}
-        {currentTrack}
-        {isMuted}
-        {volume}
-        {onVolumeChange}
-      />
+      {#if !roundEnded}
+        <!-- 게임 진행 중에만 GamePlayer 표시 -->
+        <GamePlayer
+          {preparedTrack}
+          {currentTrack}
+          {isMuted}
+          {volume}
+          {onVolumeChange}
+        />
+      {/if}
 
       {#if currentTrack && !roundEnded}
         <!-- 정답 입력 -->
