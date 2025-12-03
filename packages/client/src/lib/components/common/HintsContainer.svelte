@@ -23,23 +23,30 @@
   });
 </script>
 
-{#if hints.length > 0}
-  <div class="hints-wrapper">
-    <div class="hints-header">
-      <span class="icon">💡</span>
-      <span class="title">힌트</span>
+<div class="hints-wrapper">
+  <div class="hints-header">
+    <span class="icon">💡</span>
+    <span class="title">힌트</span>
+    {#if hints.length > 0}
       <span class="badge">{hints.length}</span>
-    </div>
+    {/if}
+  </div>
 
-    <div class="hints-body" bind:this={containerElement}>
+  <div class="hints-body" bind:this={containerElement}>
+    {#if hints.length > 0}
       <div class="hints-list">
         {#each hints as hint (hint.id)}
           <HintBar {hint} />
         {/each}
       </div>
-    </div>
+    {:else}
+      <div class="hints-empty">
+        <span class="empty-icon">🔍</span>
+        <span class="empty-text">힌트가 곧 나타날 거예요!</span>
+      </div>
+    {/if}
   </div>
-{/if}
+</div>
 
 <style>
   .hints-wrapper {
@@ -106,6 +113,28 @@
 
   .hints-body::-webkit-scrollbar-thumb:hover {
     background: rgba(102, 126, 234, 0.5);
+  }
+
+  /* 빈 상태 */
+  .hints-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    color: #999;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .empty-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    font-size: 0.9rem;
+    font-weight: 500;
   }
 
   /* 반응형 */
