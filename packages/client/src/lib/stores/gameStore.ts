@@ -4,6 +4,16 @@ import type { Socket } from 'socket.io-client';
 // 애니메이션 타입
 export type AnimationType = 'correct' | 'wrong' | 'submitted' | 'score-up' | null;
 
+// 힌트 아이템 타입
+export interface HintItem {
+  id: string;           // 고유 ID
+  text: string;         // 힌트 텍스트
+  index: number;        // 힌트 순서 (1, 2, 3...)
+  total: number;        // 전체 힌트 개수
+  timestamp: number;    // 표시된 시간 (밀리초)
+  isNew: boolean;       // 새로 추가된 힌트인지 (하이라이트용)
+}
+
 // 타입 정의
 export interface GameState {
   socket: Socket | null;
@@ -48,8 +58,9 @@ export interface GameState {
   // 오답을 제출한 플레이어 추적 (라운드별)
   answeredWrong: Set<string>;
 
-  // 힌트 시스템
-  currentHint: { text: string; index: number; total: number } | null;
+  // 힌트 시스템 (배열로 변경)
+  hints: HintItem[];
+  hintsMinimized: boolean;  // 힌트 박스 최소화 상태
 }
 
 // 초기 상태
@@ -87,7 +98,8 @@ const initialState: GameState = {
   previousScores: {},
   answeredCorrectly: new Set(),
   answeredWrong: new Set(),
-  currentHint: null,
+  hints: [],
+  hintsMinimized: false,
 };
 
 // 메인 스토어
@@ -183,5 +195,48 @@ export function resetRoundState() {
     ...state,
     answeredCorrectly: new Set(),
     answeredWrong: new Set(),
+  }));
+}
+
+// 힌트 추가
+export function addHint(hint: Omit<HintItem, 'id' | 'timestamp' | 'isNew'>) {
+  gameStore.update(state => {
+    const newHint: HintItem = {
+      ...hint,
+      id: `hint-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+      timestamp: Date.now(),
+      isNew: true
+    };
+
+    // 3초 후 isNew 플래그 제거 (하이라이트 해제)
+    setTimeout(() => {
+      gameStore.update(s => ({
+        ...s,
+        hints: s.hints.map(h =>
+          h.id === newHint.id ? { ...h, isNew: false } : h
+        )
+      }));
+    }, 3000);
+
+    return {
+      ...state,
+      hints: [...state.hints, newHint]
+    };
+  });
+}
+
+// 모든 힌트 초기화
+export function clearHints() {
+  gameStore.update(state => ({
+    ...state,
+    hints: []
+  }));
+}
+
+// 힌트 박스 최소화/최대화 토글
+export function toggleHintsMinimized() {
+  gameStore.update(state => ({
+    ...state,
+    hintsMinimized: !state.hintsMinimized
   }));
 }

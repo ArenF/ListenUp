@@ -2,10 +2,10 @@
   import { onMount } from "svelte";
   import { initSocket } from "../../socket";
   import type { Socket } from "socket.io-client";
-  import { gameStore, isHost, updateGameStore, triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState } from "../../stores/gameStore";
+  import { gameStore, isHost, updateGameStore, triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState, addHint, clearHints, toggleHintsMinimized } from "../../stores/gameStore";
   import GameLobby from "./GameLobby.svelte";
   import GameRoom from "./GameRoom.svelte";
-  import Hint from "../../components/common/Hint.svelte";
+  import HintsContainer from "../../components/common/HintsContainer.svelte";
 
   // 스토어에서 상태 추출
   let socket: Socket;
@@ -37,7 +37,8 @@
     previousScores,
     answeredCorrectly,
     answeredWrong,
-    currentHint,
+    hints,
+    hintsMinimized,
   } = $derived($gameStore);
 
   // 라운드 종료 후 준비 상태
@@ -152,8 +153,9 @@
       canForceStart = false;
       forceStartRemaining = 0;
 
-      // 라운드 시작 시 정답 상태 초기화
+      // 라운드 시작 시 정답 상태 및 힌트 초기화
       resetRoundState();
+      clearHints();
       updateGameStore({
         preparedTrack: data.track,
         currentRound: data.roundNumber,
@@ -374,14 +376,7 @@
     // 힌트 표시
     socket.on("hint-shown", (data) => {
       console.log("💡 힌트 표시:", data);
-      updateGameStore({
-        currentHint: data.hint,
-      });
-
-      // 5초 후 힌트 자동 숨김
-      setTimeout(() => {
-        updateGameStore({ currentHint: null });
-      }, 5000);
+      addHint(data.hint);  // 배열에 힌트 추가 (자동 사라짐 제거)
     });
 
     // 서버 연결 시작
@@ -914,15 +909,12 @@
     <p>Frontend: Svelte 5 + Socket.IO Client</p>
   </div>
 
-  <!-- 힌트 표시 -->
-  {#if currentHint}
-    <Hint
-      text={currentHint.text}
-      index={currentHint.index}
-      total={currentHint.total}
-      onDismiss={() => updateGameStore({ currentHint: null })}
-    />
-  {/if}
+  <!-- 힌트 박스 -->
+  <HintsContainer
+    {hints}
+    minimized={hintsMinimized}
+    onToggleMinimize={toggleHintsMinimized}
+  />
 </div>
 
 <style>
