@@ -2,10 +2,9 @@
   import { onMount } from "svelte";
   import { initSocket } from "../../socket";
   import type { Socket } from "socket.io-client";
-  import { gameStore, isHost, updateGameStore, triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState, addHint, clearHints, toggleHintsMinimized } from "../../stores/gameStore";
+  import { gameStore, isHost, updateGameStore, triggerPlayerAnimation, updatePlayerScore, markPlayerCorrect, markPlayerWrong, resetRoundState, addHint, clearHints } from "../../stores/gameStore";
   import GameLobby from "./GameLobby.svelte";
   import GameRoom from "./GameRoom.svelte";
-  import HintsContainer from "../../components/common/HintsContainer.svelte";
 
   // 스토어에서 상태 추출
   let socket: Socket;
@@ -38,7 +37,6 @@
     answeredCorrectly,
     answeredWrong,
     hints,
-    hintsMinimized,
   } = $derived($gameStore);
 
   // 라운드 종료 후 준비 상태
@@ -892,6 +890,7 @@
       {previousScores}
       {answeredCorrectly}
       {answeredWrong}
+      {hints}
       onStartGame={startGame}
       onLeaveRoom={leaveRoom}
       onVolumeChange={handleVolumeChange}
@@ -909,12 +908,6 @@
     <p>Frontend: Svelte 5 + Socket.IO Client</p>
   </div>
 
-  <!-- 힌트 박스 -->
-  <HintsContainer
-    {hints}
-    minimized={hintsMinimized}
-    onToggleMinimize={toggleHintsMinimized}
-  />
 </div>
 
 <style>

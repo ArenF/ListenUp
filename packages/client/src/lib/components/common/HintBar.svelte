@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition';
-  import { backOut } from 'svelte/easing';
   import type { HintItem } from '../../stores/gameStore';
 
   interface Props {
@@ -8,18 +6,16 @@
   }
 
   let { hint }: Props = $props();
+
+  // 숫자 이모지 매핑
+  const numberEmojis = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
 </script>
 
 <div
   class="hint-bar"
   class:is-new={hint.isNew}
-  transition:fly={{
-    y: 20,
-    duration: 400,
-    easing: backOut
-  }}
 >
-  <span class="hint-number">⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾"[hint.index - 1]</span>
+  <span class="hint-number">{numberEmojis[hint.index - 1] || hint.index}</span>
   <span class="hint-text">{hint.text}</span>
 </div>
 

@@ -60,7 +60,6 @@ export interface GameState {
 
   // 힌트 시스템 (배열로 변경)
   hints: HintItem[];
-  hintsMinimized: boolean;  // 힌트 박스 최소화 상태
 }
 
 // 초기 상태
@@ -99,7 +98,6 @@ const initialState: GameState = {
   answeredCorrectly: new Set(),
   answeredWrong: new Set(),
   hints: [],
-  hintsMinimized: false,
 };
 
 // 메인 스토어
@@ -230,13 +228,5 @@ export function clearHints() {
   gameStore.update(state => ({
     ...state,
     hints: []
-  }));
-}
-
-// 힌트 박스 최소화/최대화 토글
-export function toggleHintsMinimized() {
-  gameStore.update(state => ({
-    ...state,
-    hintsMinimized: !state.hintsMinimized
   }));
 }

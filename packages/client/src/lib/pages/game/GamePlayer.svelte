@@ -1,13 +1,17 @@
 <script lang="ts">
+  import HintsContainer from '../../components/common/HintsContainer.svelte';
+  import type { HintItem } from '../../stores/gameStore';
+
   interface Props {
     preparedTrack: any;
     currentTrack: any;
     isMuted: boolean;
     volume: number;
+    hints: HintItem[];
     onVolumeChange: (e: Event) => void;
   }
 
-  let { preparedTrack, currentTrack, isMuted, volume, onVolumeChange }: Props =
+  let { preparedTrack, currentTrack, isMuted, volume, hints, onVolumeChange }: Props =
     $props();
 </script>
 
@@ -32,6 +36,9 @@
       />
     </div>
   {/if}
+
+  <!-- 힌트 박스 (음량 슬라이더 아래) -->
+  <HintsContainer {hints} />
 {/if}
 
 <style>

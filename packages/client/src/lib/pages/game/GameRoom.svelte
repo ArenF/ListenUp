@@ -3,7 +3,7 @@
   import AnswerPlayer from "./AnswerPlayer.svelte";
   import GameResult from "./GameResult.svelte";
 
-  import type { AnimationType } from "../../stores/gameStore";
+  import type { AnimationType, HintItem } from "../../stores/gameStore";
 
   interface Props {
     currentRoom: any;
@@ -28,6 +28,7 @@
     previousScores: Record<string, number>;
     answeredCorrectly: Set<string>;
     answeredWrong: Set<string>;
+    hints: HintItem[];
     onStartGame: () => void;
     onLeaveRoom: () => void;
     onVolumeChange: (e: Event) => void;
@@ -61,6 +62,7 @@
     previousScores,
     answeredCorrectly,
     answeredWrong,
+    hints,
     onStartGame,
     onLeaveRoom,
     onVolumeChange,
@@ -152,6 +154,7 @@
           {currentTrack}
           {isMuted}
           {volume}
+          {hints}
           {onVolumeChange}
         />
       {/if}
