@@ -204,8 +204,9 @@
               </p>
               <div class="playback-inputs">
                 <div class="playback-input-group">
-                  <label>시작 시간 (초)</label>
+                  <label for="edit-start-{track.id}">시작 시간 (초)</label>
                   <input
+                    id="edit-start-{track.id}"
                     type="number"
                     value={editStartSeconds ?? ""}
                     oninput={(e) => {
@@ -218,8 +219,9 @@
                   />
                 </div>
                 <div class="playback-input-group">
-                  <label>종료 시간 (초)</label>
+                  <label for="edit-end-{track.id}">종료 시간 (초)</label>
                   <input
+                    id="edit-end-{track.id}"
                     type="number"
                     value={editEndSeconds ?? ""}
                     oninput={(e) => {

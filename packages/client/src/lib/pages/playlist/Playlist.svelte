@@ -541,16 +541,18 @@
       {:else}
         <div class="playlist-list">
           {#each playlists as playlist}
-            <div
+            <button
+              type="button"
               class="playlist-item"
               class:active={selectedPlaylist?.id === playlist.id}
               onclick={() => selectPlaylist(playlist)}
+              aria-label="플레이리스트 선택: {playlist.name}"
             >
               <div class="playlist-name">{playlist.name}</div>
               <div class="playlist-count">
                 {playlist.tracks?.length || 0} 트랙
               </div>
-            </div>
+            </button>
           {/each}
         </div>
       {/if}
@@ -731,6 +733,12 @@
   }
 
   .playlist-item {
+    /* Button reset */
+    width: 100%;
+    text-align: left;
+    font: inherit;
+
+    /* Original styles */
     padding: 1rem;
     background-color: white;
     border-radius: 8px;

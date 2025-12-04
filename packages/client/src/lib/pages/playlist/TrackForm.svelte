@@ -65,14 +65,30 @@
 </script>
 
 {#if show}
-  <div class="modal-backdrop" onclick={onClose}>
-    <div class="modal" onclick={(e) => e.stopPropagation()}>
-      <h3>트랙 추가</h3>
+  <div
+    class="modal-backdrop"
+    onclick={onClose}
+    onkeydown={(e) => e.key === 'Escape' && onClose()}
+    role="button"
+    tabindex="0"
+    aria-label="모달 닫기"
+  >
+    <div
+      class="modal"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="track-modal-title"
+      tabindex="-1"
+    >
+      <h3 id="track-modal-title">트랙 추가</h3>
 
       <div class="form-group">
-        <label>YouTube 링크 또는 비디오 ID</label>
+        <label for="track-youtube-url">YouTube 링크 또는 비디오 ID</label>
         <div class="url-input-group">
           <input
+            id="track-youtube-url"
             type="text"
             value={youtubeUrl}
             oninput={(e) => onYoutubeUrlChange(e.currentTarget.value)}
@@ -178,8 +194,9 @@
             </p>
             <div class="playback-inputs">
               <div class="playback-input-group">
-                <label>시작 시간 (초)</label>
+                <label for="track-start-seconds">시작 시간 (초)</label>
                 <input
+                  id="track-start-seconds"
                   type="number"
                   value={startSeconds ?? ""}
                   oninput={(e) => {
@@ -192,8 +209,9 @@
                 />
               </div>
               <div class="playback-input-group">
-                <label>종료 시간 (초)</label>
+                <label for="track-end-seconds">종료 시간 (초)</label>
                 <input
+                  id="track-end-seconds"
                   type="number"
                   value={endSeconds ?? ""}
                   oninput={(e) => {

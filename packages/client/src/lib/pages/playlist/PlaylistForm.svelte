@@ -23,14 +23,30 @@
 </script>
 
 {#if show}
-  <div class="modal-backdrop" onclick={onClose}>
-    <div class="modal" onclick={(e) => e.stopPropagation()}>
-      <h3>
+  <div
+    class="modal-backdrop"
+    onclick={onClose}
+    onkeydown={(e) => e.key === 'Escape' && onClose()}
+    role="button"
+    tabindex="0"
+    aria-label="모달 닫기"
+  >
+    <div
+      class="modal"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      tabindex="-1"
+    >
+      <h3 id="modal-title">
         {mode === "create" ? "새 플레이리스트 만들기" : "플레이리스트 수정"}
       </h3>
       <div class="form-group">
-        <label>플레이리스트 이름</label>
+        <label for="playlist-name">플레이리스트 이름</label>
         <input
+          id="playlist-name"
           type="text"
           value={name}
           oninput={(e) => onNameChange(e.currentTarget.value)}
@@ -38,8 +54,9 @@
         />
       </div>
       <div class="form-group">
-        <label>설명</label>
+        <label for="playlist-description">설명</label>
         <textarea
+          id="playlist-description"
           value={description}
           oninput={(e) => onDescriptionChange(e.currentTarget.value)}
           placeholder="플레이리스트 설명"
