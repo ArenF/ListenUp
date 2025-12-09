@@ -46,6 +46,7 @@ export class RoomService {
       answers: new Map(),
       scores: new Map(),
       streaks: new Map(),
+      correctAnswerCounts: new Map(),
       readyPlayers: new Set(),
       waitingForReady: false,
       tracks: [],

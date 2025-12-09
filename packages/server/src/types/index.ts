@@ -33,6 +33,7 @@ export interface GameState {
   answers: Map<string, AnswerSubmission>;  // 타입 변경: number → AnswerSubmission
   scores: Map<string, number>;
   streaks: Map<string, number>;
+  correctAnswerCounts: Map<string, number>;  // 각 플레이어의 실제 정답 수
   readyPlayers: Set<string>;          // 준비 완료된 플레이어 ID
   waitingForReady: boolean;           // 플레이어 준비 대기 중
   tracks: Track[];                    // 게임의 전체 트랙 목록

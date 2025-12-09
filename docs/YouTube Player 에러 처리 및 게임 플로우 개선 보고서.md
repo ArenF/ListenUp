@@ -492,6 +492,233 @@ Node.js: 20.x
 
 ---
 
+## 정답 영상 재생 시스템 (AnswerPlayer)
+
+**추가 일자**: 2025-12-01
+**컴포넌트**: `AnswerPlayer.svelte`
+**목적**: 라운드 종료 후 정답 영상을 자동으로 재생하여 사용자 경험 향상
+
+### 구현 배경
+
+라운드가 종료된 후 플레이어들이 정답 영상을 확인하지 못하는 문제가 있었습니다. 게임 플레이어는 음소거된 상태로 힌트만 제공하기 때문에, 정답 발표 후 실제 음악을 듣고 확인할 기회가 필요했습니다.
+
+### 주요 기능
+
+#### 1. 독립적인 정답 플레이어
+게임 플레이어(`GamePlayer.svelte`)와 분리된 독립적인 YouTube Player 인스턴스:
+
+```svelte
+<AnswerPlayer track={roundResult.track} />
+```
+
+**특징:**
+- 게임 플레이어와 별도의 DOM 요소 사용 (`answer-player`)
+- 라운드 결과가 표시될 때만 마운트됨
+- 자동으로 음소거 해제 및 재생
+
+#### 2. 자동 재생 및 음소거 해제
+
+```typescript
+onReady: (event: any) => {
+  console.log("✅ 정답 영상 플레이어 준비 완료!");
+  playerReady = true;
+
+  // 음소거 해제 후 재생
+  event.target.unMute();
+  event.target.setVolume(70); // 기본 음량 70%
+  event.target.playVideo();
+
+  console.log("🔊 정답 영상 재생 시작 (음소거 해제)");
+}
+```
+
+**동작 흐름:**
+1. `round-ended` 이벤트 발생
+2. 게임 플레이어 일시정지 + 음소거
+3. AnswerPlayer 컴포넌트 마운트
+4. YouTube Player API로 정답 영상 플레이어 생성
+5. `onReady` 이벤트 시 음소거 해제 및 자동 재생
+
+#### 3. 커스텀 재생 구간 지원
+
+```typescript
+player = new YT.Player("answer-player", {
+  videoId: track.id,
+  playerVars: {
+    autoplay: 1,
+    start: track.startSeconds,    // 커스텀 시작 시간
+    end: track.endSeconds,        // 커스텀 종료 시간
+    controls: 1,
+    rel: 0,
+    modestbranding: 1,
+  },
+  // ...
+});
+```
+
+**지원 기능:**
+- 플레이리스트에서 지정한 시작/종료 시간 자동 적용
+- 하이라이트 구간만 재생 가능
+- 사용자가 컨트롤 조작 가능 (`controls: 1`)
+
+#### 4. 에러 처리
+
+```typescript
+onError: (event: any) => {
+  const errorCode = event.data;
+  let errorMessage = "❌ 정답 영상 재생 오류";
+
+  switch (errorCode) {
+    case 2:
+      errorMessage = "❌ 잘못된 비디오 설정";
+      break;
+    case 5:
+      errorMessage = "❌ 비디오 재생 불가 (HTML5 오류)";
+      break;
+    case 100:
+      errorMessage = "❌ 비디오를 찾을 수 없음";
+      break;
+    case 101:
+    case 150:
+      errorMessage = "❌ 이 비디오는 임베드 재생이 제한되어 있습니다";
+      break;
+    default:
+      errorMessage = `❌ 영상 재생 오류 (코드: ${errorCode})`;
+  }
+
+  console.error(errorMessage);
+}
+```
+
+**에러 처리 전략:**
+- 게임 플레이어와 동일한 에러 코드 처리
+- 사용자에게 명확한 에러 메시지 표시
+- 에러 발생 시에도 게임 진행에는 영향 없음
+
+#### 5. 반응형 디자인 및 스타일링
+
+```css
+.answer-player-container {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background-color: #000;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+```
+
+**디자인 특징:**
+- 16:9 비율 유지 (모든 화면 크기에서 일관성)
+- 깔끔한 그림자 효과
+- 로딩 오버레이 표시
+
+#### 6. 리소스 정리
+
+```typescript
+onDestroy(() => {
+  if (player && typeof player.destroy === "function") {
+    console.log("🗑️ 정답 영상 플레이어 파괴");
+    try {
+      player.destroy();
+    } catch (e) {
+      console.warn("플레이어 파괴 중 에러 (무시):", e);
+    }
+  }
+});
+```
+
+**메모리 관리:**
+- 컴포넌트 언마운트 시 플레이어 자동 파괴
+- 메모리 누수 방지
+- 에러 발생 시 안전하게 처리
+
+### 게임 플로우 통합
+
+```
+게임 플레이 중
+  ├─ GamePlayer (음소거, 힌트만 제공)
+  ↓
+라운드 종료 (round-ended 이벤트)
+  ├─ GamePlayer.pauseVideo()
+  ├─ GamePlayer.mute()
+  ├─ 타이머 정리
+  ↓
+정답 발표
+  ├─ AnswerPlayer 마운트
+  ├─ 음소거 해제 + 자동 재생
+  ├─ 플레이어들이 정답 영상 감상
+  ↓
+다음 라운드 준비
+  ├─ 플레이어들 준비 완료 표시
+  ├─ 모두 준비되면 다음 라운드 시작
+  └─ AnswerPlayer 언마운트 (자동 정리)
+```
+
+### 개선된 사용자 경험
+
+**Before (2025-12-01 이전):**
+- ❌ 라운드 종료 후 음악을 들을 수 없음
+- ❌ 정답이 무엇이었는지 확인 불가
+- ❌ 단순히 텍스트로만 정답 표시
+
+**After (AnswerPlayer 추가 후):**
+- ✅ 라운드 종료 후 정답 영상 자동 재생
+- ✅ 음소거 해제로 실제 음악 청취 가능
+- ✅ 커스텀 구간 재생 지원
+- ✅ 사용자가 영상 컨트롤 가능
+
+### 기술적 상세
+
+**컴포넌트 위치**: `packages/client/src/lib/pages/game/AnswerPlayer.svelte`
+
+**Props 인터페이스:**
+```typescript
+interface Props {
+  track: {
+    id: string;
+    name: string;
+    artist: string;
+    startSeconds: number;
+    endSeconds: number;
+  };
+}
+```
+
+**상태 관리:**
+```typescript
+let player: any = null;          // YouTube Player 인스턴스
+let playerReady = $state(false); // 플레이어 준비 상태 (Svelte 5 runes)
+```
+
+**DOM 요소:**
+- `#answer-player`: YouTube Player iframe이 삽입될 div
+- `.loading-overlay`: 플레이어 로딩 중 표시
+
+### 테스트 결과
+
+✅ 정답 영상 자동 재생 확인
+✅ 음소거 해제 동작 확인 (볼륨 70%)
+✅ 커스텀 재생 구간 정상 작동
+✅ 에러 발생 시 명확한 메시지 표시
+✅ 컴포넌트 언마운트 시 리소스 정리 확인
+✅ 게임 플레이어와 독립적으로 동작
+
+### 관련 커밋
+
+- **872a0dc**: 정답 영상 출력 문제 해결 - AnswerPlayer.svelte 생성, 기존 iframe 코드 완전 제거, CSS 정리
+- **23b46fa**: Game.svelte round-ended 이벤트 핸들러에 영상 재생 로직 추가, 타이머 시스템 구현
+
+---
+
 ## 향후 개선 사항
 
 ### 1. 에러 발생 트랙 자동 제외

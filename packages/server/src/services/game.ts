@@ -94,6 +94,7 @@ export class GameService {
     room.gameState.answers = new Map();
     room.gameState.scores = new Map();
     room.gameState.streaks = new Map();
+    room.gameState.correctAnswerCounts = new Map();
     room.gameState.readyPlayers = new Set();
     room.gameState.waitingForReady = false;
     room.gameState.tracks = [];
@@ -207,6 +208,12 @@ export class GameService {
     const currentStreak = room.gameState.streaks.get(playerId) || 0;
     const newStreak = isCorrect ? currentStreak + 1 : 0;
     room.gameState.streaks.set(playerId, newStreak);
+
+    // 정답 카운트 업데이트
+    if (isCorrect) {
+      const currentCorrectCount = room.gameState.correctAnswerCounts.get(playerId) || 0;
+      room.gameState.correctAnswerCounts.set(playerId, currentCorrectCount + 1);
+    }
 
     // 누적 점수 업데이트
     const currentScore = room.gameState.scores.get(playerId) || 0;
@@ -448,8 +455,8 @@ export class GameService {
       const score = room.gameState.scores.get(player.id) || 0;
       const streak = room.gameState.streaks.get(player.id) || 0;
 
-      // 정답 개수 계산 (간소화: 점수로 추정)
-      const correctAnswers = Math.floor(score / 1000);
+      // 정답 개수 계산 (실제 정답 카운트 사용)
+      const correctAnswers = room.gameState.correctAnswerCounts.get(player.id) || 0;
 
       return {
         playerId: player.id,
