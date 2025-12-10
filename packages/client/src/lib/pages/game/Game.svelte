@@ -41,8 +41,8 @@
 
   // 라운드 종료 후 준비 상태
   let canForceStart = $state(false);
-  let forceStartTimer: NodeJS.Timeout | null = null;
-  let forceStartCountdown: NodeJS.Timeout | null = null;
+  let forceStartTimer: ReturnType<typeof setTimeout> | null = null;
+  let forceStartCountdown: ReturnType<typeof setInterval> | null = null;
   let forceStartRemaining = $state(0);
 
   onMount(() => {

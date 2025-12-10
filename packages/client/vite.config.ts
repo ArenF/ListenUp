@@ -14,7 +14,7 @@ export default defineConfig({
         // WebSocket 에러를 조용히 처리 (정상적인 연결 종료)
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
-            if (err.code === 'ECONNRESET') {
+            if ((err as any).code === 'ECONNRESET') {
               // 정상적인 연결 종료는 로그 출력 안 함
               return;
             }
