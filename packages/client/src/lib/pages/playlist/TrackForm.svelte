@@ -1,44 +1,19 @@
 <script lang="ts">
-  interface Track {
-    id: string;
-    name: string;
-    artist: string;
-    duration: number;
-    startSeconds: number;
-    endSeconds: number;
-  }
+  import type { AnswerList } from "./answerList.svelte";
+  import type { TrackSearch } from "./trackSearch.svelte";
 
   interface Props {
     show: boolean;
-    youtubeUrl: string;
-    videoId: string;
-    trackInfo: Track | null;
-    loadingTrack: boolean;
-    answers: string[];
+    /** YouTube 검색 상태 (입력 URL·조회 결과) */
+    search: TrackSearch;
+    /** 등록할 정답 목록 */
+    answers: AnswerList;
     onClose: () => void;
-    onUrlInput: () => void;
-    onYoutubeUrlChange: (value: string) => void;
-    onAddTrack: () => void;
-    onAddAnswer: () => void;
-    onRemoveAnswer: (index: number) => void;
-    onUpdateAnswer: (index: number, value: string) => void;
+    onSearch: () => void;
+    onAdd: () => void;
   }
 
-  let {
-    show,
-    youtubeUrl,
-    videoId,
-    trackInfo,
-    loadingTrack,
-    answers,
-    onClose,
-    onUrlInput,
-    onYoutubeUrlChange,
-    onAddTrack,
-    onAddAnswer,
-    onRemoveAnswer,
-    onUpdateAnswer,
-  }: Props = $props();
+  let { show, search, answers, onClose, onSearch, onAdd }: Props = $props();
 </script>
 
 {#if show}
@@ -47,34 +22,34 @@
       <h3>트랙 추가</h3>
 
       <div class="form-group">
-        <label>YouTube 링크 또는 비디오 ID</label>
+        <label for="youtube-url">YouTube 링크 또는 비디오 ID</label>
         <div class="url-input-group">
           <input
+            id="youtube-url"
             type="text"
-            value={youtubeUrl}
-            oninput={(e) => onYoutubeUrlChange(e.currentTarget.value)}
+            bind:value={search.url}
             placeholder="YouTube URL 또는 비디오 ID"
-            onkeydown={(e) => e.key === "Enter" && onUrlInput()}
+            onkeydown={(e) => e.key === "Enter" && onSearch()}
           />
-          <button class="btn-search" onclick={onUrlInput}>🔍 검색</button>
+          <button class="btn-search" onclick={onSearch}>🔍 검색</button>
         </div>
-        {#if videoId}
-          <div class="video-id-display">비디오 ID: {videoId}</div>
+        {#if search.videoId}
+          <div class="video-id-display">비디오 ID: {search.videoId}</div>
         {/if}
       </div>
 
-      {#if loadingTrack}
+      {#if search.loading}
         <div class="loading">트랙 정보 로딩 중...</div>
       {/if}
 
-      {#if trackInfo}
+      {#if search.track}
         <div class="track-info">
           <h4>트랙 정보</h4>
-          <p><strong>제목:</strong> {trackInfo.name}</p>
-          <p><strong>아티스트:</strong> {trackInfo.artist}</p>
+          <p><strong>제목:</strong> {search.track.name}</p>
+          <p><strong>아티스트:</strong> {search.track.artist}</p>
           <p>
             <strong>재생 구간:</strong>
-            {trackInfo.startSeconds}초 ~ {trackInfo.endSeconds}초
+            {search.track.startSeconds}초 ~ {search.track.endSeconds}초
           </p>
 
           <div class="answers-section">
@@ -84,18 +59,17 @@
               체크합니다.
             </p>
             <div class="answers-list">
-              {#each answers as answer, index}
+              {#each answers.items as _, index}
                 <div class="answer-input-row">
                   <input
                     type="text"
-                    value={answer}
-                    oninput={(e) => onUpdateAnswer(index, e.currentTarget.value)}
+                    bind:value={answers.items[index]}
                     placeholder="정답 {index + 1}"
-                    onkeydown={(e) => e.key === "Enter" && onAddAnswer()}
+                    onkeydown={(e) => e.key === "Enter" && answers.add()}
                   />
                   <button
                     class="btn-remove"
-                    onclick={() => onRemoveAnswer(index)}
+                    onclick={() => answers.remove(index)}
                     title="정답 제거"
                   >
                     ✕
@@ -103,13 +77,13 @@
                 </div>
               {/each}
             </div>
-            <button class="btn-add-answer" onclick={onAddAnswer}>
+            <button class="btn-add-answer" onclick={() => answers.add()}>
               ➕ 정답 추가
             </button>
           </div>
 
           <div class="track-form-actions">
-            <button class="btn-primary" onclick={onAddTrack}>
+            <button class="btn-primary" onclick={onAdd}>
               플레이리스트에 추가
             </button>
             <button class="btn-secondary" onclick={onClose}>취소</button>

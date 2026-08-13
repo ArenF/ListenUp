@@ -1,27 +1,31 @@
 <script lang="ts">
   import GamePlayer from "./GamePlayer.svelte";
   import GameResult from "./GameResult.svelte";
+  import type {
+    GameResult as GameResultData,
+    HiddenTrack,
+    Player,
+    Room,
+  } from "../../types";
 
   interface Props {
-    currentRoom: any;
-    players: any[];
+    currentRoom: Room;
+    players: Player[];
     gameStarted: boolean;
-    gameResult: any | null;
+    gameResult: GameResultData | null;
     isHost: boolean;
     currentRound: number;
     totalRounds: number;
     isLoadingTrack: boolean;
     readyPlayers: number;
-    preparedTrack: any;
-    currentTrack: any;
+    preparedTrack: HiddenTrack | null;
+    currentTrack: HiddenTrack | null;
     isMuted: boolean;
     volume: number;
     roundEnded: boolean;
     answer: string;
     onStartGame: () => void;
     onLeaveRoom: () => void;
-    onVolumeChange: (e: Event) => void;
-    onAnswerChange: (e: Event) => void;
     onSubmitAnswer: () => void;
     onNextRound: () => void;
     onEndGame: () => void;
@@ -40,13 +44,11 @@
     preparedTrack,
     currentTrack,
     isMuted,
-    volume,
+    volume = $bindable(),
     roundEnded,
-    answer,
+    answer = $bindable(),
     onStartGame,
     onLeaveRoom,
-    onVolumeChange,
-    onAnswerChange,
     onSubmitAnswer,
     onNextRound,
     onEndGame,
@@ -61,7 +63,7 @@
   </div>
   <div class="info-item">
     <strong>방장:</strong>
-    {currentRoom.players.find((p: any) => p.isHost)?.nickname}
+    {currentRoom.players.find((p) => p.isHost)?.nickname}
   </div>
   <div class="info-item">
     <strong>플레이어:</strong>
@@ -110,21 +112,14 @@
         </div>
       {/if}
 
-      <GamePlayer
-        {preparedTrack}
-        {currentTrack}
-        {isMuted}
-        {volume}
-        {onVolumeChange}
-      />
+      <GamePlayer {preparedTrack} {currentTrack} {isMuted} bind:volume />
 
       {#if currentTrack && !roundEnded}
         <!-- 정답 입력 -->
         <div class="answer-input">
           <input
             type="text"
-            value={answer}
-            oninput={onAnswerChange}
+            bind:value={answer}
             placeholder="정답을 입력하세요..."
             onkeydown={(e) => e.key === "Enter" && onSubmitAnswer()}
           />

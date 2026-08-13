@@ -1,9 +1,18 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import Game from "./lib/pages/game/Game.svelte";
   import Playlist from "./lib/pages/playlist/Playlist.svelte";
+  import Login from "./lib/pages/login/Login.svelte";
+  import Profile from "./lib/pages/login/Profile.svelte";
+  import { authStore } from "./lib/pages/login/authStore.svelte";
 
   // 페이지 라우팅
-  let currentPage = $state<"game" | "playlist">("game");
+  let currentPage = $state<"game" | "playlist" | "account">("game");
+
+  // 새로고침 후에도 로그인 세션을 이어간다
+  onMount(() => {
+    authStore.restore();
+  });
 </script>
 
 <main>
@@ -25,12 +34,29 @@
       >
         🎵 플레이리스트 관리
       </button>
+      <button
+        class="nav-button account"
+        class:active={currentPage === "account"}
+        onclick={() => (currentPage = "account")}
+      >
+        {#if authStore.isLoggedIn}
+          👤 {authStore.user?.nickname}
+        {:else}
+          🔑 로그인
+        {/if}
+      </button>
     </div>
   </nav>
 
   <!-- 페이지 컨텐츠 -->
   {#if currentPage === "playlist"}
     <Playlist />
+  {:else if currentPage === "account"}
+    {#if authStore.isLoggedIn}
+      <Profile />
+    {:else}
+      <Login />
+    {/if}
   {:else}
     <Game />
   {/if}

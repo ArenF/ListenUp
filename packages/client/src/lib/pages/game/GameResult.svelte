@@ -1,6 +1,8 @@
 <script lang="ts">
+  import type { GameResult } from "../../types";
+
   interface Props {
-    gameResult: any;
+    gameResult: GameResult;
   }
 
   let { gameResult }: Props = $props();

@@ -8,3 +8,13 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * YouTube IFrame API가 로드되면 전역에 심는 값들
+ *
+ * `YT` 네임스페이스 타입은 @types/youtube가 전역으로 제공한다.
+ */
+interface Window {
+  YT?: typeof YT;
+  onYouTubeIframeAPIReady?: () => void;
+}

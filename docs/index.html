@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🎵 ListenUp! — 프로젝트 구조 문서</title>
+<style>
+  :root {
+    --accent: #ff3e00;
+    --accent-soft: #ff6a3d;
+    --bg: #0f1117;
+    --bg-soft: #171a23;
+    --card: #1c2029;
+    --card-2: #232838;
+    --border: #2c3242;
+    --text: #e6e8ee;
+    --text-dim: #9aa3b2;
+    --green: #4caf50;
+    --blue: #4d9fff;
+    --purple: #b184ff;
+    --yellow: #ffc94d;
+    --mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Apple SD Gothic Neo", Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  /* ---------- Layout ---------- */
+  .layout { display: flex; }
+
+  aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--bg-soft);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+  }
+
+  aside .brand {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+  aside .brand small { display: block; color: var(--text-dim); font-size: 0.72rem; font-weight: 400; margin-top: 0.2rem; }
+
+  nav a {
+    display: block;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  nav a:hover { background: var(--card); color: var(--text); }
+  nav .group-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-soft);
+    margin: 1.2rem 0 0.4rem 0.6rem;
+    font-weight: 700;
+  }
+
+  main {
+    flex: 1;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 3rem 3rem 6rem;
+    min-width: 0;
+  }
+
+  /* ---------- Typography ---------- */
+  h1 {
+    font-size: 2.4rem;
+    margin: 0 0 0.3rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  h2 {
+    font-size: 1.6rem;
+    margin: 3.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  h3 { font-size: 1.2rem; margin: 2rem 0 0.6rem; color: var(--accent-soft); }
+  h4 { font-size: 1rem; margin: 1.3rem 0 0.4rem; color: var(--text); }
+  p { color: var(--text); }
+  a { color: var(--blue); }
+
+  section { scroll-margin-top: 1rem; }
+
+  .lead { font-size: 1.1rem; color: var(--text-dim); margin-top: 0; }
+
+  code {
+    font-family: var(--mono);
+    background: var(--card-2);
+    padding: 0.12em 0.4em;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: var(--yellow);
+  }
+
+  pre {
+    background: #0b0d12;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+  pre code { background: none; padding: 0; color: #cdd3df; }
+
+  /* ---------- Components ---------- */
+  .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 2rem; }
+  .badge {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .badge b { color: var(--text); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+  }
+  .card .ico { font-size: 1.6rem; }
+  .card h4 { margin: 0.5rem 0 0.3rem; color: var(--accent-soft); }
+  .card p { margin: 0; font-size: 0.88rem; color: var(--text-dim); }
+
+  .callout {
+    background: linear-gradient(180deg, rgba(255,62,0,0.08), rgba(255,62,0,0.02));
+    border: 1px solid rgba(255,62,0,0.25);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    margin: 1.2rem 0;
+    font-size: 0.92rem;
+  }
+  .callout.info { background: rgba(77,159,255,0.06); border-color: rgba(77,159,255,0.3); border-left-color: var(--blue); }
+  .callout.warn { background: rgba(255,201,77,0.06); border-color: rgba(255,201,77,0.3); border-left-color: var(--yellow); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.86rem; }
+  th, td { text-align: left; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--accent-soft); font-weight: 700; background: var(--bg-soft); }
+  tr:hover td { background: var(--card); }
+  td code { white-space: nowrap; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .tag.get { background: rgba(76,175,80,0.15); color: #7bd77f; }
+  .tag.post { background: rgba(77,159,255,0.15); color: #7bb8ff; }
+  .tag.put { background: rgba(255,201,77,0.15); color: #ffd97a; }
+  .tag.del { background: rgba(255,82,82,0.15); color: #ff8a8a; }
+  .tag.c2s { background: rgba(177,132,255,0.15); color: #c9a9ff; }
+  .tag.s2c { background: rgba(76,175,80,0.15); color: #7bd77f; }
+
+  /* ---------- Tree ---------- */
+  .tree {
+    background: #0b0d12;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  .tree .dir { color: var(--blue); font-weight: 600; }
+  .tree .file { color: #cdd3df; }
+  .tree .cmt { color: var(--text-dim); }
+
+  /* ---------- Flow diagram ---------- */
+  .flow { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .flow-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .flow-rail { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .flow-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--card-2); border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; color: var(--accent-soft);
+  }
+  .flow-line { width: 2px; flex: 1; min-height: 28px; background: var(--border); }
+  .flow-body {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.8rem;
+    flex: 1;
+  }
+  .flow-body h4 { margin: 0 0 0.2rem; }
+  .flow-body .who { font-family: var(--mono); font-size: 0.72rem; color: var(--purple); }
+  .flow-body p { margin: 0.3rem 0 0; font-size: 0.85rem; color: var(--text-dim); }
+  .flow-body code { font-size: 0.78rem; }
+
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.4rem 0; }
+  @media (max-width: 820px) { .arch-grid { grid-template-columns: 1fr; } aside { display: none; } main { padding: 2rem 1.2rem; } }
+
+  .layer {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .layer-head { padding: 0.7rem 1rem; font-weight: 700; font-size: 0.95rem; }
+  .layer-head.client { background: rgba(177,132,255,0.12); color: var(--purple); }
+  .layer-head.server { background: rgba(76,175,80,0.12); color: #7bd77f; }
+  .layer-body { padding: 0.8rem 1rem; }
+  .layer-body ul { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--text-dim); }
+  .layer-body li { margin: 0.25rem 0; }
+  .layer-body b { color: var(--text); }
+
+  footer {
+    margin-top: 4rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 0.82rem;
+  }
+
+  .pill { font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); }
+  hr.soft { border: none; border-top: 1px dashed var(--border); margin: 2rem 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- ============ SIDEBAR ============ -->
+  <aside>
+    <div class="brand">🎵 ListenUp!<small>프로젝트 구조 문서</small></div>
+    <nav>
+      <a href="#overview">개요</a>
+      <a href="#stack">기술 스택</a>
+      <div class="group-title">아키텍처</div>
+      <a href="#structure">디렉터리 구조</a>
+      <a href="#architecture">전체 아키텍처</a>
+      <a href="#dataflow">데이터 흐름</a>
+      <div class="group-title">서버</div>
+      <a href="#server-entry">진입점 · index.ts</a>
+      <a href="#server-services">서비스 계층</a>
+      <a href="#server-socket">소켓 핸들러</a>
+      <a href="#server-types">타입 정의</a>
+      <div class="group-title">클라이언트</div>
+      <a href="#client-structure">컴포넌트 구조</a>
+      <a href="#client-store">상태 · 소켓</a>
+      <div class="group-title">핵심 로직</div>
+      <a href="#game-flow">게임 진행 흐름</a>
+      <a href="#logic-scoring">채점 · 점수</a>
+      <div class="group-title">레퍼런스</div>
+      <a href="#rest-api">REST API</a>
+      <a href="#socket-events">소켓 이벤트</a>
+      <a href="#run">실행 방법</a>
+    </nav>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main>
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h1>🎵 ListenUp!</h1>
+      <p class="lead">YouTube Data API 기반 실시간 멀티플레이어 음악 맞히기 게임 — 코드베이스 전체 구조 해석 문서</p>
+      <div class="badges">
+        <span class="badge">모노레포 <b>npm workspaces</b></span>
+        <span class="badge">실시간 <b>Socket.IO</b></span>
+        <span class="badge">프론트 <b>Svelte 5</b></span>
+        <span class="badge">백엔드 <b>Node.js + Express</b></span>
+        <span class="badge">음원 <b>YouTube Data API v3</b></span>
+        <span class="badge">언어 <b>TypeScript</b></span>
+      </div>
+      <p>
+        <b>ListenUp!</b> 은 로그인 없이 <b>방 코드</b>만으로 즉시 참가하여, 짧게 재생되는 YouTube 음원을
+        듣고 곡·아티스트 이름을 가장 빨리 맞히는 웹 게임입니다. 서버는 방/게임/플레이리스트/YouTube 4개의
+        서비스 계층과 Socket.IO 실시간 통신으로 구성되며, 클라이언트는 게임 페이지와 플레이리스트 관리
+        페이지로 나뉜 Svelte SPA 입니다.
+      </p>
+      <div class="callout info">
+        이 문서는 저장소의 실제 소스( <code>packages/server</code>, <code>packages/client</code> )를 읽어
+        구조·데이터 모델·이벤트 흐름을 재구성한 것입니다. 개별 기능별 개발 보고서(Markdown)를 대체하는 단일 진입 문서입니다.
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section id="stack">
+      <h2>🏗️ 기술 스택</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="ico">🖥️</div>
+          <h4>Frontend</h4>
+          <p>Svelte 5 (Runes: <code>$state</code>, <code>$derived</code>, <code>$effect</code>) · TypeScript · Vite · socket.io-client · YouTube IFrame Player API</p>
+        </div>
+        <div class="card">
+          <div class="ico">⚙️</div>
+          <h4>Backend</h4>
+          <p>Node.js (ESM) · Express · Socket.IO 서버 · axios · node-cache · nanoid · dotenv</p>
+        </div>
+        <div class="card">
+          <div class="ico">🎵</div>
+          <h4>외부 API / 저장</h4>
+          <p>YouTube Data API v3 (곡 메타·길이 조회) · 플레이리스트는 <code>data/playlists.json</code> 파일로 영속화</p>
+        </div>
+        <div class="card">
+          <div class="ico">🧰</div>
+          <h4>개발 환경</h4>
+          <p>npm workspaces 모노레포 · GitHub Codespaces devcontainer · Vitest(서버 테스트) · 공통 <code>tsconfig.base.json</code></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRUCTURE -->
+    <section id="structure">
+      <h2>📁 디렉터리 구조</h2>
+      <div class="tree">
+<span class="dir">ListenUp/</span>
+├─ <span class="dir">.devcontainer/</span>            <span class="cmt"># Codespaces 개발 컨테이너 설정</span>
+├─ <span class="dir">docs/</span>                     <span class="cmt"># 📄 이 문서 (index.html)</span>
+├─ <span class="dir">packages/</span>
+│  ├─ <span class="dir">server/</span>                <span class="cmt"># Express + Socket.IO 백엔드</span>
+│  │  └─ <span class="dir">src/</span>
+│  │     ├─ <span class="file">index.ts</span>          <span class="cmt"># 서버 진입점 · REST · 소켓 연결</span>
+│  │     ├─ <span class="dir">config/</span><span class="file">env.ts</span>     <span class="cmt"># 환경변수 로딩/검증</span>
+│  │     ├─ <span class="dir">data/</span><span class="file">playlists.json</span> <span class="cmt"># 플레이리스트 영속 저장소</span>
+│  │     ├─ <span class="dir">services/</span>         <span class="cmt"># 도메인 로직 (싱글턴)</span>
+│  │     │  ├─ <span class="file">room.ts</span>       <span class="cmt"># 방 생성·참가·방장 위임</span>
+│  │     │  ├─ <span class="file">game.ts</span>       <span class="cmt"># 라운드·채점·점수·준비상태</span>
+│  │     │  ├─ <span class="file">playlist.ts</span>   <span class="cmt"># 플레이리스트 CRUD (파일 영속)</span>
+│  │     │  └─ <span class="file">youtube.ts</span>    <span class="cmt"># YouTube API + 캐시</span>
+│  │     ├─ <span class="dir">socket/</span>
+│  │     │  ├─ <span class="file">events.ts</span>     <span class="cmt"># 이벤트 이름 상수</span>
+│  │     │  └─ <span class="dir">handlers/</span>      <span class="cmt"># room · game · chat 핸들러</span>
+│  │     ├─ <span class="dir">types/</span><span class="file">index.ts</span>    <span class="cmt"># 공용 도메인 타입</span>
+│  │     └─ <span class="dir">__tests__/</span>        <span class="cmt"># Vitest 게임 로직 테스트</span>
+│  └─ <span class="dir">client/</span>                <span class="cmt"># Svelte 프론트엔드</span>
+│     └─ <span class="dir">src/</span>
+│        ├─ <span class="file">App.svelte</span>        <span class="cmt"># 상단 네비 + 페이지 라우팅</span>
+│        └─ <span class="dir">lib/</span>
+│           ├─ <span class="file">socket.ts</span>      <span class="cmt"># Socket.IO 싱글턴</span>
+│           └─ <span class="dir">pages/</span>
+│              ├─ <span class="dir">game/</span>        <span class="cmt"># 게임 UI + gameStore</span>
+│              └─ <span class="dir">playlist/</span>    <span class="cmt"># 플레이리스트 관리 UI</span>
+├─ <span class="file">package.json</span>              <span class="cmt"># workspaces 루트 스크립트</span>
+├─ <span class="file">tsconfig.base.json</span>        <span class="cmt"># 공통 TS 설정</span>
+└─ <span class="file">.env.example</span>              <span class="cmt"># 환경변수 템플릿</span>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+      <h2>🧩 전체 아키텍처</h2>
+      <p>
+        클라이언트와 서버는 두 개의 채널로 통신합니다. <b>플레이리스트 관리</b>는 REST(HTTP)로,
+        <b>실시간 게임 플레이</b>는 Socket.IO 이벤트로 처리됩니다. 서버의 모든 상태(방·게임)는
+        메모리 내 <code>Map</code> 에 저장되는 인메모리 구조이며, 플레이리스트만 JSON 파일로 영속화됩니다.
+      </p>
+
+      <div class="arch-grid">
+        <div class="layer">
+          <div class="layer-head client">CLIENT · Svelte SPA</div>
+          <div class="layer-body">
+            <ul>
+              <li><b>App.svelte</b> — <code>game ↔ playlist</code> 페이지 전환</li>
+              <li><b>game/</b> — Lobby · Room · Player · Result 컴포넌트, <code>gameStore</code> 중앙 상태</li>
+              <li><b>playlist/</b> — Playlist · PlaylistForm · TrackForm · TrackList</li>
+              <li><b>socket.ts</b> — 서버와의 단일 Socket 연결</li>
+              <li>YouTube IFrame Player 로 음원 재생/음소거 제어</li>
+            </ul>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-head server">SERVER · Node.js</div>
+          <div class="layer-body">
+            <ul>
+              <li><b>index.ts</b> — Express REST + Socket.IO 서버 부트스트랩</li>
+              <li><b>services</b> — roomService · gameService · playlistService · youtubeService (싱글턴)</li>
+              <li><b>socket/handlers</b> — room · game 이벤트 핸들러 등록</li>
+              <li><b>data/playlists.json</b> — 유일한 영속 저장소</li>
+              <li>방/게임 상태는 프로세스 메모리에 보관</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <pre><code>┌─────────────── Browser (Svelte) ───────────────┐
+│  Game 페이지            Playlist 관리 페이지     │
+│      │  Socket.IO             │  fetch / REST     │
+└──────┼───────────────────────┼───────────────────┘
+       │  ws: 게임 실시간       │  http: CRUD
+       ▼                        ▼
+┌─────────────────── Express 서버 ────────────────┐
+│  socket/handlers          REST 라우트 (/api/*)   │
+│      │                          │                 │
+│      ▼                          ▼                 │
+│  gameService   roomService   playlistService     │
+│      └──────────┬───────────────┘                │
+│                 ▼                                 │
+│           youtubeService ──► YouTube Data API v3  │
+│                 │                                 │
+│           playlists.json (파일 영속)              │
+└──────────────────────────────────────────────────┘</code></pre>
+    </section>
+
+    <!-- DATAFLOW -->
+    <section id="dataflow">
+      <h2>🔄 데이터 흐름 요약</h2>
+      <table>
+        <tr><th>동작</th><th>채널</th><th>경로</th></tr>
+        <tr><td>플레이리스트 조회/생성/수정</td><td>REST</td><td><code>GET/POST/PUT/DELETE /api/playlists</code> → <code>playlistService</code> → JSON 파일</td></tr>
+        <tr><td>방 생성·참가·설정</td><td>Socket</td><td><code>create-room / join-room</code> → <code>roomService</code> (메모리 Map)</td></tr>
+        <tr><td>게임 시작 · 트랙 로드</td><td>Socket</td><td><code>start-game</code> → <code>gameService</code> + <code>youtubeService</code></td></tr>
+        <tr><td>라운드 준비·재생 동기화</td><td>Socket</td><td><code>prepare-round / player-ready / round-started</code></td></tr>
+        <tr><td>정답 제출·채점</td><td>Socket</td><td><code>submit-answer</code> → <code>gameService.submitAnswer</code></td></tr>
+      </table>
+    </section>
+
+    <!-- SERVER ENTRY -->
+    <section id="server-entry">
+      <h2>⚙️ 서버 진입점 — <code>index.ts</code></h2>
+      <p>Express 앱과 HTTP 서버를 만들고 그 위에 Socket.IO 서버를 올립니다. 세 가지 책임을 가집니다:</p>
+      <ol>
+        <li><b>REST 라우트 등록</b> — 플레이리스트 CRUD, 트랙 추가/삭제, YouTube 트랙 조회, 테스트/디버그 엔드포인트</li>
+        <li><b>소켓 연결 수립</b> — 연결마다 <code>registerRoomHandlers</code> · <code>registerGameHandlers</code> 호출</li>
+        <li><b>부트스트랩</b> — <code>validateEnvYouTube()</code> → <code>playlistService.initialize()</code> → <code>httpServer.listen(3000)</code></li>
+      </ol>
+      <pre><code>io.on("connection", (socket) => {
+  registerRoomHandlers(io, socket);  // 방 관리 이벤트
+  registerGameHandlers(io, socket);  // 게임 진행 이벤트
+  socket.on("disconnect", () => { /* 방 자동 이탈 처리 */ });
+});</code></pre>
+      <div class="callout info">Socket.IO 는 <code>websocket</code> 우선, 실패 시 <code>polling</code> 폴백. CORS origin 은 <code>FRONTEND_URL</code>(기본 <code>:5173</code>)로 제한됩니다.</div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="server-services">
+      <h2>🧠 서비스 계층 (싱글턴)</h2>
+      <p>모든 서비스는 파일 하단에서 인스턴스를 하나 생성해 <code>export</code> 하는 싱글턴입니다. 상태는 인스턴스 내부 <code>Map</code>/<code>Set</code> 에 담깁니다.</p>
+
+      <h3>roomService — 방 생명주기</h3>
+      <table>
+        <tr><th>메서드</th><th>역할</th></tr>
+        <tr><td><code>createRoom()</code></td><td>6자리 대문자 코드(nanoid) 생성, 호스트 등록, 초기 <code>GameState</code> 구성</td></tr>
+        <tr><td><code>joinRoom()</code></td><td>정원·중복 닉네임·게임중 여부 검증 후 참가</td></tr>
+        <tr><td><code>leaveRoom()</code></td><td>이탈 처리 · 빈 방 삭제 · <b>방장 이탈 시 다음 플레이어에게 방장 위임</b></td></tr>
+        <tr><td><code>updateSettings()</code></td><td>방장만, 게임 중이 아닐 때 설정 변경</td></tr>
+      </table>
+
+      <h3>gameService — 게임 로직의 핵심</h3>
+      <table>
+        <tr><th>메서드</th><th>역할</th></tr>
+        <tr><td><code>startGame()</code></td><td>게임 상태 초기화, 플레이리스트 라운드 수 설정, 점수/스트릭 0으로</td></tr>
+        <tr><td><code>setTracks()</code> / <code>prepareNextRound()</code></td><td>전체 트랙 저장 후 다음 라운드용 트랙을 랜덤 선택, 준비 대기 상태로 전환</td></tr>
+        <tr><td><code>markPlayerReady()</code> / <code>isAllPlayersReady()</code></td><td>플레이어별 트랙 로딩 완료 집계 → 전원 준비 확인</td></tr>
+        <tr><td><code>activatePreparedRound()</code></td><td>준비된 트랙을 현재 트랙으로 승격, 라운드 번호 증가, 타이머 시작</td></tr>
+        <tr><td><code>submitAnswer()</code></td><td>정답 검증 → 시간 기반 점수 + 스트릭 보너스 계산 → 누적</td></tr>
+        <tr><td><code>endRound()</code> / <code>endGame()</code></td><td>라운드 결과 집계 · 최종 순위/우승자 산출 및 히스토리 저장</td></tr>
+      </table>
+
+      <h3>playlistService — 파일 영속 CRUD</h3>
+      <p>서버 시작 시 <code>initialize()</code> 로 JSON 을 메모리에 로드하고, 변경 시마다 <code>savePlaylists()</code> 로 파일에 기록합니다. 저장 실패 시 <b>메모리 상태를 롤백</b>하는 트랜잭션 패턴을 사용합니다. 이름 중복·트랙 중복을 검증합니다.</p>
+
+      <h3>youtubeService — 외부 API + 캐시</h3>
+      <p>YouTube Data API v3 <code>/videos</code> 엔드포인트로 <code>snippet + contentDetails</code> 를 조회합니다.</p>
+      <ul>
+        <li><b>ISO 8601 길이 파싱</b> (<code>PT3M45S → 225초</code>) 후, 곡 <b>중간 30초</b> 를 미리듣기 구간으로 계산</li>
+        <li><b>node-cache</b> 24시간 TTL — 정렬된 videoId 조합을 키로 캐싱</li>
+        <li>50개 초과 시 배치 분할, 403(할당량)·429(레이트리밋) 에러 구분 처리</li>
+        <li>플레이리스트의 <code>answers</code> 배열을 트랙에 매핑</li>
+      </ul>
+    </section>
+
+    <!-- SOCKET HANDLERS -->
+    <section id="server-socket">
+      <h2>📡 소켓 핸들러</h2>
+      <p>핸들러는 서비스를 호출하고 결과를 <b>직렬화</b>해 브로드캐스트합니다. 서버 상태의 <code>Map</code>/<code>Set</code> 은 JSON 직렬화가 불가하므로 배열로 변환하는 헬퍼(<code>serializeRoom</code>, <code>serializeRoundResult</code>)를 거칩니다.</p>
+      <div class="callout warn">
+        <b>정답 은닉</b> — 라운드 진행 중에는 <code>hideTrackInfo()</code> 로 곡명·아티스트를 제거한 <code>HiddenTrack</code>(id·embedUrl·재생구간만)을 전송합니다. 정답은 <code>round-ended</code> 시점에만 공개됩니다.
+      </div>
+      <h3>room.handler.ts</h3>
+      <p><code>create-room · join-room · leave-room · update-settings · disconnect</code> 를 처리. 참가/이탈은 방 채널(<code>socket.join(code)</code>)에 브로드캐스트되고, 연결 종료 시 소속 방에서 자동 이탈합니다.</p>
+      <h3>game.handler.ts</h3>
+      <p><code>start-game · player-ready · submit-answer · next-round · game-end</code> 를 처리. 방장 권한을 매 이벤트마다 <code>room.hostId === socket.id</code> 로 검증합니다. 전원 답안 제출 시 <b>2초 후 자동으로 라운드 종료</b>합니다.</p>
+    </section>
+
+    <!-- TYPES -->
+    <section id="server-types">
+      <h2>🗂️ 핵심 타입 (<code>types/index.ts</code>)</h2>
+      <table>
+        <tr><th>타입</th><th>설명</th></tr>
+        <tr><td><code>Room</code></td><td>코드·호스트·<code>players: Map</code>·설정·<code>gameState</code></td></tr>
+        <tr><td><code>GameState</code></td><td>진행중 여부·라운드·현재/다음 트랙·답안 Map·점수/스트릭 Map·준비 플레이어 Set·트랙 목록</td></tr>
+        <tr><td><code>Player</code></td><td>id·닉네임·아바타(이모지)·점수·스트릭·방장 여부</td></tr>
+        <tr><td><code>Playlist</code> / <code>PlaylistTrack</code></td><td>플레이리스트 = <code>{ videoId, answers[] }</code> 트랙 배열 + <code>roundCount</code></td></tr>
+        <tr><td><code>Track</code></td><td>YouTube 조회 결과 + 재생 구간(<code>startSeconds~endSeconds</code>) + <code>answers[]</code></td></tr>
+        <tr><td><code>AnswerSubmission</code></td><td>제출자·답안·경과시간·정답여부·획득 점수</td></tr>
+        <tr><td><code>RoundResult</code> / <code>GameResult</code></td><td>라운드/게임 종료 시 집계 결과(정답자·누적 점수·우승자)</td></tr>
+      </table>
+      <div class="callout info"><b>다중 정답</b> — 각 트랙의 <code>answers</code> 는 배열로, 곡명·아티스트·한글표기 등 여러 정답을 허용합니다(예: 강남스타일 / PSY / 싸이).</div>
+    </section>
+
+    <!-- CLIENT STRUCTURE -->
+    <section id="client-structure">
+      <h2>🖥️ 클라이언트 컴포넌트 구조</h2>
+      <p><code>App.svelte</code> 는 상단 네비게이션과 <code>game ↔ playlist</code> 페이지 전환만 담당합니다(<code>$state</code> 기반 단순 라우팅). 각 페이지는 아래 컴포넌트들로 분할됩니다.</p>
+
+      <h3>game/ — 게임 플레이</h3>
+      <div class="tree">
+<span class="file">Game.svelte</span>        <span class="cmt"># 컨테이너: 소켓 이벤트 리스너 전부 등록 · YouTube Player 생성/제어</span>
+├─ <span class="file">GameLobby.svelte</span>  <span class="cmt"># 방 생성/참가 · 닉네임 · 플레이리스트 선택</span>
+└─ <span class="file">GameRoom.svelte</span>   <span class="cmt"># 방 화면 (플레이어 목록 · 진행 · 조작)</span>
+   ├─ <span class="file">GamePlayer.svelte</span>  <span class="cmt"># YouTube 플레이어 · 음량 · 정답 입력</span>
+   └─ <span class="file">GameResult.svelte</span>  <span class="cmt"># 최종 순위 · 우승자</span>
+      </div>
+      <p><code>Game.svelte</code> 가 실질적인 두뇌입니다. <code>onMount</code> 에서 소켓의 모든 서버→클라이언트 이벤트(<code>game-started · prepare-round · round-started · round-ended · game-end</code> 등)를 구독하고, <code>gameStore</code> 를 갱신하며, YouTube IFrame Player 의 생성·음소거·재생·정지를 지휘합니다.</p>
+
+      <h3>playlist/ — 플레이리스트 관리</h3>
+      <div class="tree">
+<span class="file">Playlist.svelte</span>     <span class="cmt"># 컨테이너: REST(fetch)로 CRUD 호출</span>
+├─ <span class="file">PlaylistForm.svelte</span> <span class="cmt"># 플레이리스트 생성/수정 폼</span>
+├─ <span class="file">TrackForm.svelte</span>    <span class="cmt"># videoId + 다중 정답 입력 · YouTube 미리보기</span>
+└─ <span class="file">TrackList.svelte</span>    <span class="cmt"># 트랙 목록 · 정답 편집/삭제</span>
+      </div>
+    </section>
+
+    <!-- CLIENT STORE -->
+    <section id="client-store">
+      <h2>🗃️ 상태 관리 & 소켓</h2>
+      <h3>gameStore.ts</h3>
+      <p>Svelte <code>writable</code> 스토어 하나에 게임의 모든 상태(연결·방·플레이어·라운드·트랙·YouTube 플레이어·음량 등)를 담습니다. <code>updateGameStore(partial)</code> 로 부분 갱신하고, <code>isHost</code> 는 <code>derived</code> 스토어로 현재 소켓이 방장인지 계산합니다.</p>
+      <h3>socket.ts</h3>
+      <p><code>initSocket()</code> 이 <code>autoConnect:false</code> 인 단일 Socket 인스턴스를 지연 생성합니다. 개발 환경에서는 빈 URL(상대경로)로 Vite 프록시를 태우고, 프로덕션에서는 <code>VITE_SERVER_URL</code> 을 사용합니다.</p>
+    </section>
+
+    <!-- GAME FLOW -->
+    <section id="game-flow">
+      <h2>🎮 게임 진행 흐름</h2>
+      <p>ListenUp! 의 가장 특징적인 부분은 <b>모든 플레이어의 YouTube 트랙 로딩을 동기화</b>한 뒤 라운드를 동시에 시작한다는 점입니다. 준비 상태 집계로 "먼저 로드된 사람이 유리한" 불공정을 제거합니다.</p>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <span class="who">방장 → 서버 · <span class="tag c2s">start-game</span></span>
+            <h4>게임 시작</h4>
+            <p>서버가 플레이리스트의 videoId 들을 <code>youtubeService</code> 로 로드 → <code>setTracks()</code> → 첫 트랙 <code>prepareNextRound()</code>. 전체에 <code>game-started</code> 브로드캐스트.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <span class="who">서버 → 전원 · <span class="tag s2c">prepare-round</span></span>
+            <h4>라운드 준비 요청</h4>
+            <p>정답이 제거된 <code>HiddenTrack</code> 전송. 각 클라이언트는 YouTube Player 를 생성하고 <b>음소거 상태로</b> 로딩·일시정지.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <span class="who">각 플레이어 → 서버 · <span class="tag c2s">player-ready</span></span>
+            <h4>준비 완료 집계</h4>
+            <p>로딩이 끝난 플레이어가 준비 신호 전송. 서버는 <code>player-ready-status</code> 로 진행률(<code>n/total</code>)을 브로드캐스트.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <span class="who">서버 → 전원 · <span class="tag s2c">round-started</span></span>
+            <h4>동시 재생</h4>
+            <p><b>전원 준비 완료</b> 시 <code>activatePreparedRound()</code> 로 라운드 시작. 클라이언트는 음소거를 해제하고 재생, 타이머 시작.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">5</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <span class="who">플레이어 → 서버 · <span class="tag c2s">submit-answer</span></span>
+            <h4>정답 제출 & 채점</h4>
+            <p>서버가 정규화·유사도 기반으로 채점, 점수·스트릭 갱신 후 <code>score-updated</code> 브로드캐스트. 다른 플레이어에겐 <code>answer-submitted</code>(제출 사실만).</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">6</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <span class="who">서버 → 전원 · <span class="tag s2c">round-ended</span></span>
+            <h4>라운드 종료</h4>
+            <p>전원 제출 시 2초 뒤 <code>endRound()</code>. 이 시점에 <b>정답 트랙 전체 정보</b>가 공개됨.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-rail"><div class="flow-dot">7</div></div>
+          <div class="flow-body">
+            <span class="who">방장 → 서버 · <span class="tag c2s">next-round</span> / <span class="tag s2c">game-end</span></span>
+            <h4>다음 라운드 또는 종료</h4>
+            <p>남은 라운드가 있으면 2단계로 돌아가고, 마지막 라운드였다면 <code>endGame()</code> 으로 최종 순위·우승자를 산출해 <code>game-end</code> 브로드캐스트.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCORING -->
+    <section id="logic-scoring">
+      <h2>🎯 채점 · 점수 로직</h2>
+
+      <h3>정답 판정 (<code>checkAnswer</code>)</h3>
+      <p>사용자 답과 각 정답을 <b>정규화</b>(소문자 · 공백/특수문자 제거)한 뒤 세 단계로 판정합니다. 트랙에 <code>answers</code> 배열이 있으면 우선 사용하고, 없으면 YouTube 제목으로 대체합니다.</p>
+      <table>
+        <tr><th>단계</th><th>조건</th></tr>
+        <tr><td>완전 일치</td><td>정규화 문자열이 동일</td></tr>
+        <tr><td>부분 일치</td><td>정답이 사용자 답을 포함하고 입력이 3자 이상</td></tr>
+        <tr><td>유사도</td><td><b>Levenshtein 거리</b> 기반 유사도 <code>&gt; 0.8</code> (80%)</td></tr>
+      </table>
+
+      <h3>점수 계산 (<code>calculateScore</code>)</h3>
+      <pre><code>기본 점수      : 1000점 (정답 시)
+시간 보너스    : max(0, (제한시간 - 경과시간) / 제한시간 × 500)
+               → 즉답 +500, 마감 임박 +0
+스트릭 보너스  : 2연속부터 (streak - 1) × 100점 누적</code></pre>
+      <p>즉, 한 라운드 최대 획득 = <code>1000(기본) + 최대 500(속도) + 스트릭 보너스</code>. 오답 시 스트릭은 0으로 초기화됩니다.</p>
+      <div class="callout info"><code>packages/server/src/__tests__/game.test.ts</code> 에 Vitest 로 게임 로직 테스트가 존재합니다.</div>
+    </section>
+
+    <!-- REST API -->
+    <section id="rest-api">
+      <h2>🌐 REST API 레퍼런스</h2>
+      <h3>플레이리스트</h3>
+      <table>
+        <tr><th>메서드</th><th>경로</th><th>설명</th></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/playlists</code></td><td>전체 플레이리스트 조회</td></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/playlists/:id</code></td><td>단일 플레이리스트 조회</td></tr>
+        <tr><td><span class="tag post">POST</span></td><td><code>/api/playlists</code></td><td>플레이리스트 생성 <code>{ name, description, tracks }</code></td></tr>
+        <tr><td><span class="tag put">PUT</span></td><td><code>/api/playlists/:id</code></td><td>플레이리스트 수정</td></tr>
+        <tr><td><span class="tag del">DEL</span></td><td><code>/api/playlists/:id</code></td><td>플레이리스트 삭제</td></tr>
+      </table>
+      <h3>트랙</h3>
+      <table>
+        <tr><th>메서드</th><th>경로</th><th>설명</th></tr>
+        <tr><td><span class="tag post">POST</span></td><td><code>/api/playlists/:id/tracks</code></td><td>트랙 추가 <code>{ videoId, answers }</code></td></tr>
+        <tr><td><span class="tag put">PUT</span></td><td><code>/api/playlists/:id/tracks/:videoId</code></td><td>트랙 정답 수정 <code>{ answers }</code></td></tr>
+        <tr><td><span class="tag del">DEL</span></td><td><code>/api/playlists/:id/tracks/:videoId</code></td><td>트랙 제거</td></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/youtube/track/:trackId</code></td><td>YouTube 트랙 정보 조회(관리용)</td></tr>
+      </table>
+      <h3>테스트 · 디버그</h3>
+      <table>
+        <tr><th>메서드</th><th>경로</th><th>설명</th></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/</code></td><td>서버 상태 확인</td></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/test/playlists</code></td><td>원본 playlists.json 조회</td></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/test/playlist/:playlistId</code></td><td>플레이리스트 트랙을 YouTube 로 확장 조회</td></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/test/track/:trackId</code></td><td>단일 트랙 조회</td></tr>
+        <tr><td><span class="tag get">GET</span></td><td><code>/api/test/cache-stats</code></td><td>YouTube 캐시 통계</td></tr>
+      </table>
+    </section>
+
+    <!-- SOCKET EVENTS -->
+    <section id="socket-events">
+      <h2>📶 Socket.IO 이벤트 레퍼런스</h2>
+      <p><span class="tag c2s">C→S</span> 클라이언트가 보내는 요청 · <span class="tag s2c">S→C</span> 서버가 브로드캐스트하는 알림</p>
+      <h3>방 관리</h3>
+      <table>
+        <tr><th>방향</th><th>이벤트</th><th>설명</th></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>create-room</code></td><td>방 생성(닉네임·설정)</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>join-room</code></td><td>방 코드로 참가</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>leave-room</code></td><td>방 나가기</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>update-settings</code></td><td>방장 설정 변경</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>player-joined / player-left</code></td><td>참가/이탈 알림(방장 위임 포함)</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>settings-updated</code></td><td>설정 변경 브로드캐스트</td></tr>
+      </table>
+      <h3>게임 진행</h3>
+      <table>
+        <tr><th>방향</th><th>이벤트</th><th>설명</th></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>start-game</code></td><td>방장 게임 시작</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>player-ready</code></td><td>트랙 로딩 완료 신호</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>submit-answer</code></td><td>정답 제출</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>next-round</code></td><td>방장 다음 라운드</td></tr>
+        <tr><td><span class="tag c2s">C→S</span></td><td><code>game-end</code></td><td>방장 강제 종료</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>game-started</code></td><td>게임 시작 알림(총 라운드·플레이어)</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>prepare-round</code></td><td>라운드 준비(HiddenTrack)</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>player-ready-status</code></td><td>준비 진행률</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>round-started</code></td><td>라운드 시작(동시 재생)</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>answer-submitted</code></td><td>타 플레이어 제출 사실</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>score-updated</code></td><td>점수·스트릭 갱신</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>round-ended</code></td><td>라운드 종료(정답 공개)</td></tr>
+        <tr><td><span class="tag s2c">S→C</span></td><td><code>game-end</code></td><td>게임 종료(최종 순위·우승자)</td></tr>
+      </table>
+      <div class="callout info"><code>send-message / new-message</code> 채팅 이벤트 상수도 정의되어 있어 게임 중 채팅 확장을 위한 기반이 마련되어 있습니다.</div>
+    </section>
+
+    <!-- RUN -->
+    <section id="run">
+      <h2>🚀 실행 방법</h2>
+      <pre><code># 1) 환경변수 준비
+cp .env.example .env
+#   YOUTUBE_API_KEY, PORT, FRONTEND_URL 설정
+
+# 2) 의존성 설치 (workspaces 루트에서 한 번에)
+npm install
+
+# 3) 서버 + 클라이언트 동시 실행
+npm run dev
+#   서버  http://localhost:3000
+#   클라  http://localhost:5173
+
+# 개별 실행
+npm run dev:server   # 백엔드만
+npm run dev:client   # 프론트엔드만
+
+# 빌드
+npm run build</code></pre>
+      <div class="callout warn"><code>.env</code> 파일은 절대 Git 에 커밋하지 마세요. YouTube API 키가 없으면 트랙 로딩이 동작하지 않습니다(서버는 경고만 출력하고 계속 실행).</div>
+    </section>
+
+    <footer>
+      <p>🎵 <b>ListenUp!</b> — 저장소 소스 기반 구조 해석 문서 · 단일 HTML</p>
+      <p class="pill">generated from packages/server &amp; packages/client · branch: playlist-management</p>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

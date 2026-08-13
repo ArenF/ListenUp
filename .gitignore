@@ -30,8 +30,18 @@ Thumbs.db
 .cache/
 .temp/
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
 # TypeScript
 *.tsbuildinfo
+
+# tsc(composite)가 vite.config.ts에서 생성하는 산출물 — .ts를 가리면 안 되므로 커밋 금지
+packages/client/vite.config.js
+packages/client/vite.config.d.ts
 
 # Claude AI work files
 claude/

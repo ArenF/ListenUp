@@ -1,3 +1,41 @@
+// ============================================================================
+// Auth / User Types
+// ============================================================================
+
+// DB에 저장되는 사용자 레코드 (비밀번호 해시 포함)
+export interface UserRecord {
+  id: string;
+  email: string;
+  passwordHash: string;
+  nickname: string;
+  avatar: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// 클라이언트에 노출되는 안전한 사용자 정보 (비밀번호 제외)
+export interface PublicUser {
+  id: string;
+  email: string;
+  nickname: string;
+  avatar: string;
+  createdAt: number;
+}
+
+// JWT 페이로드
+export interface AuthTokenPayload {
+  sub: string; // 사용자 ID
+  email: string;
+}
+
+// 인증 결과
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: PublicUser;
+  token?: string;
+}
+
 export interface Player {
   id: string;
   nickname: string;

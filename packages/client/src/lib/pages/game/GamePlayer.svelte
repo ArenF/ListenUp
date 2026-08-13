@@ -1,14 +1,19 @@
 <script lang="ts">
+  import type { HiddenTrack } from "../../types";
+
   interface Props {
-    preparedTrack: any;
-    currentTrack: any;
+    preparedTrack: HiddenTrack | null;
+    currentTrack: HiddenTrack | null;
     isMuted: boolean;
     volume: number;
-    onVolumeChange: (e: Event) => void;
   }
 
-  let { preparedTrack, currentTrack, isMuted, volume, onVolumeChange }: Props =
-    $props();
+  let {
+    preparedTrack,
+    currentTrack,
+    isMuted,
+    volume = $bindable(),
+  }: Props = $props();
 </script>
 
 {#if preparedTrack || currentTrack}
@@ -26,8 +31,7 @@
         type="range"
         min="0"
         max="100"
-        value={volume}
-        oninput={onVolumeChange}
+        bind:value={volume}
         class="volume-slider"
       />
     </div>

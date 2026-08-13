@@ -1,28 +1,24 @@
 <script lang="ts">
+  import type { Playlist } from "../../types";
+
   interface Props {
     connected: boolean;
     nickname: string;
     roomCode: string;
     selectedPlaylistId: string;
-    playlists: any[];
+    playlists: Playlist[];
     onCreateRoom: () => void;
     onJoinRoom: () => void;
-    onNicknameChange: (e: Event) => void;
-    onRoomCodeChange: (e: Event) => void;
-    onPlaylistChange: (e: Event) => void;
   }
 
   let {
     connected,
-    nickname,
-    roomCode,
-    selectedPlaylistId,
+    nickname = $bindable(),
+    roomCode = $bindable(),
+    selectedPlaylistId = $bindable(),
     playlists,
     onCreateRoom,
     onJoinRoom,
-    onNicknameChange,
-    onRoomCodeChange,
-    onPlaylistChange,
   }: Props = $props();
 </script>
 
@@ -32,8 +28,7 @@
     <input
       id="nickname"
       type="text"
-      value={nickname}
-      oninput={onNicknameChange}
+      bind:value={nickname}
       placeholder="닉네임 입력"
       disabled={!connected}
     />
@@ -45,8 +40,7 @@
       <label for="playlist">플레이리스트 선택</label>
       <select
         id="playlist"
-        value={selectedPlaylistId}
-        onchange={onPlaylistChange}
+        bind:value={selectedPlaylistId}
         disabled={!connected}
       >
         {#each playlists as playlist}
@@ -70,8 +64,7 @@
       <input
         id="roomcode"
         type="text"
-        value={roomCode}
-        oninput={onRoomCodeChange}
+        bind:value={roomCode}
         placeholder="6자리 방 코드"
         maxlength="6"
         disabled={!connected}

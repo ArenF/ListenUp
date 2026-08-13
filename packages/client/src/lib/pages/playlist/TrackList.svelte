@@ -1,30 +1,19 @@
 <script lang="ts">
-  interface Track {
-    id: string;
-    name: string;
-    artist: string;
-    duration: number;
-    startSeconds: number;
-    endSeconds: number;
-  }
-
-  interface PlaylistTrack {
-    videoId: string;
-    answers: string[];
-  }
+  import type { AnswerList } from "./answerList.svelte";
+  import type { PlaylistTrack, Track } from "../../types";
 
   interface Props {
+    /** YouTube에서 조회한 트랙 메타데이터 */
     tracks: Track[];
+    /** 플레이리스트에 등록된 정답 정보 */
     playlistTracks: PlaylistTrack[];
+    /** 정답 수정 폼이 열려 있는 트랙 */
     editingTrackId: string | null;
-    editAnswers: string[];
+    editAnswers: AnswerList;
     onStartEdit: (videoId: string) => void;
     onCancelEdit: () => void;
-    onUpdateTrack: (videoId: string) => void;
-    onRemoveTrack: (videoId: string) => void;
-    onAddEditAnswer: () => void;
-    onRemoveEditAnswer: (index: number) => void;
-    onUpdateEditAnswer: (index: number, value: string) => void;
+    onSave: (videoId: string) => void;
+    onRemove: (videoId: string) => void;
   }
 
   let {
@@ -34,11 +23,8 @@
     editAnswers,
     onStartEdit,
     onCancelEdit,
-    onUpdateTrack,
-    onRemoveTrack,
-    onAddEditAnswer,
-    onRemoveEditAnswer,
-    onUpdateEditAnswer,
+    onSave,
+    onRemove,
   }: Props = $props();
 
   function getTrackAnswers(videoId: string): string[] {
@@ -83,7 +69,7 @@
             </button>
             <button
               class="btn-delete"
-              onclick={() => onRemoveTrack(track.id)}
+              onclick={() => onRemove(track.id)}
               title="트랙 제거"
             >
               🗑️ 삭제
@@ -95,18 +81,16 @@
           <div class="track-edit-form">
             <h4>정답 수정</h4>
             <div class="answers-list">
-              {#each editAnswers as answer, index}
+              {#each editAnswers.items as _, index}
                 <div class="answer-input-row">
                   <input
                     type="text"
-                    value={answer}
-                    oninput={(e) =>
-                      onUpdateEditAnswer(index, e.currentTarget.value)}
+                    bind:value={editAnswers.items[index]}
                     placeholder="정답 {index + 1}"
                   />
                   <button
                     class="btn-remove"
-                    onclick={() => onRemoveEditAnswer(index)}
+                    onclick={() => editAnswers.remove(index)}
                     title="정답 제거"
                   >
                     ✕
@@ -114,14 +98,11 @@
                 </div>
               {/each}
             </div>
-            <button class="btn-add-answer" onclick={onAddEditAnswer}>
+            <button class="btn-add-answer" onclick={() => editAnswers.add()}>
               ➕ 정답 추가
             </button>
             <div class="track-edit-actions">
-              <button
-                class="btn-save"
-                onclick={() => onUpdateTrack(track.id)}
-              >
+              <button class="btn-save" onclick={() => onSave(track.id)}>
                 ✅ 저장
               </button>
               <button class="btn-cancel" onclick={onCancelEdit}>

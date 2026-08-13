@@ -5,7 +5,7 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "target": "ES2020",
-    "types": ["svelte", "vite/client"],
+    "types": ["svelte", "vite/client", "youtube"],
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,

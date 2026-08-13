@@ -6,19 +6,15 @@
     description: string;
     onClose: () => void;
     onSave: () => void;
-    onNameChange: (value: string) => void;
-    onDescriptionChange: (value: string) => void;
   }
 
   let {
     show,
     mode,
-    name,
-    description,
+    name = $bindable(),
+    description = $bindable(),
     onClose,
     onSave,
-    onNameChange,
-    onDescriptionChange,
   }: Props = $props();
 </script>
 
@@ -29,19 +25,19 @@
         {mode === "create" ? "새 플레이리스트 만들기" : "플레이리스트 수정"}
       </h3>
       <div class="form-group">
-        <label>플레이리스트 이름</label>
+        <label for="playlist-name">플레이리스트 이름</label>
         <input
+          id="playlist-name"
           type="text"
-          value={name}
-          oninput={(e) => onNameChange(e.currentTarget.value)}
+          bind:value={name}
           placeholder="플레이리스트 이름"
         />
       </div>
       <div class="form-group">
-        <label>설명</label>
+        <label for="playlist-description">설명</label>
         <textarea
-          value={description}
-          oninput={(e) => onDescriptionChange(e.currentTarget.value)}
+          id="playlist-description"
+          bind:value={description}
           placeholder="플레이리스트 설명"
           rows="4"
         ></textarea>

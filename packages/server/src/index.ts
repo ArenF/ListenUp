@@ -2,9 +2,12 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import { config, validateEnvYouTube } from "./config/env.js";
+import cookieParser from "cookie-parser";
+import { config, validateEnvYouTube, validateEnvAuth } from "./config/env.js";
 import { youtubeService } from "./services/youtube.js";
 import { playlistService } from "./services/playlist.js";
+import { initializeDatabase } from "./db/index.js";
+import { authRouter } from "./routes/auth.routes.js";
 import { registerRoomHandlers } from "./socket/handlers/room.handler.js";
 import { registerGameHandlers } from "./socket/handlers/game.handler.js";
 import playlists from "./data/playlists.json" with { type: "json" };
@@ -22,8 +25,15 @@ const io = new Server(httpServer, {
   transports: ["websocket", "polling"],  // WebSocket 우선, 폴백으로 polling
 });
 
-app.use(cors());
+// 인증 쿠키를 주고받으려면 특정 출처를 허용하고 credentials를 켜야 한다
+app.use(
+  cors({
+    origin: config.cors.frontendUrl,
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (_req, res) => {
   res.json({
@@ -32,6 +42,11 @@ app.get("/", (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// ============================================================================
+// 인증 API (회원가입 / 로그인)
+// ============================================================================
+app.use("/api/auth", authRouter);
 
 // 테스트용 플레이리스트 목록
 app.get("/api/test/playlists", (_req, res) => {
@@ -316,6 +331,10 @@ io.on("connection", (socket) => {
 // 초기화 및 서버 시작
 async function startServer() {
   validateEnvYouTube();
+  validateEnvAuth();
+
+  // 데이터베이스 초기화 (테이블 생성)
+  initializeDatabase();
 
   // 플레이리스트 서비스 초기화
   await playlistService.initialize();

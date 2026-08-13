@@ -3,96 +3,30 @@
   import PlaylistForm from "./PlaylistForm.svelte";
   import TrackForm from "./TrackForm.svelte";
   import TrackList from "./TrackList.svelte";
+  import { playlistStore } from "./playlistStore.svelte";
+  import { AnswerList } from "./answerList.svelte";
+  import { TrackSearch } from "./trackSearch.svelte";
+  import { toErrorMessage } from "../../utils/error";
 
-  // 타입 정의
-  interface PlaylistTrack {
-    videoId: string;
-    answers: string[];
-  }
-
-  interface Playlist {
-    id: string;
-    name: string;
-    description: string;
-    tracks: PlaylistTrack[];
-    roundCount: number;
-  }
-
-  interface Track {
-    id: string;
-    name: string;
-    artist: string;
-    duration: number;
-    startSeconds: number;
-    endSeconds: number;
-  }
-
-  // 상태 관리
-  let playlists = $state<Playlist[]>([]);
-  let selectedPlaylist = $state<Playlist | null>(null);
-  let tracks = $state<Track[]>([]);
-  let loading = $state(false);
-  let error = $state("");
-
-  // 플레이리스트 생성/수정 폼
+  // 플레이리스트 생성/수정 모달
   let showPlaylistForm = $state(false);
   let formMode = $state<"create" | "edit">("create");
   let formName = $state("");
   let formDescription = $state("");
 
-  // 트랙 추가 폼
+  // 트랙 추가 모달
   let showTrackForm = $state(false);
-  let youtubeUrl = $state("");
-  let videoId = $state("");
-  let trackInfo = $state<Track | null>(null);
-  let loadingTrack = $state(false);
-  let answers = $state<string[]>([""]); // 정답 목록
+  const trackSearch = new TrackSearch();
+  const newAnswers = new AnswerList();
 
-  // 트랙 수정 폼
+  // 트랙 정답 수정 (목록 안에서 인라인으로 열린다)
   let editingTrackId = $state<string | null>(null);
-  let editAnswers = $state<string[]>([]);
+  const editAnswers = new AnswerList();
 
   onMount(() => {
-    loadPlaylists();
+    playlistStore.load();
   });
 
-  // 플레이리스트 목록 로드
-  async function loadPlaylists() {
-    try {
-      loading = true;
-      error = "";
-      const response = await fetch("/api/playlists");
-      if (!response.ok) throw new Error("Failed to fetch playlists");
-      playlists = await response.json();
-    } catch (err: any) {
-      error = err.message;
-      console.error("Error loading playlists:", err);
-    } finally {
-      loading = false;
-    }
-  }
-
-  // 플레이리스트 선택
-  async function selectPlaylist(playlist: Playlist) {
-    selectedPlaylist = playlist;
-    tracks = [];
-
-    if (playlist.tracks.length > 0) {
-      try {
-        const trackPromises = playlist.tracks.map((t) =>
-          fetch(`/api/youtube/track/${t.videoId}`).then((res) =>
-            res.ok ? res.json() : null
-          )
-        );
-        const trackResults = await Promise.all(trackPromises);
-        tracks = trackResults.filter((t) => t !== null);
-      } catch (err) {
-        console.error("Error loading tracks:", err);
-      }
-    }
-  }
-
-  // 플레이리스트 생성 폼 열기
   function openCreateForm() {
     formMode = "create";
     formName = "";
@@ -100,341 +34,102 @@
     showPlaylistForm = true;
   }
 
-  // 플레이리스트 수정 폼 열기
   function openEditForm() {
-    if (!selectedPlaylist) return;
+    const selected = playlistStore.selected;
+    if (!selected) return;
+
     formMode = "edit";
-    formName = selectedPlaylist.name;
-    formDescription = selectedPlaylist.description;
+    formName = selected.name;
+    formDescription = selected.description;
     showPlaylistForm = true;
   }
 
-  // 플레이리스트 생성/수정
   async function savePlaylist() {
+    const name = formName.trim();
+    if (!name) {
+      alert("플레이리스트 이름을 입력해주세요");
+      return;
+    }
+
+    const description = formDescription.trim();
+
     try {
-      if (!formName.trim()) {
-        alert("플레이리스트 이름을 입력해주세요");
-        return;
-      }
-
-      loading = true;
-      error = "";
-
       if (formMode === "create") {
-        const response = await fetch("/api/playlists", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formName.trim(),
-            description: formDescription.trim(),
-            tracks: [],
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to create playlist");
-        }
-
-        const newPlaylist = await response.json();
-        playlists = [...playlists, newPlaylist];
-        selectedPlaylist = newPlaylist;
+        await playlistStore.create(name, description);
       } else {
-        if (!selectedPlaylist) return;
-
-        const response = await fetch(`/api/playlists/${selectedPlaylist.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formName.trim(),
-            description: formDescription.trim(),
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to update playlist");
-        }
-
-        const updatedPlaylist = await response.json();
-        playlists = playlists.map((p) =>
-          p.id === updatedPlaylist.id ? updatedPlaylist : p
-        );
-        selectedPlaylist = updatedPlaylist;
+        await playlistStore.update(name, description);
       }
-
       showPlaylistForm = false;
-      formName = "";
-      formDescription = "";
-    } catch (err: any) {
-      error = err.message;
-      alert(err.message);
-    } finally {
-      loading = false;
+    } catch (err) {
+      alert(toErrorMessage(err));
     }
   }
 
-  // 플레이리스트 삭제
   async function deletePlaylist() {
-    if (!selectedPlaylist) return;
-    if (!confirm(`"${selectedPlaylist.name}" 플레이리스트를 삭제하시겠습니까?`))
-      return;
+    const selected = playlistStore.selected;
+    if (!selected) return;
+    if (!confirm(`"${selected.name}" 플레이리스트를 삭제하시겠습니까?`)) return;
 
     try {
-      loading = true;
-      error = "";
-
-      const response = await fetch(`/api/playlists/${selectedPlaylist.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete playlist");
-      }
-
-      playlists = playlists.filter((p) => p.id !== selectedPlaylist!.id);
-      selectedPlaylist = null;
-      tracks = [];
-    } catch (err: any) {
-      error = err.message;
-      alert(err.message);
-    } finally {
-      loading = false;
+      await playlistStore.remove();
+    } catch (err) {
+      alert(toErrorMessage(err));
     }
   }
 
-  // YouTube URL에서 비디오 ID 추출
-  function extractVideoId(url: string): string | null {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
-      /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-      /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-    ];
-
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match && match[1]) return match[1];
-    }
-
-    if (/^[a-zA-Z0-9_-]{11}$/.test(url.trim())) {
-      return url.trim();
-    }
-
-    return null;
-  }
-
-  // URL 입력 시 자동으로 비디오 ID 추출 및 트랙 검색
-  async function handleUrlInput() {
-    const extractedId = extractVideoId(youtubeUrl);
-
-    if (!extractedId) {
-      alert("유효한 YouTube URL 또는 비디오 ID를 입력해주세요");
-      return;
-    }
-
-    videoId = extractedId;
-    await searchTrack();
-  }
-
-  // YouTube 트랙 정보 조회
   async function searchTrack() {
-    if (!videoId.trim()) {
-      alert("YouTube 비디오 ID를 입력해주세요");
-      return;
-    }
-
     try {
-      loadingTrack = true;
-      const response = await fetch(`/api/youtube/track/${videoId.trim()}`);
-
-      if (!response.ok) {
-        throw new Error("트랙을 찾을 수 없습니다");
-      }
-
-      trackInfo = await response.json();
-    } catch (err: any) {
-      alert(err.message);
-      trackInfo = null;
-    } finally {
-      loadingTrack = false;
+      await trackSearch.search();
+    } catch (err) {
+      alert(toErrorMessage(err));
     }
   }
 
-  // 정답 추가
-  function addAnswer() {
-    answers = [...answers, ""];
+  function closeTrackForm() {
+    showTrackForm = false;
+    trackSearch.reset();
+    newAnswers.reset();
   }
 
-  // 정답 제거
-  function removeAnswer(index: number) {
-    if (answers.length === 1) {
-      answers = [""];
-    } else {
-      answers = answers.filter((_, i) => i !== index);
-    }
-  }
-
-  // 정답 업데이트
-  function updateAnswer(index: number, value: string) {
-    answers[index] = value;
-  }
-
-  // 수정용 정답 추가
-  function addEditAnswer() {
-    editAnswers = [...editAnswers, ""];
-  }
-
-  // 수정용 정답 제거
-  function removeEditAnswer(index: number) {
-    if (editAnswers.length === 1) {
-      editAnswers = [""];
-    } else {
-      editAnswers = editAnswers.filter((_, i) => i !== index);
-    }
-  }
-
-  // 수정용 정답 업데이트
-  function updateEditAnswer(index: number, value: string) {
-    editAnswers[index] = value;
-  }
-
-  // 트랙 추가
   async function addTrack() {
-    if (!selectedPlaylist || !trackInfo) return;
-
-    const filteredAnswers = answers.filter((a) => a.trim() !== "");
+    if (!trackSearch.track) return;
 
     try {
-      loading = true;
-      error = "";
-
-      const response = await fetch(
-        `/api/playlists/${selectedPlaylist.id}/tracks`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            videoId: trackInfo.id,
-            answers: filteredAnswers,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add track");
-      }
-
-      const updatedPlaylist = await response.json();
-      playlists = playlists.map((p) =>
-        p.id === updatedPlaylist.id ? updatedPlaylist : p
-      );
-      selectedPlaylist = updatedPlaylist;
-      tracks = [...tracks, trackInfo];
-
-      // 폼 초기화
-      showTrackForm = false;
-      youtubeUrl = "";
-      videoId = "";
-      trackInfo = null;
-      answers = [""];
-    } catch (err: any) {
-      error = err.message;
-      alert(err.message);
-    } finally {
-      loading = false;
+      await playlistStore.addTrack(trackSearch.track, newAnswers.filled);
+      closeTrackForm();
+    } catch (err) {
+      alert(toErrorMessage(err));
     }
   }
 
-  // 트랙 제거
   async function removeTrack(videoId: string) {
-    if (!selectedPlaylist) return;
-    const track = tracks.find((t) => t.id === videoId);
+    const track = playlistStore.tracks.find((t) => t.id === videoId);
     if (!track || !confirm(`"${track.name}"을(를) 제거하시겠습니까?`)) return;
 
     try {
-      loading = true;
-      error = "";
-
-      const response = await fetch(
-        `/api/playlists/${selectedPlaylist.id}/tracks/${videoId}`,
-        { method: "DELETE" }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to remove track");
-      }
-
-      const updatedPlaylist = await response.json();
-      playlists = playlists.map((p) =>
-        p.id === updatedPlaylist.id ? updatedPlaylist : p
-      );
-      selectedPlaylist = updatedPlaylist;
-      tracks = tracks.filter((t) => t.id !== videoId);
-    } catch (err: any) {
-      error = err.message;
-      alert(err.message);
-    } finally {
-      loading = false;
+      await playlistStore.removeTrack(videoId);
+    } catch (err) {
+      alert(toErrorMessage(err));
     }
   }
 
-  // 트랙 수정 시작
   function startEditTrack(videoId: string) {
-    if (!selectedPlaylist) return;
-
-    const track = selectedPlaylist.tracks.find((t) => t.videoId === videoId);
-    if (!track) return;
-
     editingTrackId = videoId;
-    editAnswers = track.answers.length > 0 ? [...track.answers] : [""];
+    editAnswers.reset(playlistStore.answersOf(videoId));
   }
 
-  // 트랙 수정 취소
   function cancelEditTrack() {
     editingTrackId = null;
-    editAnswers = [];
+    editAnswers.reset();
   }
 
-  // 트랙 정답 업데이트
-  async function updateTrackAnswers(videoId: string) {
-    if (!selectedPlaylist) return;
-
-    const filteredAnswers = editAnswers.filter((a) => a.trim() !== "");
-
+  async function saveTrackAnswers(videoId: string) {
     try {
-      loading = true;
-      error = "";
-
-      const response = await fetch(
-        `/api/playlists/${selectedPlaylist.id}/tracks/${videoId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: filteredAnswers }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update track");
-      }
-
-      const updatedPlaylist = await response.json();
-      playlists = playlists.map((p) =>
-        p.id === updatedPlaylist.id ? updatedPlaylist : p
-      );
-      selectedPlaylist = updatedPlaylist;
-
+      await playlistStore.updateTrackAnswers(videoId, editAnswers.filled);
       cancelEditTrack();
       alert("정답이 업데이트되었습니다!");
-    } catch (err: any) {
-      error = err.message;
-      alert(err.message);
-    } finally {
-      loading = false;
+    } catch (err) {
+      alert(toErrorMessage(err));
     }
   }
 </script>
@@ -442,8 +137,8 @@
 <div class="playlist-manager">
   <h1>🎵 플레이리스트 관리</h1>
 
-  {#if error}
-    <div class="error-message">{error}</div>
+  {#if playlistStore.error}
+    <div class="error-message">{playlistStore.error}</div>
   {/if}
 
   <div class="content">
@@ -456,9 +151,9 @@
         </button>
       </div>
 
-      {#if loading && playlists.length === 0}
+      {#if playlistStore.loading && playlistStore.playlists.length === 0}
         <div class="loading">로딩 중...</div>
-      {:else if playlists.length === 0}
+      {:else if playlistStore.playlists.length === 0}
         <div class="empty-message">
           플레이리스트가 없습니다.
           <br />
@@ -466,11 +161,11 @@
         </div>
       {:else}
         <div class="playlist-list">
-          {#each playlists as playlist}
+          {#each playlistStore.playlists as playlist}
             <div
               class="playlist-item"
-              class:active={selectedPlaylist?.id === playlist.id}
-              onclick={() => selectPlaylist(playlist)}
+              class:active={playlistStore.selected?.id === playlist.id}
+              onclick={() => playlistStore.select(playlist)}
             >
               <div class="playlist-name">{playlist.name}</div>
               <div class="playlist-count">
@@ -484,11 +179,11 @@
 
     <!-- 플레이리스트 상세 -->
     <div class="main-content">
-      {#if selectedPlaylist}
+      {#if playlistStore.selected}
         <div class="playlist-header">
           <div class="playlist-info">
-            <h2>{selectedPlaylist.name}</h2>
-            <p>{selectedPlaylist.description || "설명 없음"}</p>
+            <h2>{playlistStore.selected.name}</h2>
+            <p>{playlistStore.selected.description || "설명 없음"}</p>
           </div>
           <div class="playlist-actions">
             <button class="btn-secondary" onclick={openEditForm}>
@@ -504,17 +199,14 @@
         </div>
 
         <TrackList
-          {tracks}
-          playlistTracks={selectedPlaylist.tracks}
+          tracks={playlistStore.tracks}
+          playlistTracks={playlistStore.selected.tracks}
           {editingTrackId}
           {editAnswers}
           onStartEdit={startEditTrack}
           onCancelEdit={cancelEditTrack}
-          onUpdateTrack={updateTrackAnswers}
-          onRemoveTrack={removeTrack}
-          onAddEditAnswer={addEditAnswer}
-          onRemoveEditAnswer={removeEditAnswer}
-          onUpdateEditAnswer={updateEditAnswer}
+          onSave={saveTrackAnswers}
+          onRemove={removeTrack}
         />
       {:else}
         <div class="empty-state">
@@ -530,34 +222,19 @@
 <PlaylistForm
   show={showPlaylistForm}
   mode={formMode}
-  name={formName}
-  description={formDescription}
+  bind:name={formName}
+  bind:description={formDescription}
   onClose={() => (showPlaylistForm = false)}
   onSave={savePlaylist}
-  onNameChange={(value) => (formName = value)}
-  onDescriptionChange={(value) => (formDescription = value)}
 />
 
 <TrackForm
   show={showTrackForm}
-  {youtubeUrl}
-  {videoId}
-  {trackInfo}
-  {loadingTrack}
-  {answers}
-  onClose={() => {
-    showTrackForm = false;
-    youtubeUrl = "";
-    videoId = "";
-    trackInfo = null;
-    answers = [""];
-  }}
-  onUrlInput={handleUrlInput}
-  onYoutubeUrlChange={(value) => (youtubeUrl = value)}
-  onAddTrack={addTrack}
-  onAddAnswer={addAnswer}
-  onRemoveAnswer={removeAnswer}
-  onUpdateAnswer={updateAnswer}
+  search={trackSearch}
+  answers={newAnswers}
+  onClose={closeTrackForm}
+  onSearch={searchTrack}
+  onAdd={addTrack}
 />
 
 <style>

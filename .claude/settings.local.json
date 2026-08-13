@@ -8,7 +8,10 @@
       "Bash(timeout 5 npm start:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(npm run *)",
+      "Bash(echo \"===EXIT $?===\")",
+      "PowerShell(npm --prefix packages/server run build 2>&1)"
     ],
     "deny": [],
     "ask": []
