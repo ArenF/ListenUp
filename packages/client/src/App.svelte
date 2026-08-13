@@ -50,7 +50,16 @@
 
   <!-- 페이지 컨텐츠 -->
   {#if currentPage === "playlist"}
-    <Playlist />
+    {#if authStore.isLoggedIn}
+      <Playlist />
+    {:else}
+      <div class="login-required">
+        <p>🔒 플레이리스트 관리는 로그인이 필요합니다.</p>
+        <button class="login-cta" onclick={() => (currentPage = "account")}>
+          로그인하러 가기
+        </button>
+      </div>
+    {/if}
   {:else if currentPage === "account"}
     {#if authStore.isLoggedIn}
       <Profile />
@@ -108,5 +117,38 @@
     background-color: white;
     color: #ff3e00;
     border-color: white;
+  }
+
+  /* 로그인 필요 안내 */
+  .login-required {
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .login-required p {
+    margin: 0 0 1.5rem;
+    color: #555;
+    font-size: 1rem;
+  }
+
+  .login-cta {
+    padding: 0.8rem 1.5rem;
+    background: #ff3e00;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .login-cta:hover {
+    background: #e63600;
   }
 </style>

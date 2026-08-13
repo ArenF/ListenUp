@@ -39,6 +39,10 @@ export const config = {
     // SQLite 데이터베이스 파일 경로
     path: process.env.DB_PATH || path.resolve(__dirname, "../data/listenup.db"),
   },
+  uploads: {
+    // 사용자 업로드 파일 저장 디렉터리 (/api/uploads로 정적 서빙)
+    dir: process.env.UPLOADS_DIR || path.resolve(__dirname, "../../uploads"),
+  },
 };
 
 export function validateEnvYouTube() {

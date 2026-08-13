@@ -7,6 +7,13 @@
   import { AnswerList } from "./answerList.svelte";
   import { TrackSearch } from "./trackSearch.svelte";
   import { toErrorMessage } from "../../utils/error";
+  import { authStore } from "../login/authStore.svelte";
+
+  // 선택된 플레이리스트를 현재 사용자가 수정할 수 있는지 (작성자 본인만)
+  const canEditSelected = $derived(
+    !!playlistStore.selected?.ownerId &&
+      playlistStore.selected?.ownerId === authStore.user?.id
+  );
 
   // 플레이리스트 생성/수정 모달
   let showPlaylistForm = $state(false);
@@ -184,18 +191,29 @@
           <div class="playlist-info">
             <h2>{playlistStore.selected.name}</h2>
             <p>{playlistStore.selected.description || "설명 없음"}</p>
+            <span class="owner-label">
+              {#if !playlistStore.selected.ownerId}
+                🎵 기본 제공
+              {:else if canEditSelected}
+                👤 내 플레이리스트
+              {:else}
+                👤 by {playlistStore.selected.ownerNickname ?? "다른 사용자"}
+              {/if}
+            </span>
           </div>
-          <div class="playlist-actions">
-            <button class="btn-secondary" onclick={openEditForm}>
-              ✏️ 수정
-            </button>
-            <button class="btn-danger" onclick={deletePlaylist}>
-              🗑️ 삭제
-            </button>
-            <button class="btn-primary" onclick={() => (showTrackForm = true)}>
-              ➕ 트랙 추가
-            </button>
-          </div>
+          {#if canEditSelected}
+            <div class="playlist-actions">
+              <button class="btn-secondary" onclick={openEditForm}>
+                ✏️ 수정
+              </button>
+              <button class="btn-danger" onclick={deletePlaylist}>
+                🗑️ 삭제
+              </button>
+              <button class="btn-primary" onclick={() => (showTrackForm = true)}>
+                ➕ 트랙 추가
+              </button>
+            </div>
+          {/if}
         </div>
 
         <TrackList
@@ -203,6 +221,7 @@
           playlistTracks={playlistStore.selected.tracks}
           {editingTrackId}
           {editAnswers}
+          canEdit={canEditSelected}
           onStartEdit={startEditTrack}
           onCancelEdit={cancelEditTrack}
           onSave={saveTrackAnswers}
@@ -366,6 +385,14 @@
   .playlist-info p {
     margin: 0;
     color: #666;
+  }
+
+  .owner-label {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
   }
 
   .playlist-actions {

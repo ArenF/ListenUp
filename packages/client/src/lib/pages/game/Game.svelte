@@ -10,10 +10,18 @@
     startGame,
     submitAnswer,
   } from "./gameActions";
+  import { authStore } from "../login/authStore.svelte";
   import GameLobby from "./GameLobby.svelte";
   import GameRoom from "./GameRoom.svelte";
 
   startGameSession();
+
+  // 로그인 상태면 게임 닉네임을 계정 닉네임으로 고정한다
+  $effect(() => {
+    if (authStore.user) {
+      gameStore.nickname = authStore.user.nickname;
+    }
+  });
 </script>
 
 <div class="game-container">
@@ -26,6 +34,7 @@
   {#if !gameStore.currentRoom}
     <GameLobby
       connected={gameStore.connected}
+      isLoggedIn={authStore.isLoggedIn}
       bind:nickname={gameStore.nickname}
       bind:roomCode={gameStore.roomCode}
       bind:selectedPlaylistId={gameStore.selectedPlaylistId}

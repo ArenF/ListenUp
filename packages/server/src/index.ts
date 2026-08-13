@@ -8,6 +8,8 @@ import { youtubeService } from "./services/youtube.js";
 import { playlistService } from "./services/playlist.js";
 import { initializeDatabase } from "./db/index.js";
 import { authRouter } from "./routes/auth.routes.js";
+import { authService } from "./services/auth.js";
+import { requireAuth } from "./middleware/auth.js";
 import { registerRoomHandlers } from "./socket/handlers/room.handler.js";
 import { registerGameHandlers } from "./socket/handlers/game.handler.js";
 import playlists from "./data/playlists.json" with { type: "json" };
@@ -47,6 +49,9 @@ app.get("/", (_req, res) => {
 // 인증 API (회원가입 / 로그인)
 // ============================================================================
 app.use("/api/auth", authRouter);
+
+// 업로드된 파일(아바타 등) 정적 서빙 — 기존 /api 프록시로 그대로 접근된다
+app.use("/api/uploads", express.static(config.uploads.dir));
 
 // 테스트용 플레이리스트 목록
 app.get("/api/test/playlists", (_req, res) => {
@@ -132,6 +137,26 @@ app.get("/api/test/cache-stats", (_req, res) => {
 // 플레이리스트 관리 API
 // ============================================================================
 
+/**
+ * 플레이리스트 수정 권한 확인
+ *
+ * 존재하지 않으면 404, 작성자가 아니면 403을 돌려준다.
+ * ownerId가 없는 기본 제공 플레이리스트는 아무도 수정할 수 없다.
+ */
+function checkPlaylistOwner(
+  id: string,
+  userId: string
+): { status: number; error: string } | null {
+  const playlist = playlistService.getPlaylist(id);
+  if (!playlist) {
+    return { status: 404, error: "Playlist not found" };
+  }
+  if (playlist.ownerId !== userId) {
+    return { status: 403, error: "이 플레이리스트를 수정할 권한이 없습니다" };
+  }
+  return null;
+}
+
 // 모든 플레이리스트 조회
 app.get("/api/playlists", (_req, res) => {
   try {
@@ -160,8 +185,8 @@ app.get("/api/playlists/:id", (req, res) => {
   }
 });
 
-// 플레이리스트 생성
-app.post("/api/playlists", async (req, res) => {
+// 플레이리스트 생성 (로그인 필요, 작성자로 등록)
+app.post("/api/playlists", requireAuth, async (req, res) => {
   try {
     const { name, description, tracks } = req.body;
 
@@ -169,10 +194,16 @@ app.post("/api/playlists", async (req, res) => {
       return res.status(400).json({ error: "Playlist name is required" });
     }
 
+    const owner = authService.getPublicUser(req.auth!.sub);
+    if (!owner) {
+      return res.status(401).json({ error: "사용자를 찾을 수 없습니다" });
+    }
+
     const result = await playlistService.createPlaylist(
       name,
       description || "",
-      tracks || []
+      tracks || [],
+      { id: owner.id, nickname: owner.nickname }
     );
 
     if (!result.success) {
@@ -186,10 +217,13 @@ app.post("/api/playlists", async (req, res) => {
   }
 });
 
-// 플레이리스트 수정
-app.put("/api/playlists/:id", async (req, res) => {
+// 플레이리스트 수정 (작성자만)
+app.put("/api/playlists/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
+    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    if (denied) return res.status(denied.status).json({ error: denied.error });
+
     const { name, description, tracks } = req.body;
 
     const updates: any = {};
@@ -210,10 +244,12 @@ app.put("/api/playlists/:id", async (req, res) => {
   }
 });
 
-// 플레이리스트 삭제
-app.delete("/api/playlists/:id", async (req, res) => {
+// 플레이리스트 삭제 (작성자만)
+app.delete("/api/playlists/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
+    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const result = await playlistService.deletePlaylist(id);
 
@@ -228,10 +264,13 @@ app.delete("/api/playlists/:id", async (req, res) => {
   }
 });
 
-// 플레이리스트에 트랙 추가
-app.post("/api/playlists/:id/tracks", async (req, res) => {
+// 플레이리스트에 트랙 추가 (작성자만)
+app.post("/api/playlists/:id/tracks", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
+    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    if (denied) return res.status(denied.status).json({ error: denied.error });
+
     const { videoId, answers } = req.body;
 
     if (!videoId || typeof videoId !== "string") {
@@ -255,10 +294,12 @@ app.post("/api/playlists/:id/tracks", async (req, res) => {
   }
 });
 
-// 플레이리스트에서 트랙 제거
-app.delete("/api/playlists/:id/tracks/:videoId", async (req, res) => {
+// 플레이리스트에서 트랙 제거 (작성자만)
+app.delete("/api/playlists/:id/tracks/:videoId", requireAuth, async (req, res) => {
   try {
     const { id, videoId } = req.params;
+    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const result = await playlistService.removeTrack(id, videoId);
 
@@ -273,10 +314,13 @@ app.delete("/api/playlists/:id/tracks/:videoId", async (req, res) => {
   }
 });
 
-// 플레이리스트 트랙의 정답 수정
-app.put("/api/playlists/:id/tracks/:videoId", async (req, res) => {
+// 플레이리스트 트랙의 정답 수정 (작성자만)
+app.put("/api/playlists/:id/tracks/:videoId", requireAuth, async (req, res) => {
   try {
     const { id, videoId } = req.params;
+    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    if (denied) return res.status(denied.status).json({ error: denied.error });
+
     const { answers } = req.body;
 
     if (!answers || !Array.isArray(answers)) {

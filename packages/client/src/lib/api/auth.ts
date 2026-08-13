@@ -42,3 +42,39 @@ export async function fetchMe(): Promise<PublicUser> {
 export function logout(): Promise<{ success: boolean }> {
   return apiFetch<{ success: boolean }>("/api/auth/logout", { method: "POST" });
 }
+
+/** 프로필 수정 (닉네임 / 기본 아바타 선택) */
+export async function updateProfile(input: {
+  nickname?: string;
+  avatar?: string;
+}): Promise<PublicUser> {
+  const { user } = await apiFetch<{ user: PublicUser }>("/api/auth/me", {
+    method: "PATCH",
+    body: input,
+  });
+  return user;
+}
+
+/**
+ * 아바타 이미지 업로드 (multipart)
+ *
+ * 파일 업로드라 JSON 래퍼(apiFetch)를 쓰지 않고 FormData로 직접 보낸다.
+ */
+export async function uploadAvatar(file: File): Promise<PublicUser> {
+  const form = new FormData();
+  form.append("avatar", file);
+
+  const response = await fetch("/api/auth/avatar", {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error ?? `업로드에 실패했습니다 (${response.status})`);
+  }
+
+  const { user } = (await response.json()) as { user: PublicUser };
+  return user;
+}

@@ -38,6 +38,16 @@ class AuthStore {
     this.user = await this.run(() => authApi.signup(input));
   }
 
+  /** 기본 아바타 선택 등 프로필 수정 */
+  async updateProfile(updates: { nickname?: string; avatar?: string }) {
+    this.user = await this.run(() => authApi.updateProfile(updates));
+  }
+
+  /** 아바타 이미지 파일 업로드 */
+  async uploadAvatar(file: File) {
+    this.user = await this.run(() => authApi.uploadAvatar(file));
+  }
+
   /** UI는 즉시 비로그인으로 바꾸고, 서버 쿠키 제거는 뒤따르게 한다 */
   async logout() {
     this.user = null;

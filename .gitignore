@@ -36,6 +36,9 @@ Thumbs.db
 *.db-wal
 *.sqlite
 
+# 사용자 업로드 파일 (아바타 등)
+packages/server/uploads/
+
 # TypeScript
 *.tsbuildinfo
 

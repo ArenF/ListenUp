@@ -3,6 +3,7 @@
 
   interface Props {
     connected: boolean;
+    isLoggedIn: boolean;
     nickname: string;
     roomCode: string;
     selectedPlaylistId: string;
@@ -13,6 +14,7 @@
 
   let {
     connected,
+    isLoggedIn,
     nickname = $bindable(),
     roomCode = $bindable(),
     selectedPlaylistId = $bindable(),
@@ -25,13 +27,20 @@
 <div class="form-container">
   <div class="input-group">
     <label for="nickname">닉네임</label>
-    <input
-      id="nickname"
-      type="text"
-      bind:value={nickname}
-      placeholder="닉네임 입력"
-      disabled={!connected}
-    />
+    {#if isLoggedIn}
+      <div class="nickname-locked">
+        <span class="nickname-value">{nickname}</span>
+        <span class="badge">로그인 계정</span>
+      </div>
+    {:else}
+      <input
+        id="nickname"
+        type="text"
+        bind:value={nickname}
+        placeholder="닉네임 입력"
+        disabled={!connected}
+      />
+    {/if}
   </div>
 
   <div class="section">
@@ -134,6 +143,30 @@
 
   select {
     cursor: pointer;
+  }
+
+  .nickname-locked {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+  }
+
+  .nickname-value {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    background-color: #ff3e00;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
   }
 
   button {

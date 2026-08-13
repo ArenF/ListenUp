@@ -44,6 +44,21 @@ export const userRepository = {
   },
 
   /**
+   * 프로필 갱신 (닉네임/아바타 등 가변 필드)
+   */
+  update(user: UserRecord): void {
+    db.prepare(
+      `UPDATE users SET
+         email = @email,
+         password_hash = @passwordHash,
+         nickname = @nickname,
+         avatar = @avatar,
+         updated_at = @updatedAt
+       WHERE id = @id`
+    ).run(user);
+  },
+
+  /**
    * ID로 조회
    */
   findById(id: string): UserRecord | undefined {

@@ -18,10 +18,25 @@ import type {
  * - 로그인 (비밀번호 검증 후 JWT 발급)
  * - 토큰 검증 및 사용자 조회
  */
+/**
+ * 기본 제공 아바타 목록 (클라이언트 public/avatars/ 에 실제 파일 존재)
+ * 클라이언트 `src/lib/avatars.ts`와 동일하게 유지한다.
+ */
+export const DEFAULT_AVATARS = [
+  "/avatars/avatar-1.png",
+  "/avatars/avatar-2.png",
+  "/avatars/avatar-3.png",
+];
+
 export class AuthService {
   // 입력 검증 규칙
   private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   private static readonly MIN_PASSWORD_LENGTH = 8;
+
+  /** 회원가입 시 기본 아바타를 무작위로 하나 배정한다 */
+  private static randomDefaultAvatar(): string {
+    return DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)];
+  }
 
   /**
    * DB 레코드를 클라이언트에 노출 가능한 형태로 변환 (비밀번호 해시 제거)
@@ -97,7 +112,7 @@ export class AuthService {
       email,
       passwordHash,
       nickname,
-      avatar: input.avatar?.trim() || "",
+      avatar: input.avatar?.trim() || AuthService.randomDefaultAvatar(),
       createdAt: now,
       updatedAt: now,
     };
@@ -170,6 +185,37 @@ export class AuthService {
   getPublicUser(id: string): PublicUser | null {
     const user = userRepository.findById(id);
     return user ? this.toPublicUser(user) : null;
+  }
+
+  /**
+   * 프로필(닉네임/아바타) 갱신
+   *
+   * 값 검증은 라우트에서 끝냈다고 보고, 여기서는 존재하는 필드만 반영한다.
+   */
+  updateProfile(
+    userId: string,
+    updates: { nickname?: string; avatar?: string }
+  ): AuthResult {
+    const user = userRepository.findById(userId);
+    if (!user) {
+      return { success: false, error: "사용자를 찾을 수 없습니다" };
+    }
+
+    const updated: UserRecord = {
+      ...user,
+      nickname: updates.nickname?.trim() || user.nickname,
+      avatar: updates.avatar ?? user.avatar,
+      updatedAt: Date.now(),
+    };
+
+    try {
+      userRepository.update(updated);
+    } catch (error) {
+      console.error("❌ Failed to update profile:", error);
+      return { success: false, error: "프로필 수정에 실패했습니다" };
+    }
+
+    return { success: true, user: this.toPublicUser(updated) };
   }
 }
 

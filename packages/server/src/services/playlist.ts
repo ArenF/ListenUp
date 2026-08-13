@@ -103,7 +103,8 @@ export class PlaylistService {
   async createPlaylist(
     name: string,
     description: string,
-    tracks: PlaylistTrack[] = []
+    tracks: PlaylistTrack[] = [],
+    owner?: { id: string; nickname: string }
   ): Promise<{ success: boolean; error?: string; playlist?: Playlist }> {
     // 검증: 이름 중복 체크
     const existingPlaylist = Array.from(this.playlists.values()).find(
@@ -126,6 +127,8 @@ export class PlaylistService {
       description,
       tracks,
       roundCount: tracks.length,
+      ownerId: owner?.id,
+      ownerNickname: owner?.nickname,
     };
 
     this.playlists.set(id, playlist);

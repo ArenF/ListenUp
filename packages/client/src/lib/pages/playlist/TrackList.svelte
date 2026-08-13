@@ -10,6 +10,8 @@
     /** 정답 수정 폼이 열려 있는 트랙 */
     editingTrackId: string | null;
     editAnswers: AnswerList;
+    /** 트랙 편집(수정/삭제) 가능 여부 — 작성자 본인만 true */
+    canEdit: boolean;
     onStartEdit: (videoId: string) => void;
     onCancelEdit: () => void;
     onSave: (videoId: string) => void;
@@ -21,6 +23,7 @@
     playlistTracks,
     editingTrackId,
     editAnswers,
+    canEdit,
     onStartEdit,
     onCancelEdit,
     onSave,
@@ -59,25 +62,27 @@
               {/if}
             </div>
           </div>
-          <div class="track-actions">
-            <button
-              class="btn-edit"
-              onclick={() => onStartEdit(track.id)}
-              title="정답 수정"
-            >
-              ✏️ 수정
-            </button>
-            <button
-              class="btn-delete"
-              onclick={() => onRemove(track.id)}
-              title="트랙 제거"
-            >
-              🗑️ 삭제
-            </button>
-          </div>
+          {#if canEdit}
+            <div class="track-actions">
+              <button
+                class="btn-edit"
+                onclick={() => onStartEdit(track.id)}
+                title="정답 수정"
+              >
+                ✏️ 수정
+              </button>
+              <button
+                class="btn-delete"
+                onclick={() => onRemove(track.id)}
+                title="트랙 제거"
+              >
+                🗑️ 삭제
+              </button>
+            </div>
+          {/if}
         </div>
 
-        {#if editingTrackId === track.id}
+        {#if canEdit && editingTrackId === track.id}
           <div class="track-edit-form">
             <h4>정답 수정</h4>
             <div class="answers-list">

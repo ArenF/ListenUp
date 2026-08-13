@@ -87,6 +87,9 @@ export interface Playlist {
   description: string;
   tracks: PlaylistTrack[];  // trackIds → tracks로 변경
   roundCount: number;
+  // 작성자 정보 (기본 제공 플레이리스트는 없음 → 아무도 수정 불가)
+  ownerId?: string;
+  ownerNickname?: string;
 }
 
 export interface Track {

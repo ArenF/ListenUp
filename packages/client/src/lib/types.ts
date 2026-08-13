@@ -35,6 +35,9 @@ export interface Playlist {
   description: string;
   tracks: PlaylistTrack[];
   roundCount: number;
+  /** 작성자 정보 (기본 제공 플레이리스트는 없음) */
+  ownerId?: string;
+  ownerNickname?: string;
 }
 
 /** YouTube에서 조회한 트랙 메타데이터 */
