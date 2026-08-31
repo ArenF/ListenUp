@@ -15,6 +15,7 @@ interface SocketCallback<T = any> {
 
 interface SerializedRoom {
   code: string;
+  title: string;
   hostId: string;
   players: any[];
   settings: RoomSettings;
@@ -42,6 +43,7 @@ interface SerializedRoom {
 function serializeRoom(room: Room): SerializedRoom {
   return {
     code: room.code,
+    title: room.title,
     hostId: room.hostId,
     players: Array.from(room.players.values()),
     settings: room.settings,
@@ -77,7 +79,17 @@ function validateRoomSettings(settings: Partial<RoomSettings>): RoomSettings {
     maxPlayers: settings.maxPlayers || 8,
     roundInterval: settings.roundInterval || 30,
     playlistId: settings.playlistId || config.game.defaultPlaylistId,
+    // 명시적으로 false를 준 경우에만 비공개, 기본값은 공개
+    isPublic: settings.isPublic !== false,
   };
+}
+
+/**
+ * 로비에 접속한 모든 클라이언트에게 최신 공개 방 목록을 보낸다.
+ * 방이 생기거나 인원·상태가 바뀔 때마다 호출한다.
+ */
+export function emitRoomList(io: Server): void {
+  io.emit(events.ROOMS_UPDATED, { rooms: roomService.listPublicRooms() });
 }
 
 // ============================================================================
@@ -88,21 +100,21 @@ function validateRoomSettings(settings: Partial<RoomSettings>): RoomSettings {
  * 방 생성 이벤트 처리
  * 호스트 플레이어와 초기 설정으로 새 방 생성
  */
-export function handleCreateRoom(_io: Server, socket: Socket): void {
+export function handleCreateRoom(io: Server, socket: Socket): void {
   socket.on(
     events.CREATE_ROOM,
     (
-      data: { nickname: string; settings: RoomSettings },
+      data: { nickname: string; title?: string; settings: RoomSettings },
       callback: SocketCallback<{ room: SerializedRoom }>
     ) => {
       try {
-        const { nickname, settings } = data;
+        const { nickname, title, settings } = data;
 
         // 설정 검증 및 정규화
         const roomSettings = validateRoomSettings(settings);
 
         // 방 생성
-        const room = roomService.createRoom(socket.id, nickname, roomSettings);
+        const room = roomService.createRoom(socket.id, nickname, roomSettings, title);
 
         // 소켓을 방 채널에 참가시킴
         socket.join(room.code);
@@ -113,6 +125,9 @@ export function handleCreateRoom(_io: Server, socket: Socket): void {
         // 성공 응답 전송
         callback({ success: true, room: roomData });
 
+        // 공개 방이면 로비 목록을 갱신한다
+        emitRoomList(io);
+
         console.log(`Room ${room.code} created by ${nickname}`);
       } catch (error) {
         handleSocketError(error, callback, "handleCreateRoom");
@@ -122,10 +137,26 @@ export function handleCreateRoom(_io: Server, socket: Socket): void {
 }
 
 /**
+ * 공개 방 목록 요청 처리 (로비 최초 진입 시)
+ */
+export function handleListRooms(_io: Server, socket: Socket): void {
+  socket.on(
+    events.LIST_ROOMS,
+    (_data: unknown, callback: SocketCallback<{ rooms: ReturnType<typeof roomService.listPublicRooms> }>) => {
+      try {
+        callback({ success: true, rooms: roomService.listPublicRooms() });
+      } catch (error) {
+        handleSocketError(error, callback, "handleListRooms");
+      }
+    }
+  );
+}
+
+/**
  * 방 참가 이벤트 처리
  * 플레이어가 기존 방에 참가할 수 있도록 함
  */
-export function handleJoinRoom(_io: Server, socket: Socket): void {
+export function handleJoinRoom(io: Server, socket: Socket): void {
   socket.on(
     events.JOIN_ROOM,
     (
@@ -159,6 +190,9 @@ export function handleJoinRoom(_io: Server, socket: Socket): void {
           playerCount: result.room.players.size,
         });
 
+        // 로비 목록의 인원 수를 갱신한다
+        emitRoomList(io);
+
         console.log(`${nickname} joined room ${code}`);
       } catch (error) {
         handleSocketError(error, callback, "handleJoinRoom");
@@ -171,7 +205,7 @@ export function handleJoinRoom(_io: Server, socket: Socket): void {
  * 방 나가기 이벤트 처리
  * 플레이어를 방에서 제거하고 필요시 방장 권한 이전 처리
  */
-export function handleLeaveRoom(_io: Server, socket: Socket): void {
+export function handleLeaveRoom(io: Server, socket: Socket): void {
   socket.on(
     events.LEAVE_ROOM,
     (
@@ -202,6 +236,9 @@ export function handleLeaveRoom(_io: Server, socket: Socket): void {
             newHostId: result.newHostId,
           });
         }
+
+        // 방이 사라지거나 인원이 줄었으니 로비 목록을 갱신한다
+        emitRoomList(io);
 
         console.log(`Player left room ${code}`);
       } catch (error) {
@@ -257,7 +294,7 @@ export function handleUpdateSettings(io: Server, socket: Socket): void {
  * 소켓 연결 해제 이벤트 처리
  * 플레이어가 속한 방에서 자동으로 제거
  */
-export function handleDisconnect(_io: Server, socket: Socket): void {
+export function handleDisconnect(io: Server, socket: Socket): void {
   socket.on("disconnect", () => {
     // 플레이어가 속한 모든 방 찾기
     const rooms = roomService.getAllRooms();
@@ -273,6 +310,9 @@ export function handleDisconnect(_io: Server, socket: Socket): void {
             newHostId: result.newHostId,
           });
         }
+
+        // 연결이 끊긴 플레이어를 반영해 로비 목록을 갱신한다
+        emitRoomList(io);
 
         console.log(`Player disconnected from room ${room.code}`);
         break;
@@ -293,5 +333,6 @@ export function registerRoomHandlers(io: Server, socket: Socket): void {
   handleJoinRoom(io, socket);
   handleLeaveRoom(io, socket);
   handleUpdateSettings(io, socket);
+  handleListRooms(io, socket);
   handleDisconnect(io, socket);
 }

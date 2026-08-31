@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { Room, Player, RoomSettings, GameState } from "../types/index.js";
+import type { Room, Player, RoomSettings, GameState, RoomSummary } from "../types/index.js";
 
 // 방 관리 서비스
 
@@ -21,8 +21,11 @@ export class RoomService {
   /**
    * 방 생성
    */
-  createRoom(hostId: string, hostNickname: string, settings: RoomSettings): Room {
+  createRoom(hostId: string, hostNickname: string, settings: RoomSettings, title?: string): Room {
     const code = this.generateRoomCode();
+
+    // 제목이 비어 있으면 호스트 닉네임으로 기본 제목을 만든다
+    const roomTitle = title?.trim() || `${hostNickname}님의 방`;
 
     // 호스트 플레이어 생성
     const host: Player = {
@@ -53,6 +56,7 @@ export class RoomService {
 
     const room: Room = {
       code,
+      title: roomTitle,
       hostId,
       players: new Map([[hostId, host]]),
       settings,
@@ -228,6 +232,27 @@ export class RoomService {
    */
   getAllRooms(): Room[] {
     return Array.from(this.rooms.values());
+  }
+
+  /**
+   * 로비에 노출할 공개 방 목록
+   *
+   * 공개(isPublic) 상태이면서 아직 게임이 시작되지 않은 방만 요약해 반환한다.
+   * 최근 생성된 방이 위로 오도록 정렬한다.
+   */
+  listPublicRooms(): RoomSummary[] {
+    return Array.from(this.rooms.values())
+      .filter((room) => room.settings.isPublic && !room.gameState.isPlaying)
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map((room) => ({
+        code: room.code,
+        title: room.title,
+        hostNickname: room.players.get(room.hostId)?.nickname ?? "알 수 없음",
+        playerCount: room.players.size,
+        maxPlayers: room.settings.maxPlayers,
+        playlistId: room.settings.playlistId,
+        isPlaying: room.gameState.isPlaying,
+      }));
   }
 
   /**

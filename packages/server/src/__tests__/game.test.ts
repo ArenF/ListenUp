@@ -12,6 +12,7 @@ describe("GameService", () => {
     maxPlayers: 8,
     roundInterval: 30,
     playlistId: "test-playlist",
+    isPublic: true,
   };
 
   const testTracks: Track[] = [

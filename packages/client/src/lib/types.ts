@@ -68,6 +68,18 @@ export interface RoomSettings {
   maxPlayers: number;
   roundInterval: number;
   playlistId: string;
+  isPublic: boolean;
+}
+
+/** 로비 목록에 표시하는 방 요약 정보 */
+export interface RoomSummary {
+  code: string;
+  title: string;
+  hostNickname: string;
+  playerCount: number;
+  maxPlayers: number;
+  playlistId: string;
+  isPlaying: boolean;
 }
 
 /**
@@ -77,6 +89,7 @@ export interface RoomSettings {
  */
 export interface Room {
   code: string;
+  title: string;
   hostId: string;
   players: Player[];
   settings: RoomSettings;

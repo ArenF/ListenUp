@@ -2,7 +2,7 @@ import { getSocket } from "../../socket";
 import { fetchPlaylists } from "../../api/playlists";
 import { gameStore } from "./gameStore.svelte";
 import type { AckResponse } from "../../socketEvents";
-import type { AnswerCheckResult, Room } from "../../types";
+import type { AnswerCheckResult, Room, RoomSummary } from "../../types";
 
 /**
  * 게임 화면에서 서버로 보내는 요청 모음
@@ -56,6 +56,20 @@ export async function loadPlaylists() {
   }
 }
 
+/** 로비의 공개 방 목록을 서버에서 받아온다 (최초 진입 시) */
+export function listRooms() {
+  request<{ rooms: RoomSummary[] }>(
+    "list-rooms",
+    {},
+    {
+      failMessage: "방 목록 조회 실패",
+      onSuccess: ({ rooms }) => {
+        gameStore.publicRooms = rooms;
+      },
+    }
+  );
+}
+
 export function createRoom() {
   const nickname = gameStore.nickname.trim();
   if (!nickname) {
@@ -68,10 +82,12 @@ export function createRoom() {
     "create-room",
     {
       nickname,
+      title: gameStore.roomTitle.trim(),
       settings: {
         maxPlayers: 8,
         roundInterval: 30,
         playlistId: gameStore.selectedPlaylistId,
+        isPublic: gameStore.roomIsPublic,
       },
     },
     {
@@ -87,14 +103,20 @@ export function createRoom() {
   );
 }
 
-export function joinRoom() {
+/**
+ * 방에 참가한다.
+ *
+ * @param codeArg 로비에서 방 카드를 클릭한 경우 그 방의 코드. 생략하면
+ *                참가 모달에 입력한 `gameStore.roomCode`를 사용한다.
+ */
+export function joinRoom(codeArg?: string) {
   const nickname = gameStore.nickname.trim();
   if (!nickname) {
     gameStore.statusMessage = "⚠️ 닉네임을 입력해주세요";
     return;
   }
 
-  const code = gameStore.roomCode.trim();
+  const code = (codeArg ?? gameStore.roomCode).trim();
   if (!code) {
     gameStore.statusMessage = "⚠️ 방 코드를 입력해주세요";
     return;

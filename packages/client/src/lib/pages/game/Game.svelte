@@ -2,17 +2,32 @@
   import { gameStore } from "./gameStore.svelte";
   import { startGameSession } from "./gameSession.svelte";
   import {
-    createRoom,
     endGame,
-    joinRoom,
     leaveRoom,
     nextRound,
     startGame,
     submitAnswer,
   } from "./gameActions";
   import { authStore } from "../login/authStore.svelte";
-  import GameLobby from "./GameLobby.svelte";
+  import Lobby from "./Lobby.svelte";
+  import CreateRoom from "./CreateRoom.svelte";
+  import JoinRoomModal from "./JoinRoomModal.svelte";
   import GameRoom from "./GameRoom.svelte";
+
+  interface Props {
+    /** 방에 들어가 있지 않을 때 보여줄 화면 */
+    view: "lobby" | "create";
+    /** 방 참가 모달 표시 여부 (App의 네비 "방 참가"가 토글) */
+    showJoinModal: boolean;
+    /** 로비 ↔ 방 생성 페이지 전환 요청 (App의 네비 상태를 바꾼다) */
+    onNavigate: (view: "lobby" | "create") => void;
+  }
+
+  let {
+    view,
+    showJoinModal = $bindable(),
+    onNavigate,
+  }: Props = $props();
 
   startGameSession();
 
@@ -20,6 +35,13 @@
   $effect(() => {
     if (authStore.user) {
       gameStore.nickname = authStore.user.nickname;
+    }
+  });
+
+  // 방에 입장하면(생성·참가 성공) 참가 모달은 닫는다
+  $effect(() => {
+    if (gameStore.currentRoom) {
+      showJoinModal = false;
     }
   });
 </script>
@@ -31,18 +53,7 @@
     <span>{gameStore.statusMessage}</span>
   </div>
 
-  {#if !gameStore.currentRoom}
-    <GameLobby
-      connected={gameStore.connected}
-      isLoggedIn={authStore.isLoggedIn}
-      bind:nickname={gameStore.nickname}
-      bind:roomCode={gameStore.roomCode}
-      bind:selectedPlaylistId={gameStore.selectedPlaylistId}
-      playlists={gameStore.playlists}
-      onCreateRoom={createRoom}
-      onJoinRoom={joinRoom}
-    />
-  {:else}
+  {#if gameStore.currentRoom}
     <GameRoom
       currentRoom={gameStore.currentRoom}
       players={gameStore.players}
@@ -65,20 +76,24 @@
       onNextRound={nextRound}
       onEndGame={endGame}
     />
+  {:else if view === "create"}
+    <CreateRoom onCancel={() => onNavigate("lobby")} />
+  {:else}
+    <Lobby
+      onCreate={() => onNavigate("create")}
+      onJoinByCode={() => (showJoinModal = true)}
+    />
   {/if}
-
-  <div class="info">
-    <p>🔧 Socket.IO 연결 테스트 v2.0</p>
-    <p>Backend: Node.js + Socket.IO + TypeScript</p>
-    <p>Frontend: Svelte 5 + Socket.IO Client</p>
-  </div>
 </div>
+
+{#if showJoinModal && !gameStore.currentRoom}
+  <JoinRoomModal onClose={() => (showJoinModal = false)} />
+{/if}
 
 <style>
   .game-container {
-    text-align: center;
     padding: 2rem;
-    max-width: 600px;
+    max-width: 820px;
     margin: 0 auto;
   }
 
@@ -88,10 +103,12 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     background-color: #ffebee;
     border-radius: 8px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: #7a5a44;
     transition: background-color 0.3s;
   }
 
@@ -100,11 +117,12 @@
   }
 
   .status-indicator {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background-color: #f44336;
     animation: pulse 2s infinite;
+    flex-shrink: 0;
   }
 
   .status-bar.connected .status-indicator {
@@ -119,19 +137,5 @@
     50% {
       opacity: 0.5;
     }
-  }
-
-  /* 하단 정보 */
-  .info {
-    margin-top: 3rem;
-    padding: 1.5rem;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    color: #666;
-  }
-
-  .info p {
-    margin: 0.5rem 0;
   }
 </style>

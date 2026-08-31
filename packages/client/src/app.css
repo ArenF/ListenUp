@@ -3,9 +3,10 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* 밝은 주황-베이지 테마 (OS 다크모드와 무관하게 항상 라이트) */
+  color-scheme: light;
+  color: #3a2c22;
+  background-color: #fff7ee;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +16,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #ff3e00;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #e63600;
 }
 
 body {
@@ -28,6 +29,9 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* 위쪽은 크림, 아래로 옅은 살구빛으로 은은한 웜톤 베이스 */
+  background: linear-gradient(180deg, #fff7ee 0%, #ffe9d5 100%);
+  color: #3a2c22;
 }
 
 h1 {
@@ -46,6 +50,13 @@ h1 {
   text-align: center;
 }
 
+/* 모바일에서는 좌우 여백을 줄여 콘텐츠가 화면 폭을 더 넓게 쓰도록 한다 */
+@media (max-width: 480px) {
+  #app {
+    padding: 1rem 0.5rem;
+  }
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -53,27 +64,12 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  /* 전역에서 검정 배경을 강제하지 않는다. 각 컴포넌트가 자기 색을 정한다. */
+  background-color: transparent;
   cursor: pointer;
   transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }

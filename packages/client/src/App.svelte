@@ -7,7 +7,11 @@
   import { authStore } from "./lib/pages/login/authStore.svelte";
 
   // 페이지 라우팅
-  let currentPage = $state<"game" | "playlist" | "account">("game");
+  type Page = "lobby" | "create" | "playlist" | "account";
+  let currentPage = $state<Page>("lobby");
+
+  // 방 참가 모달 (로비 툴바에서 연다)
+  let showJoinModal = $state(false);
 
   // 새로고침 후에도 로그인 세션을 이어간다
   onMount(() => {
@@ -22,17 +26,17 @@
     <div class="nav-buttons">
       <button
         class="nav-button"
-        class:active={currentPage === "game"}
-        onclick={() => (currentPage = "game")}
+        class:active={currentPage === "lobby" || currentPage === "create"}
+        onclick={() => (currentPage = "lobby")}
       >
-        🎮 게임
+        🏠 로비
       </button>
       <button
         class="nav-button"
         class:active={currentPage === "playlist"}
         onclick={() => (currentPage = "playlist")}
       >
-        🎵 플레이리스트 관리
+        🎵 플레이리스트
       </button>
       <button
         class="nav-button account"
@@ -49,7 +53,13 @@
   </nav>
 
   <!-- 페이지 컨텐츠 -->
-  {#if currentPage === "playlist"}
+  {#if currentPage === "lobby" || currentPage === "create"}
+    <Game
+      view={currentPage}
+      bind:showJoinModal
+      onNavigate={(v) => (currentPage = v)}
+    />
+  {:else if currentPage === "playlist"}
     {#if authStore.isLoggedIn}
       <Playlist />
     {:else}
@@ -60,14 +70,12 @@
         </button>
       </div>
     {/if}
-  {:else if currentPage === "account"}
+  {:else}
     {#if authStore.isLoggedIn}
       <Profile />
     {:else}
       <Login />
     {/if}
-  {:else}
-    <Game />
   {/if}
 </main>
 
@@ -86,6 +94,8 @@
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
   .navbar h1 {
@@ -96,10 +106,11 @@
   .nav-buttons {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .nav-button {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     background-color: rgba(255, 255, 255, 0.2);
     color: white;
     border: 2px solid transparent;

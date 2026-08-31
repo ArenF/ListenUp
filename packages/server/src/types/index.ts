@@ -50,15 +50,28 @@ export interface RoomSettings {
   maxPlayers: number;
   roundInterval: number;
   playlistId: string;
+  isPublic: boolean;  // true면 로비 목록에 노출, false면 코드로만 참가
 }
 
 export interface Room {
   code: string;
+  title: string;       // 로비 목록에 표시되는 방 제목
   hostId: string;
   players: Map<string, Player>;
   settings: RoomSettings;
   gameState: GameState;
   createdAt: number;
+}
+
+/** 로비 목록에 뿌리는 방 요약 정보 (플레이어 상세는 제외) */
+export interface RoomSummary {
+  code: string;
+  title: string;
+  hostNickname: string;
+  playerCount: number;
+  maxPlayers: number;
+  playlistId: string;
+  isPlaying: boolean;
 }
 
 export interface GameState {

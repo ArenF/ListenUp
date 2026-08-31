@@ -4,6 +4,7 @@ import type {
   Player,
   Playlist,
   Room,
+  RoomSummary,
 } from "../../types";
 
 /**
@@ -23,6 +24,13 @@ class GameStore {
   nickname = $state("");
   currentRoom = $state<Room | null>(null);
   players = $state<Player[]>([]);
+
+  // 로비: 공개 방 목록
+  publicRooms = $state<RoomSummary[]>([]);
+
+  // 방 생성 폼
+  roomTitle = $state("");
+  roomIsPublic = $state(true);
 
   // 플레이리스트
   playlists = $state<Playlist[]>([]);

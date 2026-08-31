@@ -1,5 +1,6 @@
 import type { Socket } from "socket.io-client";
 import { gameStore } from "./gameStore.svelte";
+import { listRooms } from "./gameActions";
 import { logPlayerState } from "./youtubePlayer.svelte";
 
 /**
@@ -14,6 +15,9 @@ export function registerGameSocketHandlers(socket: Socket) {
     gameStore.socketId = socket.id ?? "";
     gameStore.statusMessage = `✅ 서버 연결 성공! (ID: ${socket.id})`;
     console.log("서버 연결:", socket.id);
+
+    // 연결되면 로비에 뿌릴 공개 방 목록을 받아온다
+    listRooms();
   });
 
   socket.on("disconnect", () => {
@@ -54,6 +58,11 @@ export function registerGameSocketHandlers(socket: Socket) {
         settings: data.settings,
       };
     }
+  });
+
+  // 로비 공개 방 목록 실시간 갱신
+  socket.on("rooms-updated", (data) => {
+    gameStore.publicRooms = data.rooms;
   });
 
   // ---------------------------------------------------------------- 게임

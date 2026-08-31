@@ -11,7 +11,13 @@
       "Bash(tasklist:*)",
       "Bash(npm run *)",
       "Bash(echo \"===EXIT $?===\")",
-      "PowerShell(npm --prefix packages/server run build 2>&1)"
+      "PowerShell(npm --prefix packages/server run build 2>&1)",
+      "Bash(npx svelte-check *)",
+      "Bash(grep -n \"review_scope\" .gitignore)",
+      "Bash(git log *)",
+      "Bash(git rev-list *)",
+      "Bash(git add *)",
+      "Bash(git reset *)"
     ],
     "deny": [],
     "ask": []

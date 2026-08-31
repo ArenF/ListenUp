@@ -4,6 +4,7 @@ import { roomService } from "../../services/room.js";
 import { youtubeService } from "../../services/youtube.js";
 import type { Track, RoundResult } from "../../types/index.js";
 import * as events from "../events.js";
+import { emitRoomList } from "./room.handler.js";
 
 // ============================================================================
 // 타입 정의
@@ -182,6 +183,9 @@ export function handleStartGame(io: Server, socket: Socket): void {
           totalRounds: room.gameState.totalRounds,
           players: Array.from(room.players.values()),
         });
+
+        // 게임이 시작된 방은 로비 목록에서 사라진다
+        emitRoomList(io);
 
         console.log(`🎮 Game started in room ${roomCode}`);
 
@@ -413,6 +417,9 @@ export function handleNextRound(io: Server, socket: Socket): void {
               },
             });
 
+            // 게임이 끝난 방은 다시 로비 목록에 노출된다
+            emitRoomList(io);
+
             console.log(`🎊 Game ended in room ${roomCode}`);
             if (gameResult.result.winner) {
               console.log(
@@ -499,6 +506,9 @@ export function handleForceEndGame(io: Server, socket: Socket): void {
             },
             forced: true, // 강제 종료 표시
           });
+
+          // 강제 종료된 방도 다시 로비 목록에 노출된다
+          emitRoomList(io);
 
           console.log(`🛑 Game force-ended by host in room ${roomCode}`);
         }

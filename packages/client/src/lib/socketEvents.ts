@@ -3,6 +3,7 @@ import type {
   HiddenTrack,
   Player,
   RoomSettings,
+  RoomSummary,
   RoundResult,
 } from "./types";
 
@@ -15,6 +16,7 @@ export interface ServerToClientEvents {
   "player-joined": (data: { player: Player; playerCount: number }) => void;
   "player-left": (data: { playerId: string; playerCount: number }) => void;
   "settings-updated": (data: { settings: RoomSettings }) => void;
+  "rooms-updated": (data: { rooms: RoomSummary[] }) => void;
 
   "game-started": (data: { totalRounds: number; players: Player[] }) => void;
   "prepare-round": (data: {

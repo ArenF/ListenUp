@@ -5,11 +5,13 @@ export const CREATE_ROOM = "create-room";
 export const JOIN_ROOM = "join-room";
 export const LEAVE_ROOM = "leave-room";
 export const UPDATE_SETTINGS = "update-settings";
+export const LIST_ROOMS = "list-rooms";  // 공개 방 목록 요청 (클라이언트 → 서버)
 
 // 방 상태 업데이트 (서버 → 클라이언트)
 export const PLAYER_JOINED = "player-joined";
 export const PLAYER_LEFT = "player-left";
 export const SETTINGS_UPDATED = "settings-updated";
+export const ROOMS_UPDATED = "rooms-updated";  // 로비 공개 방 목록 갱신 브로드캐스트
 
 // 게임 이벤트
 export const START_GAME = "start-game";
