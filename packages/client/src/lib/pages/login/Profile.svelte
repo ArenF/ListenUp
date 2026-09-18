@@ -91,6 +91,36 @@
     // 같은 파일을 다시 선택해도 change가 발생하도록 초기화
     input.value = "";
   }
+
+  /** 배경 이미지 파일 선택 → 업로드 */
+  async function onBgFileChange(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      await authStore.uploadBackground(file);
+      // localStorage 동기화 — 게임화면(GameScreen)이 바로 반영하도록
+      if (authStore.user?.bgImage) {
+        localStorage.setItem("listenup:bgImage", authStore.user.bgImage);
+      } else {
+        localStorage.removeItem("listenup:bgImage");
+      }
+    } catch {
+      // 에러는 authStore.error로 표시된다
+    }
+    input.value = "";
+  }
+
+  /** 배경 초기화 (기본 그라데이션으로 복귀) */
+  async function clearBackground() {
+    try {
+      await authStore.uploadBackground(); // 파일 없이 POST → bgImage 리셋
+      localStorage.removeItem("listenup:bgImage");
+    } catch {
+      // 에러는 authStore.error로 표시된다
+    }
+  }
 </script>
 
 <div class="profile">
@@ -185,6 +215,36 @@
       />
     </label>
     <p class="upload-hint">PNG · JPG · WebP · GIF / 최대 5MB</p>
+  </section>
+
+  <!-- 배경 이미지 변경 (게임화면 개인 배경 — 내 화면에만 적용) -->
+  <section class="avatar-edit bg-edit">
+    <h3>게임 배경 이미지</h3>
+
+    {#if user.bgImage}
+      <div class="bg-preview">
+        <img src={user.bgImage} alt="현재 배경 미리보기" />
+      </div>
+    {:else}
+      <p class="bg-empty">기본 골목길 야경 그라데이션 사용 중</p>
+    {/if}
+
+    <label class="upload" class:disabled={authStore.loading}>
+      {authStore.loading ? "처리 중..." : "🖼️ 배경 이미지 업로드"}
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        onchange={onBgFileChange}
+        disabled={authStore.loading}
+      />
+    </label>
+    <p class="upload-hint">내 화면에만 보이는 배경이야 · PNG · JPG · WebP / 최대 5MB</p>
+
+    {#if user.bgImage}
+      <button type="button" class="bg-reset" onclick={clearBackground} disabled={authStore.loading}>
+        기본 배경으로 되돌리기
+      </button>
+    {/if}
   </section>
 
   <button class="logout" onclick={() => authStore.logout()}>로그아웃</button>
@@ -590,6 +650,57 @@
     font-size: 0.75rem;
     color: var(--text-secondary);
     text-align: center;
+  }
+
+  /* ======================== 배경 이미지 변경 ======================== */
+  .bg-edit {
+    margin-top: 0.25rem;
+  }
+
+  .bg-preview {
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.9rem;
+    border: 1px solid var(--border);
+  }
+
+  .bg-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bg-empty {
+    margin: 0 0 0.9rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .bg-reset {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.6rem;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .bg-reset:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .bg-reset:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 
   /* 로그아웃 */

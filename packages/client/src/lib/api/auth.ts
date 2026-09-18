@@ -56,10 +56,29 @@ export async function updateProfile(input: {
 }
 
 /**
- * 아바타 이미지 업로드 (multipart)
+ * 배경 이미지 업로드 (multipart)
  *
  * 파일 업로드라 JSON 래퍼(apiFetch)를 쓰지 않고 FormData로 직접 보낸다.
+ * 파일을 보내면 저장 후 bgImage URL로 설정, 파일 없이 보내면 배경을 초기화한다.
  */
+export async function uploadBackground(file?: File): Promise<PublicUser> {
+  const form = new FormData();
+  if (file) form.append("bg", file);
+
+  const response = await fetch("/api/auth/bg", {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error ?? `배경 변경에 실패했습니다 (${response.status})`);
+  }
+
+  const { user } = (await response.json()) as { user: PublicUser };
+  return user;
+}
 export async function uploadAvatar(file: File): Promise<PublicUser> {
   const form = new FormData();
   form.append("avatar", file);

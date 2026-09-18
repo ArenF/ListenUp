@@ -12,13 +12,24 @@
   }
   let { trackTitle = "", trackArtist = "", children }: Props = $props();
 
-  // 개인 배경 이미지 (없으면 기본 그라데이션) — Task 6에서 gameStore로 승격
+  // 개인 배경 이미지 (없으면 기본 그라데이션) — authStore(bgImage) 우선, 로그인 전엔 localStorage
+  import { authStore } from "../login/authStore.svelte";
+
   let bgImage = $state<string | null>(null);
-  // localStorage에서 초기 로드
+  // 배경 소스: 로그인 유저의 서버 저장 배경 우선 → 없으면 localStorage(초기화 시 제거됨)
   $effect(() => {
+    const userBg = authStore.user?.bgImage;
+    if (userBg) {
+      bgImage = userBg;
+      try {
+        localStorage.setItem("listenup:bgImage", userBg);
+      } catch {
+        /* private mode 등 */
+      }
+      return;
+    }
     try {
-      const saved = localStorage.getItem("listenup:bgImage");
-      if (saved) bgImage = saved;
+      bgImage = localStorage.getItem("listenup:bgImage");
     } catch {
       /* private mode 등 */
     }

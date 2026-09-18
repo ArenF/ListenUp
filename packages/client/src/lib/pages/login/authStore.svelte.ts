@@ -48,6 +48,11 @@ class AuthStore {
     this.user = await this.run(() => authApi.uploadAvatar(file));
   }
 
+  /** 게임화면 배경 이미지 업로드 (파일 없이 호출하면 초기화) */
+  async uploadBackground(file?: File) {
+    this.user = await this.run(() => authApi.uploadBackground(file));
+  }
+
   /** UI는 즉시 비로그인으로 바꾸고, 서버 쿠키 제거는 뒤따르게 한다 */
   async logout() {
     this.user = null;

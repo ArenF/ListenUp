@@ -16,6 +16,8 @@ export interface PublicUser {
   email: string;
   nickname: string;
   avatar: string;
+  /** 게임화면 개인 배경 이미지 URL (기본 그라데이션이면 빈 문자열) */
+  bgImage: string;
   createdAt: number;
 }
 
