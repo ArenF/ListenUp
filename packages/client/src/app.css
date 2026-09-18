@@ -32,6 +32,14 @@
   --border: rgba(168, 144, 232, 0.2);   /* 투명 라벤더, 미세 경계 */
 }
 
+  /* ---------- EDM 스크린 공통 (3테마 공용) ---------- */
+  --screen-glass: rgba(12, 16, 32, 0.72);
+  --screen-bd: rgba(124, 156, 255, 0.18);
+  --viz-c1: #22d3ee;
+  --viz-c2: #7c9cff;
+  --viz-c3: #f472b6;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
 /* ---------- 라이트 — "소프트 라벤더" ---------- */
 [data-theme="light"] {
   color-scheme: light;
