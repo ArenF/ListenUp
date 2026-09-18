@@ -26,4 +26,5 @@ services:
       - NODE_ENV=production
     volumes:
       - ./packages/server/src/data:/app/data   # playlists.json 등 영속화
+      - ./packages/server/uploads:/app/packages/server/uploads   # 아바타·배경 업로드 영속화
     restart: unless-stopped

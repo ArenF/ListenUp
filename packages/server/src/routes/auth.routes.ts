@@ -167,3 +167,47 @@ authRouter.post("/avatar", requireAuth, handleAvatarUpload, (req, res) => {
 
   return res.json({ user: result.user });
 });
+
+
+// ----------------------------------------------------------------------------
+// 개인 배경 이미지 업로드 (라운드 화면 배경 — 2026-09 EDM UI)
+// ----------------------------------------------------------------------------
+const bgDir = path.join(config.uploads.dir, "backgrounds");
+fs.mkdirSync(bgDir, { recursive: true });
+
+const bgUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, bgDir),
+    filename: (req, file, cb) => {
+      const ext = MIME_EXT[file.mimetype] ?? ".png";
+      cb(null, `${req.auth!.sub}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (MIME_EXT[file.mimetype]) cb(null, true);
+    else cb(new Error("이미지 파일만 업로드할 수 있습니다 (png/jpg/webp/gif)"));
+  },
+});
+
+// 배경 이미지 업로드 → bgImage URL 갱신 (빈 파일명 = 기본 그라데이션으로 초기화)
+authRouter.post("/bg", requireAuth, (req, res, next) => {
+  bgUpload.single("bg")(req, res, (err: unknown) => {
+    if (err) {
+      let message = err instanceof Error ? err.message : "업로드에 실패했습니다";
+      if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+        message = "파일이 너무 큽니다 (최대 5MB)";
+      }
+      return res.status(400).json({ error: message });
+    }
+    next();
+  });
+}, (req, res) => {
+  // 파일이 없으면 배경 초기화 (기본 그라데이션)
+  const bgUrl = req.file ? `/api/uploads/backgrounds/${req.file.filename}` : "";
+  const result = authService.updateProfile(req.auth!.sub, { bgImage: bgUrl });
+  if (!result.success) {
+    return res.status(400).json({ error: result.error });
+  }
+  return res.json({ user: result.user });
+});

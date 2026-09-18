@@ -33,12 +33,20 @@ export function initializeDatabase(): void {
       password_hash TEXT    NOT NULL,
       nickname      TEXT    NOT NULL,
       avatar        TEXT    NOT NULL DEFAULT '',
+      bg_image      TEXT    NOT NULL DEFAULT '',
       created_at    INTEGER NOT NULL,
       updated_at    INTEGER NOT NULL
     );
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
   `);
+
+  // 기존 테이블 마이그레이션 — 개인 배경 이미지 컬럼 (2026-09 EDM UI)
+  const userCols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+  if (!userCols.some((c) => c.name === "bg_image")) {
+    db.exec("ALTER TABLE users ADD COLUMN bg_image TEXT NOT NULL DEFAULT ''");
+    console.log("✅ users.bg_image 컬럼 추가 완료");
+  }
 
   console.log(`✅ Database initialized at ${config.db.path}`);
 }

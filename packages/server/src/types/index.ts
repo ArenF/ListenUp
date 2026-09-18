@@ -9,6 +9,8 @@ export interface UserRecord {
   passwordHash: string;
   nickname: string;
   avatar: string;
+  /** 라운드 화면 개인 배경 이미지 URL (빈 문자열 = 기본 그라데이션) */
+  bgImage: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -19,6 +21,7 @@ export interface PublicUser {
   email: string;
   nickname: string;
   avatar: string;
+  bgImage: string;
   createdAt: number;
 }
 

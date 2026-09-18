@@ -47,6 +47,7 @@ export class AuthService {
       email: user.email,
       nickname: user.nickname,
       avatar: user.avatar,
+      bgImage: user.bgImage ?? "",
       createdAt: user.createdAt,
     };
   }
@@ -113,6 +114,7 @@ export class AuthService {
       passwordHash,
       nickname,
       avatar: input.avatar?.trim() || AuthService.randomDefaultAvatar(),
+      bgImage: "",
       createdAt: now,
       updatedAt: now,
     };
@@ -194,7 +196,7 @@ export class AuthService {
    */
   updateProfile(
     userId: string,
-    updates: { nickname?: string; avatar?: string }
+    updates: { nickname?: string; avatar?: string; bgImage?: string }
   ): AuthResult {
     const user = userRepository.findById(userId);
     if (!user) {
@@ -205,6 +207,7 @@ export class AuthService {
       ...user,
       nickname: updates.nickname?.trim() || user.nickname,
       avatar: updates.avatar ?? user.avatar,
+      bgImage: updates.bgImage ?? user.bgImage ?? "",
       updatedAt: Date.now(),
     };
 

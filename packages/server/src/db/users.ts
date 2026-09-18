@@ -14,6 +14,7 @@ interface UserRow {
   password_hash: string;
   nickname: string;
   avatar: string;
+  bg_image: string;
   created_at: number;
   updated_at: number;
 }
@@ -25,6 +26,7 @@ function rowToUser(row: UserRow): UserRecord {
     passwordHash: row.password_hash,
     nickname: row.nickname,
     avatar: row.avatar,
+    bgImage: row.bg_image ?? "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -37,14 +39,14 @@ export const userRepository = {
   create(user: UserRecord): void {
     db.prepare(
       `INSERT INTO users
-        (id, email, password_hash, nickname, avatar, created_at, updated_at)
+        (id, email, password_hash, nickname, avatar, bg_image, created_at, updated_at)
        VALUES
-        (@id, @email, @passwordHash, @nickname, @avatar, @createdAt, @updatedAt)`
+        (@id, @email, @passwordHash, @nickname, @avatar, @bgImage, @createdAt, @updatedAt)`
     ).run(user);
   },
 
   /**
-   * 프로필 갱신 (닉네임/아바타 등 가변 필드)
+   * 프로필 갱신 (닉네임/아바타/배경 등 가변 필드)
    */
   update(user: UserRecord): void {
     db.prepare(
@@ -53,6 +55,7 @@ export const userRepository = {
          password_hash = @passwordHash,
          nickname = @nickname,
          avatar = @avatar,
+         bg_image = @bgImage,
          updated_at = @updatedAt
        WHERE id = @id`
     ).run(user);
