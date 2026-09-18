@@ -96,7 +96,7 @@
   .toolbar h2 {
     margin: 0;
     font-size: 1.4rem;
-    color: #3a2c22;
+    color: var(--text-primary);
   }
 
   .actions {
@@ -115,24 +115,24 @@
   }
 
   .primary {
-    background: #ff3e00;
-    color: white;
-    border: 2px solid #ff3e00;
+    background: var(--accent);
+    color: var(--text-on-accent);
+    border: 2px solid var(--accent);
   }
 
   .primary:hover {
-    background: #e63600;
-    border-color: #e63600;
+    background: color-mix(in srgb, var(--accent) 85%, black);
+    border-color: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .ghost {
-    background: white;
-    color: #ff3e00;
-    border: 2px solid #ffc9a3;
+    background: var(--bg-surface);
+    color: var(--accent);
+    border: 2px solid var(--border);
   }
 
   .ghost:hover {
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   /* 게스트 닉네임 */
@@ -145,22 +145,22 @@
     margin-bottom: 0.35rem;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #7a5a44;
+    color: var(--text-secondary);
   }
 
   .guest-nickname input {
     width: 100%;
     padding: 0.7rem;
     font-size: 1rem;
-    border: 2px solid #ffd6b0;
+    border: 2px solid var(--border);
     border-radius: 8px;
     box-sizing: border-box;
-    background: white;
+    background: var(--bg-surface);
   }
 
   .guest-nickname input:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   /* 방 목록 2단 그리드 (고정 높이 스크롤 + 하단 페이드아웃) */
@@ -186,16 +186,16 @@
     );
   }
 
-  /* 얇은 주황 스크롤바 */
+  /* 얇은 액센트 스크롤바 */
   .grid::-webkit-scrollbar {
     width: 8px;
   }
   .grid::-webkit-scrollbar-thumb {
-    background: #ffcaa6;
+    background: color-mix(in srgb, var(--accent) 40%, transparent);
     border-radius: 999px;
   }
   .grid::-webkit-scrollbar-thumb:hover {
-    background: #ff9e6f;
+    background: color-mix(in srgb, var(--accent) 65%, transparent);
   }
 
   .room-card {
@@ -204,18 +204,18 @@
     gap: 0.5rem;
     padding: 1.1rem 1.2rem;
     text-align: left;
-    background: white;
-    border: 1px solid #ffe1c9;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 14px;
-    box-shadow: 0 4px 14px rgba(255, 62, 0, 0.06);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 15%, transparent);
     cursor: pointer;
     transition: all 0.2s;
   }
 
   .room-card:hover:not(:disabled) {
-    border-color: #ff3e00;
+    border-color: var(--accent);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 62, 0, 0.14);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 25%, transparent);
   }
 
   .room-card:disabled {
@@ -226,7 +226,7 @@
   .room-title {
     font-size: 1.1rem;
     font-weight: 800;
-    color: #3a2c22;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -234,7 +234,7 @@
 
   .room-host {
     font-size: 0.85rem;
-    color: #9a7b5f;
+    color: var(--text-secondary);
   }
 
   .room-meta {
@@ -247,9 +247,9 @@
   .pill {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #7a5a44;
-    background: #fff2e6;
-    border: 1px solid #ffd6b0;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
+    border: 1px solid var(--border);
     border-radius: 999px;
     padding: 0.2rem 0.6rem;
     max-width: 100%;
@@ -259,23 +259,23 @@
   }
 
   .pill.full {
-    color: #c0392b;
-    background: #fdecea;
-    border-color: #f5c6c0;
+    color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger) 10%, var(--bg-surface));
+    border-color: color-mix(in srgb, var(--color-danger) 30%, var(--bg-surface));
   }
 
   /* 빈 상태 */
   .empty {
     text-align: center;
     padding: 3rem 1rem;
-    background: white;
-    border: 1px dashed #ffd6b0;
+    background: var(--bg-surface);
+    border: 1px dashed var(--border);
     border-radius: 16px;
   }
 
   .empty p {
     margin: 0 0 1rem;
-    color: #9a7b5f;
+    color: var(--text-secondary);
   }
 
   /* 모바일: 1단 */

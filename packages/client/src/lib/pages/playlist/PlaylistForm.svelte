@@ -59,7 +59,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -67,10 +67,11 @@
   }
 
   .modal {
-    background-color: white;
+    background-color: var(--bg-surface);
     padding: 2rem;
+    border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--text-primary) 30%, transparent);
     max-width: 500px;
     width: 90%;
   }
@@ -78,7 +79,7 @@
   h3 {
     margin-top: 0;
     margin-bottom: 1.5rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   .form-group {
@@ -89,23 +90,25 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   input,
   textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1rem;
     box-sizing: border-box;
+    background: var(--bg-surface);
+    color: var(--text-primary);
   }
 
   input:focus,
   textarea:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   .button-group {
@@ -124,20 +127,20 @@
   }
 
   .btn-primary {
-    background-color: #ff3e00;
-    color: white;
+    background-color: var(--accent);
+    color: var(--text-on-accent);
   }
 
   .btn-primary:hover {
-    background-color: #e63900;
+    background-color: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .btn-secondary {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: color-mix(in srgb, var(--text-secondary) 15%, var(--bg-surface));
+    color: var(--text-primary);
   }
 
   .btn-secondary:hover {
-    background-color: #d0d0d0;
+    background-color: color-mix(in srgb, var(--text-secondary) 25%, var(--bg-surface));
   }
 </style>

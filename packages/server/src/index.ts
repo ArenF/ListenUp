@@ -374,6 +374,8 @@ io.on("connection", (socket) => {
 
 // 초기화 및 서버 시작
 async function startServer() {
+  console.log("🚀 Starting ListenUp! server...");
+
   validateEnvYouTube();
   validateEnvAuth();
 
@@ -383,11 +385,34 @@ async function startServer() {
   // 플레이리스트 서비스 초기화
   await playlistService.initialize();
 
+  // 포트 사용 중(EADDRINUSE) 등 리스닝 실패를 명확히 남긴다
+  httpServer.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code === "EADDRINUSE") {
+      console.error(
+        `❌ Port ${config.server.port} is already in use. ` +
+          `Stop the other process or set PORT to a different value.`
+      );
+    } else {
+      console.error("❌ Server error:", error);
+    }
+    process.exit(1);
+  });
+
   httpServer.listen(config.server.port, () => {
     console.log(`Server running on http://localhost:${config.server.port}`);
     console.log(`Socket.IO Ready`);
   });
 }
+
+// JS 레벨 오류가 조용히 프로세스를 종료시키지 않도록 원인을 로깅한다.
+process.on("uncaughtException", (error) => {
+  console.error("❌ Uncaught exception:", error);
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ Unhandled promise rejection:", reason);
+  process.exit(1);
+});
 
 startServer().catch((error) => {
   console.error("Failed to start server:", error);

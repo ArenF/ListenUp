@@ -104,29 +104,29 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background-color: #ffebee;
+    background-color: color-mix(in srgb, var(--color-danger) 12%, var(--bg-surface));
     border-radius: 8px;
     margin-bottom: 1.5rem;
     font-size: 0.85rem;
-    color: #7a5a44;
+    color: var(--text-secondary);
     transition: background-color 0.3s;
   }
 
   .status-bar.connected {
-    background-color: #e8f5e9;
+    background-color: color-mix(in srgb, var(--color-success) 12%, var(--bg-surface));
   }
 
   .status-indicator {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #f44336;
+    background-color: var(--color-danger);
     animation: pulse 2s infinite;
     flex-shrink: 0;
   }
 
   .status-bar.connected .status-indicator {
-    background-color: #4caf50;
+    background-color: var(--color-success);
   }
 
   @keyframes pulse {

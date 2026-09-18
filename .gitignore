@@ -47,4 +47,4 @@ packages/client/vite.config.js
 packages/client/vite.config.d.ts
 
 # Claude AI work files
-claude/
+claude/design-brief.md

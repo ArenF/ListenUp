@@ -128,21 +128,21 @@
 
   h3 {
     margin-bottom: 1rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   h4 {
     margin-bottom: 1rem;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   .empty-message {
     padding: 3rem;
     text-align: center;
-    color: #999;
-    background-color: #f9f9f9;
+    color: var(--text-secondary);
+    background-color: var(--bg-surface);
     border-radius: 8px;
-    border: 2px dashed #ddd;
+    border: 2px dashed var(--border);
   }
 
   .track-item-container {
@@ -154,15 +154,15 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 1rem;
-    background-color: white;
-    border: 2px solid #e0e0e0;
+    background-color: var(--bg-surface);
+    border: 2px solid var(--border);
     border-radius: 8px;
     transition: all 0.2s;
   }
 
   .track-item:hover {
-    border-color: #ff3e00;
-    box-shadow: 0 2px 8px rgba(255, 62, 0, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 15%, transparent);
   }
 
   .track-info {
@@ -172,29 +172,29 @@
   .track-name {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
   }
 
   .track-artist {
     font-size: 0.95rem;
-    color: #666;
+    color: var(--text-secondary);
     margin-bottom: 0.5rem;
   }
 
   .track-details {
     font-size: 0.85rem;
-    color: #999;
+    color: var(--text-secondary);
     margin-bottom: 0.5rem;
   }
 
   .track-answers {
     font-size: 0.9rem;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   .no-answers {
-    color: #999;
+    color: var(--text-secondary);
     font-style: italic;
   }
 
@@ -214,29 +214,30 @@
   }
 
   .btn-edit {
-    background-color: #2196f3;
-    color: white;
+    background-color: var(--bg-surface);
+    color: var(--accent);
+    border: 2px solid var(--border);
   }
 
   .btn-edit:hover {
-    background-color: #1976d2;
+    border-color: var(--accent);
   }
 
   .btn-delete {
-    background-color: #f44336;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--text-on-accent);
   }
 
   .btn-delete:hover {
-    background-color: #d32f2f;
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
   }
 
   .track-edit-form {
     margin-top: 1rem;
     padding: 1rem;
-    background-color: #f0f7ff;
+    background-color: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
     border-radius: 8px;
-    border: 2px solid #2196f3;
+    border: 2px solid var(--accent);
   }
 
   .answers-list {
@@ -255,37 +256,39 @@
   .answer-input-row input {
     flex: 1;
     padding: 0.75rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1rem;
+    background: var(--bg-surface);
+    color: var(--text-primary);
   }
 
   .answer-input-row input:focus {
     outline: none;
-    border-color: #2196f3;
+    border-color: var(--accent);
   }
 
   .btn-remove {
     padding: 0.75rem 1rem;
-    background-color: #f44336;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--text-on-accent);
     font-size: 1.2rem;
     font-weight: bold;
   }
 
   .btn-remove:hover {
-    background-color: #d32f2f;
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
   }
 
   .btn-add-answer {
     width: 100%;
     padding: 0.75rem;
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--color-success);
+    color: var(--text-on-accent);
   }
 
   .btn-add-answer:hover {
-    background-color: #45a049;
+    background-color: color-mix(in srgb, var(--color-success) 85%, black);
   }
 
   .track-edit-actions {
@@ -299,20 +302,20 @@
   }
 
   .btn-save {
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--color-success);
+    color: var(--text-on-accent);
   }
 
   .btn-save:hover {
-    background-color: #45a049;
+    background-color: color-mix(in srgb, var(--color-success) 85%, black);
   }
 
   .btn-cancel {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: color-mix(in srgb, var(--text-secondary) 15%, var(--bg-surface));
+    color: var(--text-primary);
   }
 
   .btn-cancel:hover {
-    background-color: #d0d0d0;
+    background-color: color-mix(in srgb, var(--text-secondary) 25%, var(--bg-surface));
   }
 </style>

@@ -150,24 +150,24 @@
 
 <style>
   .room-info {
-    background-color: #f9f9f9;
+    background-color: var(--bg-surface);
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--text-primary) 15%, transparent);
     text-align: left;
   }
 
   h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   h3 {
     font-size: 1.2rem;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   .info-item {
@@ -179,11 +179,11 @@
     font-family: "Courier New", monospace;
     font-size: 1.5rem;
     font-weight: bold;
-    color: #ff3e00;
-    background-color: #fff;
+    color: var(--accent);
+    background-color: var(--bg-surface);
     padding: 0.25rem 0.75rem;
     border-radius: 6px;
-    border: 2px solid #ff3e00;
+    border: 2px solid var(--accent);
   }
 
   /* 플레이어 목록 */
@@ -199,9 +199,9 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background-color: white;
+    background-color: var(--bg-surface);
     border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--text-primary) 15%, transparent);
   }
 
   .avatar {
@@ -220,7 +220,7 @@
   }
 
   .score {
-    color: #ff3e00;
+    color: var(--accent);
     font-weight: 600;
     margin-left: 0.5rem;
   }
@@ -231,8 +231,8 @@
     padding: 1rem;
     font-size: 1.1rem;
     font-weight: 600;
-    color: white;
-    background-color: #ff3e00;
+    color: var(--text-on-accent);
+    background-color: var(--accent);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -240,9 +240,9 @@
   }
 
   button:hover:not(:disabled) {
-    background-color: #e63900;
+    background-color: color-mix(in srgb, var(--accent) 85%, black);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 62, 0, 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
   }
 
   button:active:not(:disabled) {
@@ -250,53 +250,58 @@
   }
 
   button:disabled {
-    background-color: #ccc;
+    background-color: color-mix(in srgb, var(--text-secondary) 40%, var(--bg-surface));
     cursor: not-allowed;
     transform: none;
   }
 
   .game-button {
     margin-top: 1.5rem;
-    background-color: #4caf50;
+    background-color: var(--color-success);
   }
 
   .game-button:hover:not(:disabled) {
-    background-color: #45a049;
+    background-color: color-mix(in srgb, var(--color-success) 85%, black);
   }
 
   .leave-button {
     margin-top: 2rem;
-    background-color: #757575;
+    background-color: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 2px solid var(--border);
   }
 
   .leave-button:hover:not(:disabled) {
-    background-color: #616161;
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: var(--bg-surface);
   }
 
   .waiting-message {
     margin-top: 1.5rem;
     padding: 1rem;
-    background-color: #fff3cd;
+    background-color: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
     border-radius: 8px;
-    color: #856404;
+    color: var(--text-secondary);
     font-weight: 500;
   }
 
   .loading-status {
     margin: 1rem 0;
     padding: 1rem;
-    background-color: #e3f2fd;
+    background-color: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
     border-radius: 8px;
-    color: #1976d2;
+    color: var(--accent);
     font-weight: 500;
   }
 
   .game-controls {
     margin-top: 1.5rem;
     padding: 1.5rem;
-    background-color: #fff;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--text-primary) 15%, transparent);
   }
 
   .answer-input {
@@ -309,7 +314,7 @@
     flex: 1;
     padding: 0.75rem;
     font-size: 1rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border);
     border-radius: 8px;
     box-sizing: border-box;
     transition: border-color 0.3s;
@@ -317,7 +322,7 @@
 
   .answer-input input:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   .answer-input button {
@@ -336,10 +341,10 @@
   }
 
   .end-button {
-    background-color: #f44336;
+    background-color: var(--color-danger);
   }
 
   .end-button:hover:not(:disabled) {
-    background-color: #d32f2f;
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
   }
 </style>

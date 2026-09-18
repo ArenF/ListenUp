@@ -502,23 +502,23 @@
     width: 100%;
     max-width: 520px;
     padding: 1.5rem;
-    background: white;
-    border: 1px solid #ffe1c9;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(255, 62, 0, 0.06);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .avatar-edit h3 {
     margin: 0 0 0.9rem;
     font-size: 0.9rem;
-    color: #7a5a44;
+    color: var(--text-secondary);
   }
 
   .error {
     padding: 0.6rem 0.75rem;
     margin-bottom: 0.75rem;
-    background: #fdecea;
-    color: #c0392b;
+    background: color-mix(in srgb, var(--color-danger) 10%, var(--bg-surface));
+    color: var(--color-danger);
     border-radius: 8px;
     font-size: 0.8rem;
   }
@@ -537,7 +537,7 @@
     border-radius: 50%;
     overflow: hidden;
     cursor: pointer;
-    background: #fbeee2;
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
     transition: border-color 0.2s;
   }
 
@@ -549,7 +549,7 @@
   }
 
   .preset.selected {
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   .preset:disabled {
@@ -561,19 +561,19 @@
     display: block;
     padding: 0.7rem;
     text-align: center;
-    background: #fff6ee;
-    border: 2px dashed #ffc9a3;
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
+    border: 2px dashed color-mix(in srgb, var(--accent) 40%, var(--bg-surface));
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #7a5a44;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
   }
 
   .upload:hover {
-    border-color: #ff3e00;
-    color: #ff3e00;
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .upload.disabled {
@@ -588,7 +588,7 @@
   .upload-hint {
     margin: 0.5rem 0 0;
     font-size: 0.75rem;
-    color: #c3a88f;
+    color: var(--text-secondary);
     text-align: center;
   }
 
@@ -597,9 +597,9 @@
     width: 100%;
     max-width: 520px;
     padding: 0.8rem;
-    background: white;
-    color: #ff3e00;
-    border: 2px solid #ff3e00;
+    background: var(--bg-surface);
+    color: var(--color-danger);
+    border: 2px solid var(--color-danger);
     border-radius: 8px;
     font-size: 0.95rem;
     font-weight: 700;
@@ -608,8 +608,8 @@
   }
 
   .logout:hover {
-    background: #ff3e00;
-    color: white;
+    background: var(--color-danger);
+    color: var(--text-on-accent);
   }
 
   /* 모바일 */

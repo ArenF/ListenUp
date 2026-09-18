@@ -93,16 +93,17 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: rgba(58, 44, 34, 0.45);
+    background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
   }
 
   .modal {
     width: 100%;
     max-width: 360px;
     padding: 1.5rem;
-    background: white;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 20px 50px color-mix(in srgb, var(--text-primary) 25%, transparent);
     text-align: left;
   }
 
@@ -116,12 +117,12 @@
   .modal-header h3 {
     margin: 0;
     font-size: 1.2rem;
-    color: #3a2c22;
+    color: var(--text-primary);
   }
 
   .close {
     font-size: 1rem;
-    color: #9a7b5f;
+    color: var(--text-secondary);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -129,7 +130,7 @@
   }
 
   .close:hover {
-    color: #ff3e00;
+    color: var(--accent);
   }
 
   .field {
@@ -141,23 +142,23 @@
     margin-bottom: 0.4rem;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #7a5a44;
+    color: var(--text-secondary);
   }
 
   input {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    border: 2px solid #ffd6b0;
+    border: 2px solid var(--border);
     border-radius: 8px;
     box-sizing: border-box;
-    background: white;
+    background: var(--bg-surface);
     transition: border-color 0.2s;
   }
 
   input:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   #join-code {
@@ -171,8 +172,8 @@
     padding: 0.9rem;
     font-size: 1rem;
     font-weight: 700;
-    color: white;
-    background: #ff3e00;
+    color: var(--text-on-accent);
+    background: var(--accent);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -180,11 +181,11 @@
   }
 
   .submit:hover:not(:disabled) {
-    background: #e63600;
+    background: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .submit:disabled {
-    background: #e6c9b6;
+    background: color-mix(in srgb, var(--accent) 25%, var(--bg-surface));
     cursor: not-allowed;
   }
 </style>

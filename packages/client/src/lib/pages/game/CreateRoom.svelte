@@ -120,31 +120,31 @@
   .header h2 {
     margin: 0;
     font-size: 1.4rem;
-    color: #3a2c22;
+    color: var(--text-primary);
   }
 
   .back {
     padding: 0.5rem 0.9rem;
     font-size: 0.85rem;
     font-weight: 700;
-    color: #7a5a44;
-    background: white;
-    border: 2px solid #ffd6b0;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border: 2px solid var(--border);
     border-radius: 8px;
     cursor: pointer;
   }
 
   .back:hover {
-    border-color: #ff3e00;
-    color: #ff3e00;
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .card {
     padding: 1.75rem 1.5rem;
-    background: white;
-    border: 1px solid #ffe1c9;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(255, 62, 0, 0.06);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .field {
@@ -157,7 +157,7 @@
     margin-bottom: 0.4rem;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #7a5a44;
+    color: var(--text-secondary);
   }
 
   input,
@@ -165,22 +165,22 @@
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    border: 2px solid #ffd6b0;
+    border: 2px solid var(--border);
     border-radius: 8px;
     box-sizing: border-box;
-    background: white;
+    background: var(--bg-surface);
     transition: border-color 0.2s;
   }
 
   input:focus,
   select:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   input:disabled,
   select:disabled {
-    background: #f7f2ea;
+    background: color-mix(in srgb, var(--text-secondary) 10%, var(--bg-surface));
     cursor: not-allowed;
   }
 
@@ -189,18 +189,18 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem;
-    border: 2px solid #ffe1c9;
+    border: 2px solid var(--border);
     border-radius: 8px;
-    background: #fff6ee;
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
     font-weight: 600;
-    color: #3a2c22;
+    color: var(--text-primary);
   }
 
   .badge {
     font-size: 0.7rem;
     font-weight: 700;
-    color: white;
-    background: #ff3e00;
+    color: var(--text-on-accent);
+    background: var(--accent);
     padding: 0.2rem 0.55rem;
     border-radius: 999px;
   }
@@ -219,9 +219,9 @@
     padding: 0.7rem;
     font-size: 0.9rem;
     font-weight: 700;
-    color: #7a5a44;
-    background: #fff6ee;
-    border: 2px solid #ffd6b0;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
+    border: 2px solid var(--border);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s;
@@ -230,17 +230,17 @@
   .toggle small {
     font-weight: 500;
     font-size: 0.7rem;
-    color: #b3987c;
+    color: var(--text-secondary);
   }
 
   .toggle.active {
-    color: #ff3e00;
-    border-color: #ff3e00;
-    background: #fff1e8;
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
   }
 
   .toggle.active small {
-    color: #d9744f;
+    color: color-mix(in srgb, var(--accent) 70%, var(--text-primary));
   }
 
   .submit {
@@ -248,8 +248,8 @@
     padding: 0.95rem;
     font-size: 1.05rem;
     font-weight: 700;
-    color: white;
-    background: #ff3e00;
+    color: var(--text-on-accent);
+    background: var(--accent);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -257,13 +257,13 @@
   }
 
   .submit:hover:not(:disabled) {
-    background: #e63600;
+    background: color-mix(in srgb, var(--accent) 85%, black);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 62, 0, 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
   }
 
   .submit:disabled {
-    background: #e6c9b6;
+    background: color-mix(in srgb, var(--accent) 25%, var(--bg-surface));
     cursor: not-allowed;
   }
 </style>

@@ -33,7 +33,8 @@
   .game-result {
     margin-top: 1.5rem;
     padding: 1.5rem;
-    background-color: #fff;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 8px;
     text-align: center;
   }
@@ -41,22 +42,22 @@
   h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   h4 {
     font-size: 1.2rem;
     margin-top: 1.5rem;
     margin-bottom: 1rem;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   .winner {
     margin: 1rem 0;
     padding: 1rem;
-    background-color: #fff8e1;
+    background-color: color-mix(in srgb, var(--accent) 14%, var(--bg-surface));
     border-radius: 8px;
-    border: 2px solid #ffd54f;
+    border: 2px solid color-mix(in srgb, var(--accent) 60%, var(--bg-surface));
   }
 
   .winner p {
@@ -65,7 +66,7 @@
   }
 
   .winner strong {
-    color: #ff3e00;
+    color: var(--accent);
   }
 
   .final-scores {
@@ -79,13 +80,13 @@
     gap: 1rem;
     padding: 0.75rem;
     margin-bottom: 0.5rem;
-    background-color: #f9f9f9;
+    background-color: color-mix(in srgb, var(--bg-primary) 6%, var(--bg-surface));
     border-radius: 8px;
   }
 
   .score-item .rank {
     font-weight: 700;
-    color: #ff3e00;
+    color: var(--accent);
     min-width: 40px;
   }
 
@@ -96,7 +97,7 @@
 
   .score-item .score {
     font-weight: 600;
-    color: #4caf50;
+    color: var(--color-success);
     margin: 0;
   }
 </style>

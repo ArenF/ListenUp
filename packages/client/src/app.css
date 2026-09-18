@@ -1,12 +1,85 @@
+/* ============================================================
+   ListenUp! 테마 토큰
+   데이터 속성으로 3개 테마를 전환한다.
+   - 기본(속성 없음 / data-theme="dark")  : 퍼플 네온
+   - data-theme="light"                   : 피치 라이트
+   - data-theme="arcade"                  : 아크 네온 (아케이드 모드)
+   ============================================================ */
+
+/* ---------- 기본(다크) — "퍼플 네온" ---------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* 배경 */
+  --bg-primary: #201255;                /* 짙은 남紫色, 전체 배경 */
+  --bg-surface: #2a1a6e;                /* 한 단계 밝은 퍼플, 카드/컨테이너 */
+
+  /* 텍스트 */
+  --text-primary: #f0ecff;              /* 거의 흰색 라벤더, 본문 */
+  --text-secondary: #b8a9e0;            /* 라벤더 그레이, 라벨/캡션 */
+
+  /* 액센트 */
+  --accent: #a890e8;                    /* 밝은 라벤더, CTA/하이라이트 */
+  --accent-alt: #ff6bcb;                /* 핑크 네온, 보조 강조 */
+  --text-on-accent: #201255;            /* 액센트 위에 올라갈 텍스트 */
+
+  /* 시맨틱 */
+  --color-success: #7cdeba;             /* 민트 그린, 정답/성공 */
+  --color-danger: #ff5a6e;              /* 코랄 레드, 오답/경고 */
+
+  /* 보더 */
+  --border: rgba(168, 144, 232, 0.2);   /* 투명 라벤더, 미세 경계 */
+}
+
+/* ---------- 라이트 — "소프트 라벤더" ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-primary: #f5f0ff;                /* 연한 라벤더 화이트, 전체 배경 */
+  --bg-surface: #ffffff;                /* 순백, 카드/컨테이너 */
+
+  --text-primary: #2d1b69;              /* 딥 퍼플, 본문 */
+  --text-secondary: #6b5b8a;            /* 뮤트 퍼플, 라벨/캡션 */
+
+  --accent: #6b4fba;                    /* 딥 라벤더, CTA */
+  --accent-alt: #e84393;                /* 핑크, 보조 강조 */
+  --text-on-accent: #ffffff;            /* 액센트 위 텍스트 */
+
+  --color-success: #27ae60;             /* 그린 */
+  --color-danger: #e74c3c;              /* 레드 */
+
+  --border: #e0d6f5;                    /* 연한 라벤더 보더 */
+}
+
+/* ---------- 아케이드 — "아크 네온" ---------- */
+[data-theme="arcade"] {
+  color-scheme: dark;
+
+  --bg-primary: #0a0a1a;                /* 거의 블랙, 네온 대비 극대 */
+  --bg-surface: #141428;                /* 다크 네이비, 카드 */
+
+  --text-primary: #eaffff;              /* 냉백, 시안 틴트 */
+  --text-secondary: #7ec8c8;            /* 딥 시안 그레이 */
+
+  --accent: #00e5ff;                    /* 브라이트 시안, 메인 CTA */
+  --accent-alt: #ff2d6f;                /* 핫핑크, 보조 강조 */
+  --text-on-accent: #0a0a1a;            /* 액센트 위 텍스트 */
+
+  --color-success: #00ff94;             /* 라임 네온 */
+  --color-danger: #ff1744;              /* 순수 레드 */
+
+  --border: rgba(0, 229, 255, 0.2);     /* 투명 시안 */
+}
+
+/* ============================================================
+   공통 기본 스타일 (토큰 참조)
+   ============================================================ */
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  /* 밝은 주황-베이지 테마 (OS 다크모드와 무관하게 항상 라이트) */
-  color-scheme: light;
-  color: #3a2c22;
-  background-color: #fff7ee;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,11 +89,13 @@
 
 a {
   font-weight: 500;
-  color: #ff3e00;
+  color: var(--accent);
   text-decoration: inherit;
+  transition: color 0.2s;
 }
 a:hover {
-  color: #e63600;
+  /* hover 시 액센트를 살짝 밝게 */
+  color: color-mix(in srgb, var(--accent) 80%, white);
 }
 
 body {
@@ -29,9 +104,10 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  /* 위쪽은 크림, 아래로 옅은 살구빛으로 은은한 웜톤 베이스 */
-  background: linear-gradient(180deg, #fff7ee 0%, #ffe9d5 100%);
-  color: #3a2c22;
+  /* 위→아래로 배경에서 서피스으로 이어지는 은은한 그래디언트 */
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-surface) 100%);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 h1 {
@@ -64,12 +140,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  /* 전역에서 검정 배경을 강제하지 않는다. 각 컴포넌트가 자기 색을 정한다. */
+  /* 전역에서 특정 배경을 강제하지 않는다. 각 컴포넌트가 자기 색을 정한다. */
   background-color: transparent;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.2s, color 0.2s, border-color 0.25s;
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 4px auto var(--accent);
 }

@@ -112,19 +112,20 @@
     flex-direction: column;
     gap: 1rem;
     padding: 2rem;
-    background: white;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--text-primary) 10%, transparent);
   }
 
   h2 {
     margin: 0;
-    color: #ff3e00;
+    color: var(--accent);
   }
 
   .subtitle {
     margin: -0.5rem 0 0.5rem;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9rem;
   }
 
@@ -134,17 +135,17 @@
     gap: 0.35rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
   }
 
   .optional {
-    color: #999;
+    color: var(--text-secondary);
     font-weight: 400;
   }
 
   input {
     padding: 0.7rem 0.85rem;
-    border: 2px solid #eee;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.2s;
@@ -152,13 +153,13 @@
 
   input:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   .error {
     padding: 0.7rem 0.85rem;
-    background: #fdecea;
-    color: #c0392b;
+    background: color-mix(in srgb, var(--color-danger) 10%, var(--bg-surface));
+    color: var(--color-danger);
     border-radius: 8px;
     font-size: 0.85rem;
   }
@@ -166,8 +167,8 @@
   .submit {
     margin-top: 0.5rem;
     padding: 0.8rem;
-    background: #ff3e00;
-    color: white;
+    background: var(--accent);
+    color: var(--text-on-accent);
     border: none;
     border-radius: 8px;
     font-size: 1rem;
@@ -177,7 +178,7 @@
   }
 
   .submit:hover:not(:disabled) {
-    background: #e63600;
+    background: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .submit:disabled {
@@ -188,7 +189,7 @@
   .toggle {
     background: none;
     border: none;
-    color: #ff3e00;
+    color: var(--accent);
     font-size: 0.85rem;
     cursor: pointer;
   }

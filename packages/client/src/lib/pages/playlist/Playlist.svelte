@@ -265,13 +265,13 @@
 
   h1 {
     margin-bottom: 2rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   .error-message {
     padding: 1rem;
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: color-mix(in srgb, var(--color-danger) 12%, var(--bg-surface));
+    color: var(--color-danger);
     border-radius: 8px;
     margin-bottom: 1rem;
   }
@@ -285,7 +285,8 @@
 
   /* 사이드바 */
   .sidebar {
-    background-color: #f9f9f9;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1.5rem;
   }
@@ -300,13 +301,13 @@
   .sidebar-header h2 {
     margin: 0;
     font-size: 1.3rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   .btn-create {
     padding: 0.5rem 1rem;
-    background-color: #ff3e00;
-    color: white;
+    background-color: var(--accent);
+    color: var(--text-on-accent);
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -315,14 +316,14 @@
   }
 
   .btn-create:hover {
-    background-color: #e63900;
+    background-color: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .loading,
   .empty-message {
     text-align: center;
     padding: 2rem;
-    color: #999;
+    color: var(--text-secondary);
   }
 
   .playlist-list {
@@ -333,7 +334,7 @@
 
   .playlist-item {
     padding: 1rem;
-    background-color: white;
+    background-color: var(--bg-surface);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
@@ -341,29 +342,30 @@
   }
 
   .playlist-item:hover {
-    border-color: #ff3e00;
+    border-color: var(--accent);
     transform: translateX(4px);
   }
 
   .playlist-item.active {
-    background-color: #fff3e0;
-    border-color: #ff3e00;
+    background-color: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
+    border-color: var(--accent);
   }
 
   .playlist-name {
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
   }
 
   .playlist-count {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-secondary);
   }
 
   /* 메인 컨텐츠 */
   .main-content {
-    background-color: #f9f9f9;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 2rem;
   }
@@ -374,17 +376,17 @@
     align-items: flex-start;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--border);
   }
 
   .playlist-info h2 {
     margin: 0 0 0.5rem 0;
-    color: #333;
+    color: var(--text-primary);
   }
 
   .playlist-info p {
     margin: 0;
-    color: #666;
+    color: var(--text-secondary);
   }
 
   .owner-label {
@@ -392,7 +394,7 @@
     margin-top: 0.5rem;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #888;
+    color: var(--text-secondary);
   }
 
   .playlist-actions {
@@ -410,36 +412,37 @@
   }
 
   .btn-primary {
-    background-color: #ff3e00;
-    color: white;
+    background-color: var(--accent);
+    color: var(--text-on-accent);
   }
 
   .btn-primary:hover {
-    background-color: #e63900;
+    background-color: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .btn-secondary {
-    background-color: #2196f3;
-    color: white;
+    background-color: var(--bg-surface);
+    color: var(--accent);
+    border: 2px solid var(--border);
   }
 
   .btn-secondary:hover {
-    background-color: #1976d2;
+    border-color: var(--accent);
   }
 
   .btn-danger {
-    background-color: #f44336;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--text-on-accent);
   }
 
   .btn-danger:hover {
-    background-color: #d32f2f;
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
   }
 
   .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    color: #999;
+    color: var(--text-secondary);
   }
 
   .empty-state h2 {

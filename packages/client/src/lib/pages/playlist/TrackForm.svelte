@@ -101,7 +101,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -110,10 +110,11 @@
   }
 
   .modal {
-    background-color: white;
+    background-color: var(--bg-surface);
     padding: 2rem;
+    border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--text-primary) 30%, transparent);
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
@@ -123,13 +124,13 @@
   h3 {
     margin-top: 0;
     margin-bottom: 1.5rem;
-    color: #333;
+    color: var(--text-primary);
   }
 
   h4 {
     margin-top: 1rem;
     margin-bottom: 0.75rem;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   .form-group {
@@ -140,21 +141,23 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #555;
+    color: var(--text-secondary);
   }
 
   input {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1rem;
     box-sizing: border-box;
+    background: var(--bg-surface);
+    color: var(--text-primary);
   }
 
   input:focus {
     outline: none;
-    border-color: #ff3e00;
+    border-color: var(--accent);
   }
 
   .url-input-group {
@@ -168,9 +171,9 @@
 
   .btn-search {
     padding: 0.75rem 1.5rem;
-    background-color: #2196f3;
-    color: white;
-    border: none;
+    background-color: var(--bg-surface);
+    color: var(--accent);
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -178,22 +181,22 @@
   }
 
   .btn-search:hover {
-    background-color: #1976d2;
+    border-color: var(--accent);
   }
 
   .video-id-display {
     margin-top: 0.5rem;
     padding: 0.5rem;
-    background-color: #f0f0f0;
+    background-color: color-mix(in srgb, var(--text-secondary) 12%, var(--bg-surface));
     border-radius: 4px;
     font-size: 0.9rem;
-    color: #666;
+    color: var(--text-secondary);
   }
 
   .loading {
     text-align: center;
     padding: 2rem;
-    color: #666;
+    color: var(--text-secondary);
   }
 
   .track-info {
@@ -207,14 +210,14 @@
   .answers-section {
     margin-top: 1.5rem;
     padding: 1rem;
-    background-color: #f9f9f9;
+    background-color: var(--bg-surface);
     border-radius: 8px;
-    border-top: 3px solid #ff3e00;
+    border-top: 3px solid var(--accent);
   }
 
   .hint {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--text-secondary);
     font-style: italic;
   }
 
@@ -237,8 +240,8 @@
 
   .btn-remove {
     padding: 0.75rem 1rem;
-    background-color: #f44336;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--text-on-accent);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -247,14 +250,14 @@
   }
 
   .btn-remove:hover {
-    background-color: #d32f2f;
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
   }
 
   .btn-add-answer {
     width: 100%;
     padding: 0.75rem;
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--color-success);
+    color: var(--text-on-accent);
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -262,7 +265,7 @@
   }
 
   .btn-add-answer:hover {
-    background-color: #45a049;
+    background-color: color-mix(in srgb, var(--color-success) 85%, black);
   }
 
   .track-form-actions {
@@ -282,20 +285,20 @@
   }
 
   .btn-primary {
-    background-color: #ff3e00;
-    color: white;
+    background-color: var(--accent);
+    color: var(--text-on-accent);
   }
 
   .btn-primary:hover {
-    background-color: #e63900;
+    background-color: color-mix(in srgb, var(--accent) 85%, black);
   }
 
   .btn-secondary {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: color-mix(in srgb, var(--text-secondary) 15%, var(--bg-surface));
+    color: var(--text-primary);
   }
 
   .btn-secondary:hover {
-    background-color: #d0d0d0;
+    background-color: color-mix(in srgb, var(--text-secondary) 25%, var(--bg-surface));
   }
 </style>
