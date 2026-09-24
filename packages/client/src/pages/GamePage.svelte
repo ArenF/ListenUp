@@ -104,7 +104,7 @@
 
 <style>
   .game-container {
-    padding: 2rem;
+    padding: var(--space-8);
     max-width: 820px;
     margin: 0 auto;
   }
@@ -114,12 +114,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
     background-color: color-mix(in srgb, var(--color-danger) 12%, var(--bg-surface));
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    font-size: 0.85rem;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-6);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     transition: background-color 0.3s;
   }

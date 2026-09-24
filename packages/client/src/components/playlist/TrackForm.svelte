@@ -111,10 +111,10 @@
 
   .modal {
     background-color: var(--bg-surface);
-    padding: 2rem;
+    padding: var(--space-8);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px color-mix(in srgb, var(--text-primary) 30%, transparent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
@@ -123,33 +123,33 @@
 
   h3 {
     margin-top: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
     color: var(--text-primary);
   }
 
   h4 {
-    margin-top: 1rem;
-    margin-bottom: 0.75rem;
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-3);
     color: var(--text-secondary);
   }
 
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
   }
 
   label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
     font-weight: 600;
     color: var(--text-secondary);
   }
 
   input {
     width: 100%;
-    padding: 0.75rem;
+    padding: var(--space-3);
     border: 2px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
     box-sizing: border-box;
     background: var(--bg-surface);
     color: var(--text-primary);
@@ -162,7 +162,7 @@
 
   .url-input-group {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .url-input-group input {
@@ -170,11 +170,11 @@
   }
 
   .btn-search {
-    padding: 0.75rem 1.5rem;
+    padding: var(--space-3) var(--space-6);
     background-color: var(--bg-surface);
     color: var(--accent);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -185,38 +185,38 @@
   }
 
   .video-id-display {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
+    margin-top: var(--space-2);
+    padding: var(--space-2);
     background-color: color-mix(in srgb, var(--text-secondary) 12%, var(--bg-surface));
-    border-radius: 4px;
-    font-size: 0.9rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
   .loading {
     text-align: center;
-    padding: 2rem;
+    padding: var(--space-8);
     color: var(--text-secondary);
   }
 
   .track-info {
-    margin-top: 1rem;
+    margin-top: var(--space-4);
   }
 
   .track-info p {
-    margin: 0.5rem 0;
+    margin: var(--space-2) 0;
   }
 
   .answers-section {
-    margin-top: 1.5rem;
-    padding: 1rem;
+    margin-top: var(--space-6);
+    padding: var(--space-4);
     background-color: var(--bg-surface);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     border-top: 3px solid var(--accent);
   }
 
   .hint {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     font-style: italic;
   }
@@ -224,13 +224,13 @@
   .answers-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin: 1rem 0;
+    gap: var(--space-2);
+    margin: var(--space-4) 0;
   }
 
   .answer-input-row {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: center;
   }
 
@@ -239,13 +239,13 @@
   }
 
   .btn-remove {
-    padding: 0.75rem 1rem;
+    padding: var(--space-3) var(--space-4);
     background-color: var(--color-danger);
     color: var(--text-on-accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: var(--font-size-xl);
     font-weight: bold;
   }
 
@@ -255,11 +255,11 @@
 
   .btn-add-answer {
     width: 100%;
-    padding: 0.75rem;
+    padding: var(--space-3);
     background-color: var(--color-success);
     color: var(--text-on-accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
   }
@@ -270,15 +270,15 @@
 
   .track-form-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     justify-content: flex-end;
-    margin-top: 1.5rem;
+    margin-top: var(--space-6);
   }
 
   button {
-    padding: 0.75rem 1.5rem;
+    padding: var(--space-3) var(--space-6);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;

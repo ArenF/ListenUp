@@ -68,27 +68,27 @@
 
   .modal {
     background-color: var(--bg-surface);
-    padding: 2rem;
+    padding: var(--space-8);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px color-mix(in srgb, var(--text-primary) 30%, transparent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
     max-width: 500px;
     width: 90%;
   }
 
   h3 {
     margin-top: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
     color: var(--text-primary);
   }
 
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
   }
 
   label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
     font-weight: 600;
     color: var(--text-secondary);
   }
@@ -96,10 +96,10 @@
   input,
   textarea {
     width: 100%;
-    padding: 0.75rem;
+    padding: var(--space-3);
     border: 2px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
     box-sizing: border-box;
     background: var(--bg-surface);
     color: var(--text-primary);
@@ -113,14 +113,14 @@
 
   .button-group {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     justify-content: flex-end;
   }
 
   button {
-    padding: 0.75rem 1.5rem;
+    padding: var(--space-3) var(--space-6);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;

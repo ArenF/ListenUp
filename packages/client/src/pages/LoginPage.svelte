@@ -102,7 +102,7 @@
   .auth {
     display: flex;
     justify-content: center;
-    padding: 3rem 1rem;
+    padding: var(--space-12) var(--space-4);
   }
 
   .auth-card {
@@ -110,12 +110,12 @@
     max-width: 380px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 2rem;
+    gap: var(--space-4);
+    padding: var(--space-8);
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--text-primary) 10%, transparent);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
   }
 
   h2 {
@@ -124,16 +124,16 @@
   }
 
   .subtitle {
-    margin: -0.5rem 0 0.5rem;
+    margin: calc(var(--space-2) * -1) 0 var(--space-2);
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
   }
 
   label {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     color: var(--text-primary);
   }
@@ -146,8 +146,8 @@
   input {
     padding: 0.7rem 0.85rem;
     border: 2px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
     transition: border-color 0.2s;
   }
 
@@ -160,18 +160,18 @@
     padding: 0.7rem 0.85rem;
     background: color-mix(in srgb, var(--color-danger) 10%, var(--bg-surface));
     color: var(--color-danger);
-    border-radius: 8px;
-    font-size: 0.85rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
   }
 
   .submit {
-    margin-top: 0.5rem;
+    margin-top: var(--space-2);
     padding: 0.8rem;
     background: var(--accent);
     color: var(--text-on-accent);
     border: none;
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
     font-weight: 700;
     cursor: pointer;
     transition: background 0.2s;
@@ -190,7 +190,7 @@
     background: none;
     border: none;
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     cursor: pointer;
   }
 

@@ -258,28 +258,28 @@
 
 <style>
   .playlist-manager {
-    padding: 2rem;
+    padding: var(--space-8);
     max-width: 1400px;
     margin: 0 auto;
   }
 
   h1 {
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-8);
     color: var(--text-primary);
   }
 
   .error-message {
-    padding: 1rem;
+    padding: var(--space-4);
     background-color: color-mix(in srgb, var(--color-danger) 12%, var(--bg-surface));
     color: var(--color-danger);
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
   }
 
   .content {
     display: grid;
     grid-template-columns: 300px 1fr;
-    gap: 2rem;
+    gap: var(--space-8);
     min-height: 600px;
   }
 
@@ -287,15 +287,15 @@
   .sidebar {
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
   }
 
   .sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
   }
 
   .sidebar-header h2 {
@@ -305,14 +305,14 @@
   }
 
   .btn-create {
-    padding: 0.5rem 1rem;
+    padding: var(--space-2) var(--space-4);
     background-color: var(--accent);
     color: var(--text-on-accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
   }
 
   .btn-create:hover {
@@ -322,20 +322,20 @@
   .loading,
   .empty-message {
     text-align: center;
-    padding: 2rem;
+    padding: var(--space-8);
     color: var(--text-secondary);
   }
 
   .playlist-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .playlist-item {
-    padding: 1rem;
+    padding: var(--space-4);
     background-color: var(--bg-surface);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s;
     border: 2px solid transparent;
@@ -354,11 +354,11 @@
   .playlist-name {
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-1);
   }
 
   .playlist-count {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
 
@@ -366,21 +366,21 @@
   .main-content {
     background-color: var(--bg-primary);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 2rem;
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
   }
 
   .playlist-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
     border-bottom: 2px solid var(--border);
   }
 
   .playlist-info h2 {
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 var(--space-2) 0;
     color: var(--text-primary);
   }
 
@@ -391,7 +391,7 @@
 
   .owner-label {
     display: inline-block;
-    margin-top: 0.5rem;
+    margin-top: var(--space-2);
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -399,13 +399,13 @@
 
   .playlist-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   button {
-    padding: 0.75rem 1.5rem;
+    padding: var(--space-3) var(--space-6);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -441,12 +441,12 @@
 
   .empty-state {
     text-align: center;
-    padding: 4rem 2rem;
+    padding: var(--space-16) var(--space-8);
     color: var(--text-secondary);
   }
 
   .empty-state h2 {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
   }
 
   /* 반응형 */
@@ -456,7 +456,7 @@
     }
 
     .sidebar {
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-8);
     }
   }
 </style>

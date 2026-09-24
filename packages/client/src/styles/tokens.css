@@ -1,0 +1,157 @@
+/* ============================================================
+   ListenUp! 테마 토큰
+   데이터 속성으로 3개 테마를 전환한다.
+   - 기본(속성 없음 / data-theme="dark")  : 퍼플 네온
+   - data-theme="light"                   : 피치 라이트
+   - data-theme="arcade"                  : 아크 네온 (아케이드 모드)
+   ============================================================ */
+
+/* ---------- 기본(다크) — "퍼플 네온" ---------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* 배경 */
+  --bg-primary: #201255;                /* 짙은 남紫色, 전체 배경 */
+  --bg-surface: #2a1a6e;                /* 한 단계 밝은 퍼플, 카드/컨테이너 */
+
+  /* 텍스트 */
+  --text-primary: #f0ecff;              /* 거의 흰색 라벤더, 본문 */
+  --text-secondary: #b8a9e0;            /* 라벤더 그레이, 라벨/캡션 */
+
+  /* 액센트 */
+  --accent: #a890e8;                    /* 밝은 라벤더, CTA/하이라이트 */
+  --accent-alt: #ff6bcb;                /* 핑크 네온, 보조 강조 */
+  --text-on-accent: #201255;            /* 액센트 위에 올라갈 텍스트 */
+
+  /* 시맨틱 */
+  --color-success: #7cdeba;             /* 민트 그린, 정답/성공 */
+  --color-danger: #ff5a6e;              /* 코랄 레드, 오답/경고 */
+
+  /* 보더 */
+  --border: rgba(168, 144, 232, 0.2);   /* 투명 라벤더, 미세 경계 */
+}
+
+/* ---------- 라이트 — "소프트 라벤더" ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-primary: #f5f0ff;                /* 연한 라벤더 화이트, 전체 배경 */
+  --bg-surface: #ffffff;                /* 순백, 카드/컨테이너 */
+
+  --text-primary: #2d1b69;              /* 딥 퍼플, 본문 */
+  --text-secondary: #6b5b8a;            /* 뮤트 퍼플, 라벨/캡션 */
+
+  --accent: #6b4fba;                    /* 딥 라벤더, CTA */
+  --accent-alt: #e84393;                /* 핑크, 보조 강조 */
+  --text-on-accent: #ffffff;            /* 액센트 위 텍스트 */
+
+  --color-success: #27ae60;             /* 그린 */
+  --color-danger: #e74c3c;              /* 레드 */
+
+  --border: #e0d6f5;                    /* 연한 라벤더 보더 */
+}
+
+/* ---------- 아케이드 — "아크 네온" ---------- */
+[data-theme="arcade"] {
+  color-scheme: dark;
+
+  --bg-primary: #0a0a1a;                /* 거의 블랙, 네온 대비 극대 */
+  --bg-surface: #141428;                /* 다크 네이비, 카드 */
+
+  --text-primary: #eaffff;              /* 냉백, 시안 틴트 */
+  --text-secondary: #7ec8c8;            /* 딥 시안 그레이 */
+
+  --accent: #00e5ff;                    /* 브라이트 시안, 메인 CTA */
+  --accent-alt: #ff2d6f;                /* 핫핑크, 보조 강조 */
+  --text-on-accent: #0a0a1a;            /* 액센트 위 텍스트 */
+
+  --color-success: #00ff94;             /* 라임 네온 */
+  --color-danger: #ff1744;              /* 순수 레드 */
+
+  --border: rgba(0, 229, 255, 0.2);     /* 투명 시안 */
+}
+
+
+/* ============================================================
+   크기 토큰 (모든 테마 공통)
+   ============================================================ */
+
+:root {
+  /* 여백 — 숫자 × 0.25rem (예: --space-4 = 1rem) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* 글꼴 */
+  --font-family-base: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-size-2xs: 0.75rem;             /* 배지, 보조 라벨 */
+  --font-size-xs: 0.85rem;              /* 캡션, 상태 메시지 */
+  --font-size-sm: 0.9rem;               /* 작은 버튼, 메타 정보 */
+  --font-size-base: 1rem;               /* 본문 */
+  --font-size-lg: 1.1rem;               /* 강조 본문 */
+  --font-size-xl: 1.2rem;               /* 소제목 */
+  --font-size-2xl: 1.5rem;              /* 섹션 제목 */
+
+  /* 모서리 */
+  --radius-sm: 4px;
+  --radius-md: 8px;                     /* 버튼·입력·카드 기본 */
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;                 /* 알약 모양 */
+
+  /* 그림자 — 색은 현재 테마 토큰을 따른다 */
+  --shadow-sm: 0 2px 8px color-mix(in srgb, var(--text-primary) 15%, transparent);
+  --shadow-md: 0 8px 24px color-mix(in srgb, var(--text-primary) 10%, transparent);
+  --shadow-modal: 0 4px 20px color-mix(in srgb, var(--text-primary) 30%, transparent);
+  --shadow-accent: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
+  --shadow-accent-soft: 0 6px 18px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ============================================================
+   프로필 카드 팔레트 (모든 테마 공통)
+   수집형 카드는 테마와 상관없이 같은 피치 톤으로 보인다.
+   ============================================================ */
+
+:root {
+  --card-ink: #3a2c22;                  /* 본문 글자, 바코드 */
+  --card-ink-soft: #7a5a44;             /* 하단 장르 라벨 */
+  --card-ink-muted: #9a7b5f;            /* 이메일, 스탯 라벨 */
+  --card-ink-warm: #c07a4a;             /* 대표 스탯 보조 라벨 */
+  --card-highlight: #ff3e00;            /* 레벨, 칭호, 대표 스탯 숫자 */
+  --card-on-highlight: #fff;            /* 배지·리본 글자, 아바타 테두리 */
+
+  --card-bg: linear-gradient(160deg, #fffaf3, #ffe9d2);
+  --card-border: #ffd6b0;
+  --card-line: #ffcaa6;                 /* 아바타 외곽선, 하단 구분선 */
+  --card-divider: rgba(255, 122, 60, 0.4);
+  --card-footer-bg: rgba(255, 255, 255, 0.4);
+  --card-shine: rgba(255, 255, 255, 0.55);
+  --card-ribbon-bg: rgba(58, 44, 34, 0.75);
+  --card-avatar-bg: linear-gradient(160deg, #ffb183, #ff8a5b);
+
+  --card-shadow: 0 18px 40px rgba(255, 62, 0, 0.18);
+  --card-shadow-hover: 0 26px 60px rgba(255, 62, 0, 0.28);
+  --card-avatar-shadow: 0 4px 12px rgba(255, 62, 0, 0.18);
+
+  /* 티어별 카드 배경·테두리와 배지 */
+  --tier-bronze-bg: linear-gradient(160deg, #fdf1e6, #eccdb2);
+  --tier-bronze-border: #d9a978;
+  --tier-bronze-badge: linear-gradient(135deg, #ff6b3d, #ff3e00);
+  --tier-silver-bg: linear-gradient(160deg, #fbfcfe, #d7dde6);
+  --tier-silver-border: #b8c2d0;
+  --tier-silver-badge: linear-gradient(135deg, #9aa6b5, #6f7c8d);
+  --tier-gold-bg: linear-gradient(160deg, #fff8e0, #ffe08a);
+  --tier-gold-border: #e6b422;
+  --tier-gold-badge: linear-gradient(135deg, #f6c454, #e6a017);
+  --tier-gold-badge-text: #4a3b30;
+  --tier-master-bg: linear-gradient(135deg, #fff2e6 0%, #ffd1e8 35%, #d9e4ff 70%, #d6fff2 100%);
+  --tier-master-border: #ff6b3d;
+  --tier-master-badge: linear-gradient(135deg, #ff6b3d, #d94ea8, #6d7cff);
+}

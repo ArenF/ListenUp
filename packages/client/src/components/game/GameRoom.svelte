@@ -151,37 +151,37 @@
 <style>
   .room-info {
     background-color: var(--bg-surface);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--text-primary) 15%, transparent);
+    padding: var(--space-8);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     text-align: left;
   }
 
   h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-4);
     color: var(--text-primary);
   }
 
   h3 {
-    font-size: 1.2rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: var(--font-size-xl);
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-2);
     color: var(--text-secondary);
   }
 
   .info-item {
-    margin: 0.75rem 0;
-    font-size: 1.1rem;
+    margin: var(--space-3) 0;
+    font-size: var(--font-size-lg);
   }
 
   .room-code {
     font-family: "Courier New", monospace;
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
     font-weight: bold;
     color: var(--accent);
     background-color: var(--bg-surface);
-    padding: 0.25rem 0.75rem;
+    padding: var(--space-1) var(--space-3);
     border-radius: 6px;
     border: 2px solid var(--accent);
   }
@@ -190,17 +190,17 @@
   .players-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
   }
 
   .player-card {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
+    gap: var(--space-4);
+    padding: var(--space-4);
     background-color: var(--bg-surface);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     box-shadow: 0 1px 4px color-mix(in srgb, var(--text-primary) 15%, transparent);
   }
 
@@ -209,32 +209,32 @@
   }
 
   .player-name {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
     font-weight: 500;
     flex: 1;
     text-align: left;
   }
 
   .host-badge {
-    margin-left: 0.5rem;
+    margin-left: var(--space-2);
   }
 
   .score {
     color: var(--accent);
     font-weight: 600;
-    margin-left: 0.5rem;
+    margin-left: var(--space-2);
   }
 
   /* 버튼 스타일 */
   button {
     width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
+    padding: var(--space-4);
+    font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--text-on-accent);
     background-color: var(--accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.3s;
   }
@@ -242,7 +242,7 @@
   button:hover:not(:disabled) {
     background-color: color-mix(in srgb, var(--accent) 85%, black);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: var(--shadow-accent);
   }
 
   button:active:not(:disabled) {
@@ -256,7 +256,7 @@
   }
 
   .game-button {
-    margin-top: 1.5rem;
+    margin-top: var(--space-6);
     background-color: var(--color-success);
   }
 
@@ -265,7 +265,7 @@
   }
 
   .leave-button {
-    margin-top: 2rem;
+    margin-top: var(--space-8);
     background-color: var(--bg-surface);
     color: var(--text-secondary);
     border: 2px solid var(--border);
@@ -278,44 +278,44 @@
   }
 
   .waiting-message {
-    margin-top: 1.5rem;
-    padding: 1rem;
+    margin-top: var(--space-6);
+    padding: var(--space-4);
     background-color: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-weight: 500;
   }
 
   .loading-status {
-    margin: 1rem 0;
-    padding: 1rem;
+    margin: var(--space-4) 0;
+    padding: var(--space-4);
     background-color: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     color: var(--accent);
     font-weight: 500;
   }
 
   .game-controls {
-    margin-top: 1.5rem;
-    padding: 1.5rem;
+    margin-top: var(--space-6);
+    padding: var(--space-6);
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--text-primary) 15%, transparent);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
   }
 
   .answer-input {
     display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
+    gap: var(--space-2);
+    margin: var(--space-4) 0;
   }
 
   .answer-input input {
     flex: 1;
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: var(--space-3);
+    font-size: var(--font-size-base);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     box-sizing: border-box;
     transition: border-color 0.3s;
   }
@@ -327,13 +327,13 @@
 
   .answer-input button {
     width: auto;
-    padding: 0.75rem 1.5rem;
+    padding: var(--space-3) var(--space-6);
   }
 
   .host-controls {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
   }
 
   .host-controls button {

@@ -123,40 +123,40 @@
 
 <style>
   .track-list {
-    margin-top: 2rem;
+    margin-top: var(--space-8);
   }
 
   h3 {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
     color: var(--text-primary);
   }
 
   h4 {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
     color: var(--text-secondary);
   }
 
   .empty-message {
-    padding: 3rem;
+    padding: var(--space-12);
     text-align: center;
     color: var(--text-secondary);
     background-color: var(--bg-surface);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     border: 2px dashed var(--border);
   }
 
   .track-item-container {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
   }
 
   .track-item {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 1rem;
+    padding: var(--space-4);
     background-color: var(--bg-surface);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     transition: all 0.2s;
   }
 
@@ -170,26 +170,26 @@
   }
 
   .track-name {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-1);
   }
 
   .track-artist {
     font-size: 0.95rem;
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
 
   .track-details {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
 
   .track-answers {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
@@ -200,12 +200,12 @@
 
   .track-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     flex-shrink: 0;
   }
 
   button {
-    padding: 0.5rem 1rem;
+    padding: var(--space-2) var(--space-4);
     border: none;
     border-radius: 6px;
     font-weight: 600;
@@ -233,32 +233,32 @@
   }
 
   .track-edit-form {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: var(--space-4);
+    padding: var(--space-4);
     background-color: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     border: 2px solid var(--accent);
   }
 
   .answers-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
   }
 
   .answer-input-row {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: center;
   }
 
   .answer-input-row input {
     flex: 1;
-    padding: 0.75rem;
+    padding: var(--space-3);
     border: 2px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
     background: var(--bg-surface);
     color: var(--text-primary);
   }
@@ -269,10 +269,10 @@
   }
 
   .btn-remove {
-    padding: 0.75rem 1rem;
+    padding: var(--space-3) var(--space-4);
     background-color: var(--color-danger);
     color: var(--text-on-accent);
-    font-size: 1.2rem;
+    font-size: var(--font-size-xl);
     font-weight: bold;
   }
 
@@ -282,7 +282,7 @@
 
   .btn-add-answer {
     width: 100%;
-    padding: 0.75rem;
+    padding: var(--space-3);
     background-color: var(--color-success);
     color: var(--text-on-accent);
   }
@@ -293,8 +293,8 @@
 
   .track-edit-actions {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
   }
 
   .track-edit-actions button {

@@ -119,7 +119,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
   }
 
   .header h2 {
@@ -129,13 +129,13 @@
   }
 
   .back {
-    padding: 0.5rem 0.9rem;
-    font-size: 0.85rem;
+    padding: var(--space-2) 0.9rem;
+    font-size: var(--font-size-xs);
     font-weight: 700;
     color: var(--text-secondary);
     background: var(--bg-surface);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
   }
 
@@ -145,15 +145,15 @@
   }
 
   .card {
-    padding: 1.75rem 1.5rem;
+    padding: 1.75rem var(--space-6);
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-accent-soft);
   }
 
   .field {
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
   }
 
   label,
@@ -161,17 +161,17 @@
     display: block;
     margin-bottom: 0.4rem;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
 
   input,
   select {
     width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: var(--space-3);
+    font-size: var(--font-size-base);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     box-sizing: border-box;
     background: var(--bg-surface);
     transition: border-color 0.2s;
@@ -193,9 +193,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem;
+    padding: var(--space-3);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
     font-weight: 600;
     color: var(--text-primary);
@@ -207,7 +207,7 @@
     color: var(--text-on-accent);
     background: var(--accent);
     padding: 0.2rem 0.55rem;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
   }
 
   /* 공개/비공개 토글 */
@@ -222,7 +222,7 @@
     flex-direction: column;
     gap: 0.15rem;
     padding: 0.7rem;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--text-secondary);
     background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
@@ -256,7 +256,7 @@
     color: var(--text-on-accent);
     background: var(--accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -264,7 +264,7 @@
   .submit:hover:not(:disabled) {
     background: color-mix(in srgb, var(--accent) 85%, black);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: var(--shadow-accent);
   }
 
   .submit:disabled {

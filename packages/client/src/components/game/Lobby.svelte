@@ -90,7 +90,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
   }
 
   .toolbar h2 {
@@ -101,15 +101,15 @@
 
   .actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .primary,
   .ghost {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.6rem var(--space-4);
+    font-size: var(--font-size-sm);
     font-weight: 700;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -137,23 +137,23 @@
 
   /* 게스트 닉네임 */
   .guest-nickname {
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
   }
 
   .guest-nickname label {
     display: block;
     margin-bottom: 0.35rem;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
 
   .guest-nickname input {
     width: 100%;
     padding: 0.7rem;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     box-sizing: border-box;
     background: var(--bg-surface);
   }
@@ -167,7 +167,7 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: var(--space-4);
     max-height: 62vh;
     overflow-y: auto;
     /* 하단 페이드 안으로 마지막 카드가 충분히 들어오도록 넉넉한 아래 여백 */
@@ -192,7 +192,7 @@
   }
   .grid::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, var(--accent) 40%, transparent);
-    border-radius: 999px;
+    border-radius: var(--radius-full);
   }
   .grid::-webkit-scrollbar-thumb:hover {
     background: color-mix(in srgb, var(--accent) 65%, transparent);
@@ -201,7 +201,7 @@
   .room-card {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-2);
     padding: 1.1rem 1.2rem;
     text-align: left;
     background: var(--bg-surface);
@@ -224,7 +224,7 @@
   }
 
   .room-title {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
     font-weight: 800;
     color: var(--text-primary);
     white-space: nowrap;
@@ -233,7 +233,7 @@
   }
 
   .room-host {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
 
@@ -245,12 +245,12 @@
   }
 
   .pill {
-    font-size: 0.75rem;
+    font-size: var(--font-size-2xs);
     font-weight: 600;
     color: var(--text-secondary);
     background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     padding: 0.2rem 0.6rem;
     max-width: 100%;
     white-space: nowrap;
@@ -267,14 +267,14 @@
   /* 빈 상태 */
   .empty {
     text-align: center;
-    padding: 3rem 1rem;
+    padding: var(--space-12) var(--space-4);
     background: var(--bg-surface);
     border: 1px dashed var(--border);
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
   }
 
   .empty p {
-    margin: 0 0 1rem;
+    margin: 0 0 var(--space-4);
     color: var(--text-secondary);
   }
 
@@ -286,7 +286,7 @@
     .toolbar {
       flex-direction: column;
       align-items: stretch;
-      gap: 0.75rem;
+      gap: var(--space-3);
     }
   }
 </style>

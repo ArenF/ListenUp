@@ -1,0 +1,78 @@
+/* ============================================================
+   공통 기본 스타일 — 요소 기본값 (값은 tokens.css의 변수를 쓴다)
+   ============================================================ */
+
+:root {
+  font-family: var(--font-family-base);
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: inherit;
+  transition: color 0.2s;
+}
+a:hover {
+  /* hover 시 액센트를 살짝 밝게 */
+  color: color-mix(in srgb, var(--accent) 80%, white);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  /* 위→아래로 배경에서 서피스으로 이어지는 은은한 그래디언트 */
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-surface) 100%);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+/* 모바일에서는 좌우 여백을 줄여 콘텐츠가 화면 폭을 더 넓게 쓰도록 한다 */
+@media (max-width: 480px) {
+  #app {
+    padding: var(--space-4) var(--space-2);
+  }
+}
+
+button {
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  /* 전역에서 특정 배경을 강제하지 않는다. 각 컴포넌트가 자기 색을 정한다. */
+  background-color: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.25s;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto var(--accent);
+}

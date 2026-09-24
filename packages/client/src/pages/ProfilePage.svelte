@@ -195,8 +195,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.25rem;
-    padding: 3rem 1rem;
+    gap: var(--space-5);
+    padding: var(--space-12) var(--space-4);
   }
 
   /* ======================== 수집형 플레이어 카드 ======================== */
@@ -204,39 +204,39 @@
     position: relative;
     width: 100%;
     max-width: 400px;
-    padding: 1.1rem 1.25rem 0;
+    padding: 1.1rem var(--space-5) 0;
     border-radius: 20px;
     overflow: hidden;
-    color: #3a2c22;
+    color: var(--card-ink);
     /* 티어별로 배경/테두리를 덮어쓴다 (아래 .bronze/.silver/... 참고) */
-    background: linear-gradient(160deg, #fffaf3, #ffe9d2);
-    border: 2px solid #ffd6b0;
-    box-shadow: 0 18px 40px rgba(255, 62, 0, 0.18);
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    box-shadow: var(--card-shadow);
     transition: box-shadow 0.2s, transform 0.12s ease-out;
     transform-style: preserve-3d;
     will-change: transform;
   }
 
   .player-card:hover {
-    box-shadow: 0 26px 60px rgba(255, 62, 0, 0.28);
+    box-shadow: var(--card-shadow-hover);
   }
 
   /* 티어별 프레임 -------------------------------------------------- */
   .player-card.bronze {
-    background: linear-gradient(160deg, #fdf1e6, #eccdb2);
-    border-color: #d9a978;
+    background: var(--tier-bronze-bg);
+    border-color: var(--tier-bronze-border);
   }
   .player-card.silver {
-    background: linear-gradient(160deg, #fbfcfe, #d7dde6);
-    border-color: #b8c2d0;
+    background: var(--tier-silver-bg);
+    border-color: var(--tier-silver-border);
   }
   .player-card.gold {
-    background: linear-gradient(160deg, #fff8e0, #ffe08a);
-    border-color: #e6b422;
+    background: var(--tier-gold-bg);
+    border-color: var(--tier-gold-border);
   }
   .player-card.master {
-    background: linear-gradient(135deg, #fff2e6 0%, #ffd1e8 35%, #d9e4ff 70%, #d6fff2 100%);
-    border-color: #ff6b3d;
+    background: var(--tier-master-bg);
+    border-color: var(--tier-master-border);
   }
 
   /* 광택 스윕: 마스터 티어에서만 은은히 흐른다 */
@@ -247,7 +247,7 @@
     background: linear-gradient(
       115deg,
       transparent 30%,
-      rgba(255, 255, 255, 0.55) 45%,
+      var(--card-shine) 45%,
       transparent 60%
     );
     background-size: 250% 250%;
@@ -282,35 +282,35 @@
     font-weight: 800;
     font-size: 0.72rem;
     letter-spacing: 1px;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    color: #fff;
-    background: linear-gradient(135deg, #ff6b3d, #ff3e00);
+    padding: var(--space-1) 0.6rem;
+    border-radius: var(--radius-full);
+    color: var(--card-on-highlight);
+    background: var(--tier-bronze-badge);
   }
   .silver .tier-badge {
-    background: linear-gradient(135deg, #9aa6b5, #6f7c8d);
+    background: var(--tier-silver-badge);
   }
   .gold .tier-badge {
-    background: linear-gradient(135deg, #f6c454, #e6a017);
-    color: #4a3b30;
+    background: var(--tier-gold-badge);
+    color: var(--tier-gold-badge-text);
   }
   .master .tier-badge {
-    background: linear-gradient(135deg, #ff6b3d, #d94ea8, #6d7cff);
+    background: var(--tier-master-badge);
   }
 
   .level {
     font-family: "Courier New", monospace;
     font-weight: 800;
     font-size: 0.95rem;
-    color: #ff3e00;
+    color: var(--card-highlight);
   }
 
   /* 히어로 */
   .hero {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 0 1.1rem;
+    gap: var(--space-4);
+    padding: var(--space-4) 0 1.1rem;
     position: relative;
     z-index: 1;
   }
@@ -322,13 +322,13 @@
     flex-shrink: 0;
     border-radius: 50%;
     overflow: hidden;
-    background: linear-gradient(160deg, #ffb183, #ff8a5b);
-    border: 3px solid #fff;
-    outline: 2px solid #ffcaa6;
+    background: var(--card-avatar-bg);
+    border: 3px solid var(--card-on-highlight);
+    outline: 2px solid var(--card-line);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(255, 62, 0, 0.18);
+    box-shadow: var(--card-avatar-shadow);
   }
 
   .photo img {
@@ -353,21 +353,21 @@
   .who .name {
     font-weight: 800;
     font-size: 1.4rem;
-    color: #3a2c22;
+    color: var(--card-ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .who .title {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     font-weight: 700;
-    color: #ff3e00;
+    color: var(--card-highlight);
   }
 
   .who .email {
-    font-size: 0.75rem;
-    color: #9a7b5f;
+    font-size: var(--font-size-2xs);
+    color: var(--card-ink-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -380,8 +380,8 @@
     align-items: center;
     gap: 0.1rem;
     padding: 0.9rem 0;
-    border-top: 1px dashed rgba(255, 122, 60, 0.4);
-    border-bottom: 1px dashed rgba(255, 122, 60, 0.4);
+    border-top: 1px dashed var(--card-divider);
+    border-bottom: 1px dashed var(--card-divider);
     position: relative;
     z-index: 1;
   }
@@ -390,14 +390,14 @@
     font-size: 2.6rem;
     font-weight: 900;
     line-height: 1;
-    color: #ff3e00;
+    color: var(--card-highlight);
   }
 
   .signature .cap {
     font-family: "Courier New", monospace;
     font-size: 0.62rem;
     letter-spacing: 1px;
-    color: #c07a4a;
+    color: var(--card-ink-warm);
     text-transform: uppercase;
   }
 
@@ -405,10 +405,10 @@
   .stat-grid {
     list-style: none;
     margin: 0;
-    padding: 1rem 0;
+    padding: var(--space-4) 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+    gap: var(--space-2);
     position: relative;
     z-index: 1;
   }
@@ -423,23 +423,23 @@
   .stat-grid .num {
     font-weight: 800;
     font-size: 1.15rem;
-    color: #3a2c22;
+    color: var(--card-ink);
   }
 
   .stat-grid .lbl {
     font-size: 0.68rem;
-    color: #9a7b5f;
+    color: var(--card-ink-muted);
   }
 
   /* 하단 바코드 스트립 */
   .strip {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin: 0 -1.25rem;
-    padding: 0.6rem 1.25rem 0.75rem;
-    border-top: 1px dashed #ffcaa6;
-    background: rgba(255, 255, 255, 0.4);
+    gap: var(--space-3);
+    margin: 0 calc(var(--space-5) * -1);
+    padding: 0.6rem var(--space-5) var(--space-3);
+    border-top: 1px dashed var(--card-line);
+    background: var(--card-footer-bg);
     position: relative;
     z-index: 1;
   }
@@ -449,16 +449,16 @@
     height: 22px;
     background-image: repeating-linear-gradient(
       90deg,
-      #3a2c22 0,
-      #3a2c22 2px,
+      var(--card-ink) 0,
+      var(--card-ink) 2px,
       transparent 2px,
       transparent 4px,
-      #3a2c22 4px,
-      #3a2c22 7px,
+      var(--card-ink) 4px,
+      var(--card-ink) 7px,
       transparent 7px,
       transparent 9px,
-      #3a2c22 9px,
-      #3a2c22 10px,
+      var(--card-ink) 9px,
+      var(--card-ink) 10px,
       transparent 10px,
       transparent 14px
     );
@@ -469,7 +469,7 @@
   .fav {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #7a5a44;
+    color: var(--card-ink-soft);
     white-space: nowrap;
   }
 
@@ -478,7 +478,7 @@
     font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: #ff3e00;
+    color: var(--card-highlight);
     white-space: nowrap;
   }
 
@@ -488,12 +488,12 @@
     top: 0.6rem;
     right: -2.1rem;
     transform: rotate(45deg);
-    background: rgba(58, 44, 34, 0.75);
-    color: #fff;
+    background: var(--card-ribbon-bg);
+    color: var(--card-on-highlight);
     font-size: 0.55rem;
     font-weight: 800;
     letter-spacing: 2px;
-    padding: 0.15rem 2rem;
+    padding: 0.15rem var(--space-8);
     z-index: 2;
   }
 
@@ -501,32 +501,32 @@
   .avatar-edit {
     width: 100%;
     max-width: 520px;
-    padding: 1.5rem;
+    padding: var(--space-6);
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-accent-soft);
   }
 
   .avatar-edit h3 {
     margin: 0 0 0.9rem;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
   .error {
-    padding: 0.6rem 0.75rem;
-    margin-bottom: 0.75rem;
+    padding: 0.6rem var(--space-3);
+    margin-bottom: var(--space-3);
     background: color-mix(in srgb, var(--color-danger) 10%, var(--bg-surface));
     color: var(--color-danger);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: 0.8rem;
   }
 
   .presets {
     display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
   }
 
   .preset {
@@ -563,8 +563,8 @@
     text-align: center;
     background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
     border: 2px dashed color-mix(in srgb, var(--accent) 40%, var(--bg-surface));
-    border-radius: 8px;
-    font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
@@ -586,8 +586,8 @@
   }
 
   .upload-hint {
-    margin: 0.5rem 0 0;
-    font-size: 0.75rem;
+    margin: var(--space-2) 0 0;
+    font-size: var(--font-size-2xs);
     color: var(--text-secondary);
     text-align: center;
   }
@@ -600,7 +600,7 @@
     background: var(--bg-surface);
     color: var(--color-danger);
     border: 2px solid var(--color-danger);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
@@ -615,7 +615,7 @@
   /* 모바일 */
   @media (max-width: 480px) {
     .profile {
-      padding: 2rem 0.5rem;
+      padding: var(--space-8) var(--space-2);
     }
   }
 
@@ -629,7 +629,7 @@
       white-space: normal;
     }
     .stat-grid .num {
-      font-size: 1rem;
+      font-size: var(--font-size-base);
     }
   }
 </style>

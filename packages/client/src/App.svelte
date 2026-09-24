@@ -98,14 +98,14 @@
   .navbar {
     background-color: var(--bg-surface);
     color: var(--text-primary);
-    padding: 1rem 2rem;
+    padding: var(--space-4) var(--space-8);
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border);
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--text-primary) 15%, transparent);
+    box-shadow: var(--shadow-sm);
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: var(--space-3);
   }
 
   /* 로고에만 액센트 사용 (아케이드 테마에서 헤더가 물들지 않도록) */
@@ -117,16 +117,16 @@
 
   .nav-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     flex-wrap: wrap;
   }
 
   .nav-button {
-    padding: 0.75rem 1.25rem;
+    padding: var(--space-3) var(--space-5);
     background-color: color-mix(in srgb, var(--accent) 12%, transparent);
     color: var(--text-primary);
     border: 2px solid transparent;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s;
@@ -144,35 +144,35 @@
 
   /* 테마 토글 (현재 테마 아이콘 표시) */
   .theme-toggle {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
     line-height: 1;
-    padding: 0.75rem 0.9rem;
+    padding: var(--space-3) 0.9rem;
   }
 
   /* 로그인 필요 안내 */
   .login-required {
     max-width: 400px;
-    margin: 4rem auto;
-    padding: 2.5rem 2rem;
+    margin: var(--space-16) auto;
+    padding: 2.5rem var(--space-8);
     text-align: center;
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--text-primary) 10%, transparent);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
   }
 
   .login-required p {
-    margin: 0 0 1.5rem;
+    margin: 0 0 var(--space-6);
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .login-cta {
-    padding: 0.8rem 1.5rem;
+    padding: 0.8rem var(--space-6);
     background: var(--accent);
     color: var(--text-on-accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;

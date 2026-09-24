@@ -93,17 +93,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: var(--space-4);
     background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
   }
 
   .modal {
     width: 100%;
     max-width: 360px;
-    padding: 1.5rem;
+    padding: var(--space-6);
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     box-shadow: 0 20px 50px color-mix(in srgb, var(--text-primary) 25%, transparent);
     text-align: left;
   }
@@ -112,22 +112,22 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
   }
 
   .modal-header h3 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: var(--font-size-xl);
     color: var(--text-primary);
   }
 
   .close {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0.25rem;
+    padding: var(--space-1);
   }
 
   .close:hover {
@@ -135,23 +135,23 @@
   }
 
   .field {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
   }
 
   label {
     display: block;
     margin-bottom: 0.4rem;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
 
   input {
     width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: var(--space-3);
+    font-size: var(--font-size-base);
     border: 2px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     box-sizing: border-box;
     background: var(--bg-surface);
     transition: border-color 0.2s;
@@ -171,12 +171,12 @@
   .submit {
     width: 100%;
     padding: 0.9rem;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     font-weight: 700;
     color: var(--text-on-accent);
     background: var(--accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s;
   }

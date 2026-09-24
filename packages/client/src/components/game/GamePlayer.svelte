@@ -52,26 +52,26 @@
 
   /* 음량 조절 */
   .volume-control {
-    margin: 1.5rem 0;
-    padding: 1rem;
+    margin: var(--space-6) 0;
+    padding: var(--space-4);
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     text-align: center;
   }
 
   .volume-control label {
     display: block;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--space-3);
     font-weight: 600;
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .volume-slider {
     width: 100%;
     height: 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: linear-gradient(to right, var(--border) 0%, var(--accent) 100%);
     outline: none;
     -webkit-appearance: none;
