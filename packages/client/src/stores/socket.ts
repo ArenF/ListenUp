@@ -2,7 +2,7 @@ import { io, Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
-} from "./socketEvents";
+} from "../types/socketEvents";
 
 /**
  * 서버에서 오는 이벤트는 타입을 지정하고, 보내는 이벤트는 열어 둔다.

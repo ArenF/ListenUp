@@ -1,6 +1,6 @@
-import { fetchTrack } from "../../api/youtube";
-import { extractVideoId } from "../../utils/youtubeUrl";
-import type { Track } from "../../types";
+import { fetchTrack } from "../api/youtube";
+import { extractVideoId } from "../utils/youtubeUrl";
+import type { Track } from "../types/index";
 
 /**
  * 트랙 추가 폼의 YouTube 검색 상태

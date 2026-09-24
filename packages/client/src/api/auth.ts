@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import type { PublicUser } from "../types";
+import type { PublicUser } from "../types/index";
 
 /**
  * 인증 REST API

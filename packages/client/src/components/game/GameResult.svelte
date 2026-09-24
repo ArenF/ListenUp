@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { GameResult } from "../../types";
+  import type { GameResult } from "../../types/index";
 
   interface Props {
     gameResult: GameResult;

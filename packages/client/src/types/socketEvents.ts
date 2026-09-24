@@ -5,7 +5,7 @@ import type {
   RoomSettings,
   RoomSummary,
   RoundResult,
-} from "./types";
+} from "./index";
 
 /**
  * 서버 → 클라이언트 Socket.IO 이벤트 정의

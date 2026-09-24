@@ -128,7 +128,7 @@ npm run dev:client
 **해결:**
 1. 서버가 실행 중인지 확인 (`npm run dev:server`)
 2. 포트 3000이 사용 중인지 확인
-3. `packages/client/src/lib/socket.ts`에서 서버 URL 확인
+3. `packages/client/src/stores/socket.ts`에서 서버 URL 확인
    ```typescript
    socket = io("http://localhost:3000", { ... });
    ```

@@ -6,7 +6,7 @@
     HiddenTrack,
     Player,
     Room,
-  } from "../../types";
+  } from "../../types/index";
 
   interface Props {
     currentRoom: Room;

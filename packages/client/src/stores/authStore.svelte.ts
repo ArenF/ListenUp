@@ -1,6 +1,6 @@
-import * as authApi from "../../api/auth";
-import { toErrorMessage } from "../../utils/error";
-import type { PublicUser } from "../../types";
+import * as authApi from "../api/auth";
+import { toErrorMessage } from "../utils/error";
+import type { PublicUser } from "../types/index";
 
 /**
  * 로그인 세션 상태 (Svelte 5 룬 기반)

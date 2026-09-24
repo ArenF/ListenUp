@@ -1,6 +1,6 @@
 import { onMount } from "svelte";
 import type { Socket } from "socket.io-client";
-import { initSocket } from "../../socket";
+import { initSocket } from "./socket";
 import { loadPlaylists } from "./gameActions";
 import { registerGameSocketHandlers } from "./gameSocketHandlers";
 import { destroyPlayer, loadIframeApi, setupYouTubePlayer } from "./youtubePlayer.svelte";

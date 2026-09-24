@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import type { Playlist } from "../types";
+import type { Playlist } from "../types/index";
 
 /**
  * 플레이리스트 REST API

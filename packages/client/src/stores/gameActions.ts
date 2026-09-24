@@ -1,8 +1,8 @@
-import { getSocket } from "../../socket";
-import { fetchPlaylists } from "../../api/playlists";
+import { getSocket } from "./socket";
+import { fetchPlaylists } from "../api/playlists";
 import { gameStore } from "./gameStore.svelte";
-import type { AckResponse } from "../../socketEvents";
-import type { AnswerCheckResult, Room, RoomSummary } from "../../types";
+import type { AckResponse } from "../types/socketEvents";
+import type { AnswerCheckResult, Room, RoomSummary } from "../types/index";
 
 /**
  * 게임 화면에서 서버로 보내는 요청 모음

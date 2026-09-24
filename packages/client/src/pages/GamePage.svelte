@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { gameStore } from "./gameStore.svelte";
-  import { startGameSession } from "./gameSession.svelte";
+  import { gameStore } from "../stores/gameStore.svelte";
+  import { startGameSession } from "../stores/gameSession.svelte";
   import {
     endGame,
     leaveRoom,
     nextRound,
     startGame,
     submitAnswer,
-  } from "./gameActions";
-  import { authStore } from "../login/authStore.svelte";
-  import Lobby from "./Lobby.svelte";
-  import CreateRoom from "./CreateRoom.svelte";
-  import JoinRoomModal from "./JoinRoomModal.svelte";
-  import GameRoom from "./GameRoom.svelte";
+  } from "../stores/gameActions";
+  import { authStore } from "../stores/authStore.svelte";
+  import Lobby from "../components/game/Lobby.svelte";
+  import CreateRoom from "../components/game/CreateRoom.svelte";
+  import JoinRoomModal from "../components/game/JoinRoomModal.svelte";
+  import GameRoom from "../components/game/GameRoom.svelte";
 
   interface Props {
     /** 방에 들어가 있지 않을 때 보여줄 화면 */

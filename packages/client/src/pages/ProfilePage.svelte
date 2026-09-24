@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { authStore } from "./authStore.svelte";
-  import { DEFAULT_AVATARS } from "../../avatars";
+  import { authStore } from "../stores/authStore.svelte";
+  import { DEFAULT_AVATARS } from "../utils/avatars";
 
   // 로그인 상태에서만 렌더링되므로 user는 존재한다
   const user = $derived(authStore.user!);

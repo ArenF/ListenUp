@@ -20,7 +20,7 @@ import type {
  */
 /**
  * 기본 제공 아바타 목록 (클라이언트 public/avatars/ 에 실제 파일 존재)
- * 클라이언트 `src/lib/avatars.ts`와 동일하게 유지한다.
+ * 클라이언트 `src/utils/avatars.ts`와 동일하게 유지한다.
  */
 export const DEFAULT_AVATARS = [
   "/avatars/avatar-1.png",

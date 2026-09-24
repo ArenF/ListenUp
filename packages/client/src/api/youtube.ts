@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import type { Track } from "../types";
+import type { Track } from "../types/index";
 
 export function fetchTrack(videoId: string): Promise<Track> {
   return apiFetch<Track>(`/api/youtube/track/${videoId}`);

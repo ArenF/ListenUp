@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { gameStore } from "./gameStore.svelte";
-  import { authStore } from "../login/authStore.svelte";
-  import { joinRoom } from "./gameActions";
+  import { gameStore } from "../../stores/gameStore.svelte";
+  import { authStore } from "../../stores/authStore.svelte";
+  import { joinRoom } from "../../stores/gameActions";
 
   interface Props {
     onClose: () => void;

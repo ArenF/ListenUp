@@ -9,6 +9,6 @@
 | `avatar-2.png` | 치킨 (MC Chicken) |
 | `avatar-3.png` | 늑대 |
 
-기본 아바타 목록은 `packages/client/src/lib/avatars.ts`와
+기본 아바타 목록은 `packages/client/src/utils/avatars.ts`와
 `packages/server/src/services/auth.ts`의 `DEFAULT_AVATARS`에 정의되어 있습니다.
 파일명을 바꾸려면 두 곳을 함께 수정하세요.

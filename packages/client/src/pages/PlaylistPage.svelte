@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import PlaylistForm from "./PlaylistForm.svelte";
-  import TrackForm from "./TrackForm.svelte";
-  import TrackList from "./TrackList.svelte";
-  import { playlistStore } from "./playlistStore.svelte";
-  import { AnswerList } from "./answerList.svelte";
-  import { TrackSearch } from "./trackSearch.svelte";
-  import { toErrorMessage } from "../../utils/error";
-  import { authStore } from "../login/authStore.svelte";
+  import PlaylistForm from "../components/playlist/PlaylistForm.svelte";
+  import TrackForm from "../components/playlist/TrackForm.svelte";
+  import TrackList from "../components/playlist/TrackList.svelte";
+  import { playlistStore } from "../stores/playlistStore.svelte";
+  import { AnswerList } from "../stores/answerList.svelte";
+  import { TrackSearch } from "../stores/trackSearch.svelte";
+  import { toErrorMessage } from "../utils/error";
+  import { authStore } from "../stores/authStore.svelte";
 
   // 선택된 플레이리스트를 현재 사용자가 수정할 수 있는지 (작성자 본인만)
   const canEditSelected = $derived(

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { AnswerList } from "./answerList.svelte";
-  import type { PlaylistTrack, Track } from "../../types";
+  import type { AnswerList } from "../../stores/answerList.svelte";
+  import type { PlaylistTrack, Track } from "../../types/index";
 
   interface Props {
     /** YouTube에서 조회한 트랙 메타데이터 */

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HiddenTrack } from "../../types";
+  import type { HiddenTrack } from "../../types/index";
 
   interface Props {
     preparedTrack: HiddenTrack | null;

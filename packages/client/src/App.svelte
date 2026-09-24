@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Game from "./lib/pages/game/Game.svelte";
-  import Playlist from "./lib/pages/playlist/Playlist.svelte";
-  import Login from "./lib/pages/login/Login.svelte";
-  import Profile from "./lib/pages/login/Profile.svelte";
-  import { authStore } from "./lib/pages/login/authStore.svelte";
+  import Game from "./pages/GamePage.svelte";
+  import Playlist from "./pages/PlaylistPage.svelte";
+  import Login from "./pages/LoginPage.svelte";
+  import Profile from "./pages/ProfilePage.svelte";
+  import { authStore } from "./stores/authStore.svelte";
 
   // 페이지 라우팅
   type Page = "lobby" | "create" | "playlist" | "account";

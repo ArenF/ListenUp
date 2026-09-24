@@ -1,12 +1,12 @@
-import * as playlistApi from "../../api/playlists";
-import { fetchTracks } from "../../api/youtube";
-import { toErrorMessage } from "../../utils/error";
-import type { Playlist, Track } from "../../types";
+import * as playlistApi from "../api/playlists";
+import { fetchTracks } from "../api/youtube";
+import { toErrorMessage } from "../utils/error";
+import type { Playlist, Track } from "../types/index";
 
 /**
  * 플레이리스트 관리 화면의 도메인 상태
  *
- * 서버 통신은 `lib/api`에 맡기고, 여기서는 그 결과를 상태에 반영하는 일만 한다.
+ * 서버 통신은 `api/`에 맡기고, 여기서는 그 결과를 상태에 반영하는 일만 한다.
  * 실패하면 `error`에 메시지를 남긴 뒤 그대로 다시 던지므로,
  * 화면은 배너로 보여줄지 alert로 띄울지 스스로 정할 수 있다.
  */

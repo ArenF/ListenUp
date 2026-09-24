@@ -5,7 +5,7 @@ import type {
   Playlist,
   Room,
   RoomSummary,
-} from "../../types";
+} from "../types/index";
 
 /**
  * 게임 화면의 상태 (Svelte 5 룬 기반)

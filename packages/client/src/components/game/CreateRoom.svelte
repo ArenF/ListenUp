@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { gameStore } from "./gameStore.svelte";
-  import { authStore } from "../login/authStore.svelte";
-  import { createRoom } from "./gameActions";
+  import { gameStore } from "../../stores/gameStore.svelte";
+  import { authStore } from "../../stores/authStore.svelte";
+  import { createRoom } from "../../stores/gameActions";
 
   interface Props {
     /** 취소하고 로비로 돌아가기 */

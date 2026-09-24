@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { AnswerList } from "./answerList.svelte";
-  import type { TrackSearch } from "./trackSearch.svelte";
+  import type { AnswerList } from "../../stores/answerList.svelte";
+  import type { TrackSearch } from "../../stores/trackSearch.svelte";
 
   interface Props {
     show: boolean;
