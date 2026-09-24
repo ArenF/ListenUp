@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { gameStore } from "../../stores/gameStore.svelte";
-  import { authStore } from "../../stores/authStore.svelte";
-  import { joinRoom } from "../../stores/gameActions";
+  import { connection } from "../../stores/socket.svelte";
+  import { authStore } from "../../stores/auth.svelte";
+  import { joinRoom, roomStore } from "../../stores/room.svelte";
 
   interface Props {
     /** "방 생성" 페이지로 이동 */
@@ -15,12 +15,12 @@
   const isLoggedIn = $derived(authStore.isLoggedIn);
   // 참가하려면 연결 + 닉네임이 있어야 한다 (로그인 계정은 닉네임이 이미 채워짐)
   const canJoin = $derived(
-    gameStore.connected && gameStore.nickname.trim().length > 0
+    connection.connected && roomStore.nickname.trim().length > 0
   );
 
   /** 플레이리스트 ID를 사람이 읽는 이름으로 바꾼다 */
   function playlistName(id: string): string {
-    return gameStore.playlists.find((p) => p.id === id)?.name ?? id;
+    return roomStore.playlists.find((p) => p.id === id)?.name ?? id;
   }
 
   function enter(code: string) {
@@ -44,21 +44,21 @@
       <input
         id="lobby-nickname"
         type="text"
-        bind:value={gameStore.nickname}
+        bind:value={roomStore.nickname}
         placeholder="닉네임을 입력하면 방에 참가할 수 있어요"
         maxlength="12"
       />
     </div>
   {/if}
 
-  {#if gameStore.publicRooms.length === 0}
+  {#if roomStore.publicRooms.length === 0}
     <div class="empty">
       <p>🕳️ 지금 열려 있는 공개 방이 없어요.</p>
       <button class="primary" onclick={onCreate}>첫 방 만들기</button>
     </div>
   {:else}
     <div class="grid">
-      {#each gameStore.publicRooms as room (room.code)}
+      {#each roomStore.publicRooms as room (room.code)}
         <button
           class="room-card"
           onclick={() => enter(room.code)}

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { gameStore } from "../../stores/gameStore.svelte";
-  import { authStore } from "../../stores/authStore.svelte";
-  import { joinRoom } from "../../stores/gameActions";
+  import { connection } from "../../stores/socket.svelte";
+  import { authStore } from "../../stores/auth.svelte";
+  import { joinRoom, roomStore } from "../../stores/room.svelte";
 
   interface Props {
     onClose: () => void;
@@ -10,15 +10,16 @@
   let { onClose }: Props = $props();
 
   const isLoggedIn = $derived(authStore.isLoggedIn);
+  let code = $state("");
   const canJoin = $derived(
-    gameStore.connected &&
-      gameStore.nickname.trim().length > 0 &&
-      gameStore.roomCode.trim().length > 0
+    connection.connected &&
+      roomStore.nickname.trim().length > 0 &&
+      code.trim().length > 0
   );
 
   function submit() {
     if (!canJoin) return;
-    joinRoom();
+    joinRoom(code);
     // 성공하면 currentRoom이 채워지며 상위에서 모달을 닫는다.
     // 실패 시에는 statusMessage에 사유가 남고 모달은 유지된다.
   }
@@ -59,7 +60,7 @@
         <input
           id="join-nickname"
           type="text"
-          bind:value={gameStore.nickname}
+          bind:value={roomStore.nickname}
           placeholder="닉네임 입력"
           maxlength="12"
         />
@@ -71,7 +72,7 @@
       <input
         id="join-code"
         type="text"
-        bind:value={gameStore.roomCode}
+        bind:value={code}
         placeholder="6자리 방 코드"
         maxlength="6"
         autocomplete="off"

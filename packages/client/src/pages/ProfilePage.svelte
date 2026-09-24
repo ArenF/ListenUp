@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { authStore } from "../stores/authStore.svelte";
+  import { authStore } from "../stores/auth.svelte";
   import { DEFAULT_AVATARS } from "../utils/avatars";
 
   // 로그인 상태에서만 렌더링되므로 user는 존재한다

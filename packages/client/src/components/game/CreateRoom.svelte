@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { gameStore } from "../../stores/gameStore.svelte";
-  import { authStore } from "../../stores/authStore.svelte";
-  import { createRoom } from "../../stores/gameActions";
+  import { connection } from "../../stores/socket.svelte";
+  import { authStore } from "../../stores/auth.svelte";
+  import { createRoom, roomStore } from "../../stores/room.svelte";
 
   interface Props {
     /** 취소하고 로비로 돌아가기 */
@@ -12,8 +12,13 @@
 
   const isLoggedIn = $derived(authStore.isLoggedIn);
   const canCreate = $derived(
-    gameStore.connected && gameStore.nickname.trim().length > 0
+    connection.connected && roomStore.nickname.trim().length > 0
   );
+
+  // 방 생성 폼 입력값 (화면을 벗어나면 초기화된다)
+  let title = $state("");
+  let playlistId = $state("test-playlist");
+  let isPublic = $state(true);
 </script>
 
 <div class="create">
@@ -28,17 +33,17 @@
       <label for="nickname">닉네임</label>
       {#if isLoggedIn}
         <div class="locked">
-          <span>{gameStore.nickname}</span>
+          <span>{roomStore.nickname}</span>
           <span class="badge">로그인 계정</span>
         </div>
       {:else}
         <input
           id="nickname"
           type="text"
-          bind:value={gameStore.nickname}
+          bind:value={roomStore.nickname}
           placeholder="닉네임 입력"
           maxlength="12"
-          disabled={!gameStore.connected}
+          disabled={!connection.connected}
         />
       {/if}
     </div>
@@ -49,10 +54,10 @@
       <input
         id="title"
         type="text"
-        bind:value={gameStore.roomTitle}
-        placeholder="비워두면 '{gameStore.nickname || '나'}님의 방'"
+        bind:value={title}
+        placeholder="비워두면 '{roomStore.nickname || '나'}님의 방'"
         maxlength="24"
-        disabled={!gameStore.connected}
+        disabled={!connection.connected}
       />
     </div>
 
@@ -61,10 +66,10 @@
       <label for="playlist">플레이리스트</label>
       <select
         id="playlist"
-        bind:value={gameStore.selectedPlaylistId}
-        disabled={!gameStore.connected}
+        bind:value={playlistId}
+        disabled={!connection.connected}
       >
-        {#each gameStore.playlists as playlist}
+        {#each roomStore.playlists as playlist}
           <option value={playlist.id}>
             {playlist.name} ({playlist.tracks?.length || 0} 트랙)
           </option>
@@ -79,8 +84,8 @@
         <button
           type="button"
           class="toggle"
-          class:active={gameStore.roomIsPublic}
-          onclick={() => (gameStore.roomIsPublic = true)}
+          class:active={isPublic}
+          onclick={() => (isPublic = true)}
         >
           🌐 공개
           <small>로비 목록에 표시</small>
@@ -88,8 +93,8 @@
         <button
           type="button"
           class="toggle"
-          class:active={!gameStore.roomIsPublic}
-          onclick={() => (gameStore.roomIsPublic = false)}
+          class:active={!isPublic}
+          onclick={() => (isPublic = false)}
         >
           🔒 비공개
           <small>코드로만 참가</small>
@@ -97,7 +102,7 @@
       </div>
     </div>
 
-    <button class="submit" onclick={createRoom} disabled={!canCreate}>
+    <button class="submit" onclick={() => createRoom({ title, playlistId, isPublic })} disabled={!canCreate}>
       🏠 방 만들기
     </button>
   </div>

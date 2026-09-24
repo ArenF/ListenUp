@@ -53,7 +53,7 @@ export interface ServerToClientEvents {
  * 클라이언트 → 서버 이벤트
  *
  * 요청마다 페이로드와 ack 형태가 달라 이벤트별로 일일이 정의하지 않는다.
- * 실제 ack 응답 타입은 `gameActions`의 request()가 AckResponse<T>로 좁힌다.
+ * 실제 ack 응답 타입은 `stores/socket.svelte`의 request()가 AckResponse<T>로 좁힌다.
  */
 export interface ClientToServerEvents {
   [event: string]: (...args: unknown[]) => void;

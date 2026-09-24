@@ -4,7 +4,8 @@
   import Playlist from "./pages/PlaylistPage.svelte";
   import Login from "./pages/LoginPage.svelte";
   import Profile from "./pages/ProfilePage.svelte";
-  import { authStore } from "./stores/authStore.svelte";
+  import { authStore } from "./stores/auth.svelte";
+  import { themeStore } from "./stores/theme.svelte";
 
   // 페이지 라우팅
   type Page = "lobby" | "create" | "playlist" | "account";
@@ -12,34 +13,6 @@
 
   // 방 참가 모달 (로비 툴바에서 연다)
   let showJoinModal = $state(false);
-
-  // 테마: 다크(퍼플 네온) → 라이트(피치) → 아케이드(아크 네온) 순환. 기본 다크.
-  type Theme = "dark" | "light" | "arcade";
-  const THEME_KEY = "listenup-theme";
-  const THEMES: Theme[] = ["dark", "light", "arcade"];
-  const THEME_ICONS: Record<Theme, string> = {
-    dark: "🌙",
-    light: "☀️",
-    arcade: "🎮",
-  };
-
-  function loadTheme(): Theme {
-    if (typeof localStorage === "undefined") return "dark";
-    const saved = localStorage.getItem(THEME_KEY);
-    return saved === "light" || saved === "arcade" ? saved : "dark";
-  }
-
-  let theme = $state<Theme>(loadTheme());
-
-  function cycleTheme() {
-    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
-  }
-
-  // 테마 변경 시 <html data-theme> 반영 + localStorage 저장
-  $effect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
-  });
 
   // 새로고침 후에도 로그인 세션을 이어간다
   onMount(() => {
@@ -79,11 +52,11 @@
       </button>
       <button
         class="nav-button theme-toggle"
-        onclick={cycleTheme}
+        onclick={() => themeStore.cycle()}
         title="테마 전환 (다크 · 라이트 · 아케이드)"
         aria-label="테마 전환"
       >
-        {THEME_ICONS[theme]}
+        {themeStore.icon}
       </button>
     </div>
   </nav>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { authStore } from "../stores/authStore.svelte";
+  import { authStore } from "../stores/auth.svelte";
 
   // 로그인 ↔ 회원가입 전환
   let mode = $state<"login" | "signup">("login");

@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { gameStore } from "../stores/gameStore.svelte";
-  import { startGameSession } from "../stores/gameSession.svelte";
+  import { onMount } from "svelte";
+  import { connect, connection, disconnect } from "../stores/socket.svelte";
+  import { leaveRoom, loadPlaylists, roomStore } from "../stores/room.svelte";
   import {
     endGame,
-    leaveRoom,
+    gameStore,
     nextRound,
     startGame,
     submitAnswer,
-  } from "../stores/gameActions";
-  import { authStore } from "../stores/authStore.svelte";
+  } from "../stores/game.svelte";
+  import { playerStore } from "../stores/player.svelte";
+  import { authStore } from "../stores/auth.svelte";
   import Lobby from "../components/game/Lobby.svelte";
   import CreateRoom from "../components/game/CreateRoom.svelte";
   import JoinRoomModal from "../components/game/JoinRoomModal.svelte";
@@ -29,18 +31,28 @@
     onNavigate,
   }: Props = $props();
 
-  startGameSession();
+  // 게임 화면에 있는 동안만 서버에 연결한다
+  onMount(() => {
+    loadPlaylists();
+    connect();
+    playerStore.loadApi();
+
+    return () => {
+      disconnect();
+      playerStore.destroy();
+    };
+  });
 
   // 로그인 상태면 게임 닉네임을 계정 닉네임으로 고정한다
   $effect(() => {
     if (authStore.user) {
-      gameStore.nickname = authStore.user.nickname;
+      roomStore.nickname = authStore.user.nickname;
     }
   });
 
   // 방에 입장하면(생성·참가 성공) 참가 모달은 닫는다
   $effect(() => {
-    if (gameStore.currentRoom) {
+    if (roomStore.current) {
       showJoinModal = false;
     }
   });
@@ -48,30 +60,30 @@
 
 <div class="game-container">
   <!-- 연결 상태 -->
-  <div class="status-bar" class:connected={gameStore.connected}>
+  <div class="status-bar" class:connected={connection.connected}>
     <div class="status-indicator"></div>
-    <span>{gameStore.statusMessage}</span>
+    <span>{connection.statusMessage}</span>
   </div>
 
-  {#if gameStore.currentRoom}
+  {#if roomStore.current}
     <GameRoom
-      currentRoom={gameStore.currentRoom}
-      players={gameStore.players}
-      gameStarted={gameStore.gameStarted}
-      gameResult={gameStore.gameResult}
-      isHost={gameStore.isHost}
+      currentRoom={roomStore.current}
+      players={roomStore.players}
+      gameStarted={gameStore.started}
+      gameResult={gameStore.result}
+      isHost={roomStore.isHost}
       currentRound={gameStore.currentRound}
       totalRounds={gameStore.totalRounds}
       isLoadingTrack={gameStore.isLoadingTrack}
       readyPlayers={gameStore.readyPlayers}
       preparedTrack={gameStore.preparedTrack}
       currentTrack={gameStore.currentTrack}
-      isMuted={gameStore.isMuted}
+      isMuted={playerStore.isMuted}
       roundEnded={gameStore.roundEnded}
-      bind:volume={gameStore.volume}
+      bind:volume={playerStore.volume}
       bind:answer={gameStore.answer}
       onStartGame={startGame}
-      onLeaveRoom={leaveRoom}
+      onLeaveRoom={() => leaveRoom(() => gameStore.reset())}
       onSubmitAnswer={submitAnswer}
       onNextRound={nextRound}
       onEndGame={endGame}
@@ -86,7 +98,7 @@
   {/if}
 </div>
 
-{#if showJoinModal && !gameStore.currentRoom}
+{#if showJoinModal && !roomStore.current}
   <JoinRoomModal onClose={() => (showJoinModal = false)} />
 {/if}
 
