@@ -40,6 +40,18 @@ class RoomStore {
 
 export const roomStore = new RoomStore();
 
+const roomLeftListeners: Array<() => void> = [];
+
+/**
+ * 방을 나갔을 때 할 일을 등록한다.
+ *
+ * 게임 상태 정리처럼 다른 store가 할 일을 여기에 걸어 두면
+ * room store는 그 store를 몰라도 된다 (서로 import하면 순환 참조가 생긴다).
+ */
+export function onRoomLeft(listener: () => void) {
+  roomLeftListeners.push(listener);
+}
+
 // ------------------------------------------------------------ 서버 → 클라이언트
 
 // 연결되면 로비에 뿌릴 공개 방 목록을 받아온다
@@ -186,12 +198,8 @@ export function joinRoom(code: string) {
   );
 }
 
-/**
- * 방을 나간다.
- *
- * @param onLeft 나가기에 성공한 뒤 호출된다 (게임 상태 정리 등)
- */
-export function leaveRoom(onLeft?: () => void) {
+/** 방을 나간다. 성공하면 onRoomLeft()로 등록한 작업이 이어서 실행된다 */
+export function leaveRoom() {
   if (!roomStore.current) return;
 
   request(
@@ -201,7 +209,7 @@ export function leaveRoom(onLeft?: () => void) {
       failMessage: "방 나가기 실패",
       onSuccess: () => {
         roomStore.reset();
-        onLeft?.();
+        roomLeftListeners.forEach((listener) => listener());
         connection.statusMessage = "👋 방을 나갔습니다";
         console.log("방 나가기 성공");
       },

@@ -30,9 +30,7 @@
     <GameResult gameResult={gameStore.result} />
   {/if}
 
-  <button class="leave-button" onclick={() => leaveRoom(() => gameStore.reset())}>
-    🚪 방 나가기
-  </button>
+  <button class="leave-button" onclick={leaveRoom}> 🚪 방 나가기 </button>
 </div>
 
 <style>

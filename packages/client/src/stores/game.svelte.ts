@@ -1,5 +1,5 @@
 import { connection, request, socket } from "./socket.svelte";
-import { roomStore } from "./room.svelte";
+import { onRoomLeft, roomStore } from "./room.svelte";
 import { playerStore } from "./player.svelte";
 import type {
   AnswerCheckResult,
@@ -29,7 +29,7 @@ class GameStore {
   /** 정답 입력란. 새 라운드가 시작되면 서버 이벤트로 비워지므로 store에 둔다 */
   answer = $state("");
 
-  /** 방을 나갔을 때 게임 상태를 비우고 플레이어를 정리한다 */
+  /** 게임 상태를 비우고 플레이어를 정리한다 (방을 나가면 자동으로 호출된다) */
   reset() {
     this.started = false;
     this.currentRound = 0;
@@ -47,6 +47,9 @@ class GameStore {
 }
 
 export const gameStore = new GameStore();
+
+// 방을 나가면 진행 중이던 게임 상태도 비운다
+onRoomLeft(() => gameStore.reset());
 
 // ------------------------------------------------------------ 서버 → 클라이언트
 
