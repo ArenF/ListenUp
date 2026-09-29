@@ -41,10 +41,12 @@
     }
   });
 
-  // 방에 입장하면(생성·참가 성공) 참가 모달은 닫는다
+  // 방에 입장하면(생성·참가 성공) 참가 모달은 닫고,
+  // 방 생성 화면에서 들어왔다면 나갈 때 로비로 돌아가도록 로비로 바꿔 둔다
   $effect(() => {
     if (roomStore.current) {
       showJoinModal = false;
+      if (view === "create") onNavigate("lobby");
     }
   });
 </script>

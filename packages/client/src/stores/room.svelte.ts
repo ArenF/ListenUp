@@ -52,11 +52,23 @@ export function onRoomLeft(listener: () => void) {
   roomLeftListeners.push(listener);
 }
 
+/** 방 상태를 비우고 onRoomLeft()로 등록한 작업을 실행한다 */
+function clearRoom() {
+  roomStore.reset();
+  roomLeftListeners.forEach((listener) => listener());
+}
+
 // ------------------------------------------------------------ 서버 → 클라이언트
 
 // 연결되면 로비에 뿌릴 공개 방 목록을 받아온다
 socket.on("connect", () => {
   listRooms();
+});
+
+// 연결이 끊기면 서버가 방에서 내보내므로 방 상태도 비운다.
+// 게임 화면을 벗어날 때(연결 해제)와 네트워크가 끊겼을 때 모두 해당한다.
+socket.on("disconnect", () => {
+  if (roomStore.current) clearRoom();
 });
 
 // 로비 공개 방 목록 실시간 갱신
@@ -208,8 +220,7 @@ export function leaveRoom() {
     {
       failMessage: "방 나가기 실패",
       onSuccess: () => {
-        roomStore.reset();
-        roomLeftListeners.forEach((listener) => listener());
+        clearRoom();
         connection.statusMessage = "👋 방을 나갔습니다";
         console.log("방 나가기 성공");
       },
