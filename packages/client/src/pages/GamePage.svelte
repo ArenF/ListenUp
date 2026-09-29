@@ -1,16 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { connect, connection, disconnect } from "../stores/socket.svelte";
-  import { leaveRoom, loadPlaylists, roomStore } from "../stores/room.svelte";
-  import {
-    endGame,
-    gameStore,
-    nextRound,
-    startGame,
-    submitAnswer,
-  } from "../stores/game.svelte";
+  import { connect, disconnect } from "../stores/socket.svelte";
+  import { loadPlaylists, roomStore } from "../stores/room.svelte";
   import { playerStore } from "../stores/player.svelte";
   import { authStore } from "../stores/auth.svelte";
+  import StatusBar from "../components/common/StatusBar.svelte";
   import Lobby from "../components/game/Lobby.svelte";
   import CreateRoom from "../components/game/CreateRoom.svelte";
   import JoinRoomModal from "../components/game/JoinRoomModal.svelte";
@@ -59,35 +53,10 @@
 </script>
 
 <div class="game-container">
-  <!-- 연결 상태 -->
-  <div class="status-bar" class:connected={connection.connected}>
-    <div class="status-indicator"></div>
-    <span>{connection.statusMessage}</span>
-  </div>
+  <StatusBar />
 
   {#if roomStore.current}
-    <GameRoom
-      currentRoom={roomStore.current}
-      players={roomStore.players}
-      gameStarted={gameStore.started}
-      gameResult={gameStore.result}
-      isHost={roomStore.isHost}
-      currentRound={gameStore.currentRound}
-      totalRounds={gameStore.totalRounds}
-      isLoadingTrack={gameStore.isLoadingTrack}
-      readyPlayers={gameStore.readyPlayers}
-      preparedTrack={gameStore.preparedTrack}
-      currentTrack={gameStore.currentTrack}
-      isMuted={playerStore.isMuted}
-      roundEnded={gameStore.roundEnded}
-      bind:volume={playerStore.volume}
-      bind:answer={gameStore.answer}
-      onStartGame={startGame}
-      onLeaveRoom={() => leaveRoom(() => gameStore.reset())}
-      onSubmitAnswer={submitAnswer}
-      onNextRound={nextRound}
-      onEndGame={endGame}
-    />
+    <GameRoom />
   {:else if view === "create"}
     <CreateRoom onCancel={() => onNavigate("lobby")} />
   {:else}
@@ -107,47 +76,5 @@
     padding: var(--space-8);
     max-width: 820px;
     margin: 0 auto;
-  }
-
-  /* 상태바 */
-  .status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    background-color: color-mix(in srgb, var(--color-danger) 12%, var(--bg-surface));
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-6);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    transition: background-color 0.3s;
-  }
-
-  .status-bar.connected {
-    background-color: color-mix(in srgb, var(--color-success) 12%, var(--bg-surface));
-  }
-
-  .status-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: var(--color-danger);
-    animation: pulse 2s infinite;
-    flex-shrink: 0;
-  }
-
-  .status-bar.connected .status-indicator {
-    background-color: var(--color-success);
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
   }
 </style>

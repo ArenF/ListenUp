@@ -2,6 +2,7 @@
   import { connection } from "../../stores/socket.svelte";
   import { authStore } from "../../stores/auth.svelte";
   import { joinRoom, roomStore } from "../../stores/room.svelte";
+  import Modal from "../common/Modal.svelte";
 
   interface Props {
     onClose: () => void;
@@ -24,31 +25,16 @@
     // 실패 시에는 statusMessage에 사유가 남고 모달은 유지된다.
   }
 
+  // Esc는 Modal이 처리한다
   function onKeydown(event: KeyboardEvent) {
-    if (event.key === "Escape") onClose();
     if (event.key === "Enter") submit();
   }
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
-<div
-  class="backdrop"
-  role="button"
-  tabindex="-1"
-  aria-label="닫기"
-  onclick={onClose}
-  onkeydown={(e) => e.key === "Enter" && onClose()}
->
-  <div
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    aria-label="방 참가"
-    tabindex="-1"
-    onclick={(e) => e.stopPropagation()}
-    onkeydown={(e) => e.stopPropagation()}
-  >
+<Modal label="방 참가" maxWidth="360px" {onClose}>
+  <div class="join">
     <div class="modal-header">
       <h3>방 코드로 참가</h3>
       <button class="close" onclick={onClose} aria-label="닫기">✕</button>
@@ -83,28 +69,10 @@
       🚪 참가하기
     </button>
   </div>
-</div>
+</Modal>
 
 <style>
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-4);
-    background: color-mix(in srgb, var(--bg-primary) 75%, transparent);
-  }
-
-  .modal {
-    width: 100%;
-    max-width: 360px;
-    padding: var(--space-6);
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 20px 50px color-mix(in srgb, var(--text-primary) 25%, transparent);
+  .join {
     text-align: left;
   }
 

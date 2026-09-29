@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Modal from "../common/Modal.svelte";
+
   interface Props {
     show: boolean;
     mode: "create" | "edit";
@@ -16,66 +18,43 @@
     onClose,
     onSave,
   }: Props = $props();
+
+  const title = $derived(
+    mode === "create" ? "새 플레이리스트 만들기" : "플레이리스트 수정"
+  );
 </script>
 
 {#if show}
-  <div class="modal-backdrop" onclick={onClose}>
-    <div class="modal" onclick={(e) => e.stopPropagation()}>
-      <h3>
-        {mode === "create" ? "새 플레이리스트 만들기" : "플레이리스트 수정"}
-      </h3>
-      <div class="form-group">
-        <label for="playlist-name">플레이리스트 이름</label>
-        <input
-          id="playlist-name"
-          type="text"
-          bind:value={name}
-          placeholder="플레이리스트 이름"
-        />
-      </div>
-      <div class="form-group">
-        <label for="playlist-description">설명</label>
-        <textarea
-          id="playlist-description"
-          bind:value={description}
-          placeholder="플레이리스트 설명"
-          rows="4"
-        ></textarea>
-      </div>
-      <div class="button-group">
-        <button class="btn-primary" onclick={onSave}>
-          {mode === "create" ? "생성" : "저장"}
-        </button>
-        <button class="btn-secondary" onclick={onClose}>취소</button>
-      </div>
+  <Modal label={title} {onClose}>
+    <h3>{title}</h3>
+    <div class="form-group">
+      <label for="playlist-name">플레이리스트 이름</label>
+      <input
+        id="playlist-name"
+        type="text"
+        bind:value={name}
+        placeholder="플레이리스트 이름"
+      />
     </div>
-  </div>
+    <div class="form-group">
+      <label for="playlist-description">설명</label>
+      <textarea
+        id="playlist-description"
+        bind:value={description}
+        placeholder="플레이리스트 설명"
+        rows="4"
+      ></textarea>
+    </div>
+    <div class="button-group">
+      <button class="btn-primary" onclick={onSave}>
+        {mode === "create" ? "생성" : "저장"}
+      </button>
+      <button class="btn-secondary" onclick={onClose}>취소</button>
+    </div>
+  </Modal>
 {/if}
 
 <style>
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  .modal {
-    background-color: var(--bg-surface);
-    padding: var(--space-8);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
-    max-width: 500px;
-    width: 90%;
-  }
-
   h3 {
     margin-top: 0;
     margin-bottom: var(--space-6);
