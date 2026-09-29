@@ -13,17 +13,14 @@
   interface Props {
     /** 방에 들어가 있지 않을 때 보여줄 화면 */
     view: "lobby" | "create";
-    /** 방 참가 모달 표시 여부 (App의 네비 "방 참가"가 토글) */
-    showJoinModal: boolean;
     /** 로비 ↔ 방 생성 페이지 전환 요청 (App의 네비 상태를 바꾼다) */
     onNavigate: (view: "lobby" | "create") => void;
   }
 
-  let {
-    view,
-    showJoinModal = $bindable(),
-    onNavigate,
-  }: Props = $props();
+  let { view, onNavigate }: Props = $props();
+
+  // 방 참가 모달 (로비 툴바의 "코드로 참가"가 연다)
+  let showJoinModal = $state(false);
 
   // 게임 화면에 있는 동안만 서버에 연결한다
   onMount(() => {

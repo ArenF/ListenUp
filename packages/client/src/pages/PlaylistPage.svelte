@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { untrack } from "svelte";
+  import LoginRequired from "../components/common/LoginRequired.svelte";
   import PlaylistForm from "../components/playlist/PlaylistForm.svelte";
   import PlaylistSidebar from "../components/playlist/PlaylistSidebar.svelte";
   import TrackForm from "../components/playlist/TrackForm.svelte";
@@ -9,6 +10,13 @@
   import { TrackSearch } from "../stores/trackSearch.svelte";
   import { toErrorMessage } from "../utils/error";
   import { authStore } from "../stores/auth.svelte";
+
+  interface Props {
+    /** 로그인 안내에서 "로그인하러 가기"를 눌렀을 때 */
+    onLogin: () => void;
+  }
+
+  let { onLogin }: Props = $props();
 
   // 선택된 플레이리스트를 현재 사용자가 수정할 수 있는지 (작성자 본인만)
   const canEditSelected = $derived(
@@ -31,8 +39,9 @@
   let editingTrackId = $state<string | null>(null);
   const editAnswers = new AnswerList();
 
-  onMount(() => {
-    playlistStore.load();
+  // 로그인한 뒤에만 목록을 불러온다 (load가 읽는 상태는 추적하지 않는다)
+  $effect(() => {
+    if (authStore.isLoggedIn) untrack(() => playlistStore.load());
   });
 
   function openCreateForm() {
@@ -142,87 +151,91 @@
   }
 </script>
 
-<div class="playlist-manager">
-  <h1>🎵 플레이리스트 관리</h1>
+{#if !authStore.isLoggedIn}
+  <LoginRequired message="플레이리스트 관리는 로그인이 필요합니다." {onLogin} />
+{:else}
+  <div class="playlist-manager">
+    <h1>🎵 플레이리스트 관리</h1>
 
-  {#if playlistStore.error}
-    <div class="error-message">{playlistStore.error}</div>
-  {/if}
+    {#if playlistStore.error}
+      <div class="error-message">{playlistStore.error}</div>
+    {/if}
 
-  <div class="content">
-    <PlaylistSidebar onCreate={openCreateForm} />
+    <div class="content">
+      <PlaylistSidebar onCreate={openCreateForm} />
 
-    <!-- 플레이리스트 상세 -->
-    <div class="main-content">
-      {#if playlistStore.selected}
-        <div class="playlist-header">
-          <div class="playlist-info">
-            <h2>{playlistStore.selected.name}</h2>
-            <p>{playlistStore.selected.description || "설명 없음"}</p>
-            <span class="owner-label">
-              {#if !playlistStore.selected.ownerId}
-                🎵 기본 제공
-              {:else if canEditSelected}
-                👤 내 플레이리스트
-              {:else}
-                👤 by {playlistStore.selected.ownerNickname ?? "다른 사용자"}
-              {/if}
-            </span>
-          </div>
-          {#if canEditSelected}
-            <div class="playlist-actions">
-              <button class="btn-secondary" onclick={openEditForm}>
-                ✏️ 수정
-              </button>
-              <button class="btn-danger" onclick={deletePlaylist}>
-                🗑️ 삭제
-              </button>
-              <button class="btn-primary" onclick={() => (showTrackForm = true)}>
-                ➕ 트랙 추가
-              </button>
+      <!-- 플레이리스트 상세 -->
+      <div class="main-content">
+        {#if playlistStore.selected}
+          <div class="playlist-header">
+            <div class="playlist-info">
+              <h2>{playlistStore.selected.name}</h2>
+              <p>{playlistStore.selected.description || "설명 없음"}</p>
+              <span class="owner-label">
+                {#if !playlistStore.selected.ownerId}
+                  🎵 기본 제공
+                {:else if canEditSelected}
+                  👤 내 플레이리스트
+                {:else}
+                  👤 by {playlistStore.selected.ownerNickname ?? "다른 사용자"}
+                {/if}
+              </span>
             </div>
-          {/if}
-        </div>
+            {#if canEditSelected}
+              <div class="playlist-actions">
+                <button class="btn-secondary" onclick={openEditForm}>
+                  ✏️ 수정
+                </button>
+                <button class="btn-danger" onclick={deletePlaylist}>
+                  🗑️ 삭제
+                </button>
+                <button class="btn-primary" onclick={() => (showTrackForm = true)}>
+                  ➕ 트랙 추가
+                </button>
+              </div>
+            {/if}
+          </div>
 
-        <TrackList
-          tracks={playlistStore.tracks}
-          playlistTracks={playlistStore.selected.tracks}
-          {editingTrackId}
-          {editAnswers}
-          canEdit={canEditSelected}
-          onStartEdit={startEditTrack}
-          onCancelEdit={cancelEditTrack}
-          onSave={saveTrackAnswers}
-          onRemove={removeTrack}
-        />
-      {:else}
-        <div class="empty-state">
-          <h2>플레이리스트를 선택하세요</h2>
-          <p>왼쪽에서 플레이리스트를 선택하거나 새로 만들어보세요!</p>
-        </div>
-      {/if}
+          <TrackList
+            tracks={playlistStore.tracks}
+            playlistTracks={playlistStore.selected.tracks}
+            {editingTrackId}
+            {editAnswers}
+            canEdit={canEditSelected}
+            onStartEdit={startEditTrack}
+            onCancelEdit={cancelEditTrack}
+            onSave={saveTrackAnswers}
+            onRemove={removeTrack}
+          />
+        {:else}
+          <div class="empty-state">
+            <h2>플레이리스트를 선택하세요</h2>
+            <p>왼쪽에서 플레이리스트를 선택하거나 새로 만들어보세요!</p>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
-</div>
 
-<!-- 모달들 -->
-<PlaylistForm
-  show={showPlaylistForm}
-  mode={formMode}
-  bind:name={formName}
-  bind:description={formDescription}
-  onClose={() => (showPlaylistForm = false)}
-  onSave={savePlaylist}
-/>
+  <!-- 모달들 -->
+  <PlaylistForm
+    show={showPlaylistForm}
+    mode={formMode}
+    bind:name={formName}
+    bind:description={formDescription}
+    onClose={() => (showPlaylistForm = false)}
+    onSave={savePlaylist}
+  />
 
-<TrackForm
-  show={showTrackForm}
-  search={trackSearch}
-  answers={newAnswers}
-  onClose={closeTrackForm}
-  onSearch={searchTrack}
-  onAdd={addTrack}
-/>
+  <TrackForm
+    show={showTrackForm}
+    search={trackSearch}
+    answers={newAnswers}
+    onClose={closeTrackForm}
+    onSearch={searchTrack}
+    onAdd={addTrack}
+  />
+{/if}
 
 <style>
   .playlist-manager {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import ProfileCard from "../components/account/ProfileCard.svelte";
   import AvatarPicker from "../components/account/AvatarPicker.svelte";
+  import LoginForm from "../components/account/LoginForm.svelte";
   import { authStore } from "../stores/auth.svelte";
   import type { PlayerStats } from "../utils/profile";
 
@@ -21,14 +22,18 @@
   };
 </script>
 
-<div class="profile">
-  <!-- 로그인 상태에서만 렌더링되므로 user는 존재한다 -->
-  <ProfileCard user={authStore.user!} {stats} mock />
+<!-- 로그인 전에는 로그인·회원가입 폼, 로그인하면 프로필 -->
+{#if authStore.user}
+  <div class="profile">
+    <ProfileCard user={authStore.user} {stats} mock />
 
-  <AvatarPicker />
+    <AvatarPicker />
 
-  <button class="logout" onclick={() => authStore.logout()}>로그아웃</button>
-</div>
+    <button class="logout" onclick={() => authStore.logout()}>로그아웃</button>
+  </div>
+{:else}
+  <LoginForm />
+{/if}
 
 <style>
   .profile {

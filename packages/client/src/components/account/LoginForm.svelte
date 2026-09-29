@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { authStore } from "../stores/auth.svelte";
+  import { authStore } from "../../stores/auth.svelte";
 
   // 로그인 ↔ 회원가입 전환
   let mode = $state<"login" | "signup">("login");
@@ -28,7 +28,7 @@
       } else {
         await authStore.login(email, password);
       }
-      // 성공하면 상위 화면이 프로필 카드로 전환한다. 폼만 비워 둔다.
+      // 성공하면 AccountPage가 프로필 카드로 전환한다. 폼만 비워 둔다.
       password = "";
     } catch {
       // 에러 메시지는 authStore.error로 배너에 표시된다
