@@ -2,13 +2,11 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import cookieParser from "cookie-parser";
-import { config, validateEnvYouTube, validateEnvAuth } from "./config/env.js";
+import { config, validateEnvYouTube } from "./config/env.js";
 import { youtubeService } from "./services/youtube.js";
 import { playlistService } from "./services/playlist.js";
-import { initializeDatabase } from "./db/index.js";
 import { authRouter } from "./routes/auth.routes.js";
-import { authService } from "./services/auth.js";
+import { userService } from "./services/user.js";
 import { requireAuth } from "./middleware/auth.js";
 import { registerRoomHandlers } from "./socket/handlers/room.handler.js";
 import { registerGameHandlers } from "./socket/handlers/game.handler.js";
@@ -27,15 +25,8 @@ const io = new Server(httpServer, {
   transports: ["websocket", "polling"],  // WebSocket 우선, 폴백으로 polling
 });
 
-// 인증 쿠키를 주고받으려면 특정 출처를 허용하고 credentials를 켜야 한다
-app.use(
-  cors({
-    origin: config.cors.frontendUrl,
-    credentials: true,
-  })
-);
+app.use(cors({ origin: config.cors.frontendUrl }));
 app.use(express.json());
-app.use(cookieParser());
 
 app.get("/", (_req, res) => {
   res.json({
@@ -46,12 +37,9 @@ app.get("/", (_req, res) => {
 });
 
 // ============================================================================
-// 인증 API (회원가입 / 로그인)
+// 인증 API (로그인 후 프로필 준비)
 // ============================================================================
 app.use("/api/auth", authRouter);
-
-// 업로드된 파일(아바타 등) 정적 서빙 — 기존 /api 프록시로 그대로 접근된다
-app.use("/api/uploads", express.static(config.uploads.dir));
 
 // 테스트용 플레이리스트 목록
 app.get("/api/test/playlists", (_req, res) => {
@@ -194,8 +182,8 @@ app.post("/api/playlists", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Playlist name is required" });
     }
 
-    const owner = authService.getPublicUser(req.auth!.sub);
-    if (!owner) {
+    const ownerNickname = await userService.getNickname(req.auth!.uid);
+    if (!ownerNickname) {
       return res.status(401).json({ error: "사용자를 찾을 수 없습니다" });
     }
 
@@ -203,7 +191,7 @@ app.post("/api/playlists", requireAuth, async (req, res) => {
       name,
       description || "",
       tracks || [],
-      { id: owner.id, nickname: owner.nickname }
+      { id: req.auth!.uid, nickname: ownerNickname }
     );
 
     if (!result.success) {
@@ -221,7 +209,7 @@ app.post("/api/playlists", requireAuth, async (req, res) => {
 app.put("/api/playlists/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    const denied = checkPlaylistOwner(id, req.auth!.uid);
     if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const { name, description, tracks } = req.body;
@@ -248,7 +236,7 @@ app.put("/api/playlists/:id", requireAuth, async (req, res) => {
 app.delete("/api/playlists/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    const denied = checkPlaylistOwner(id, req.auth!.uid);
     if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const result = await playlistService.deletePlaylist(id);
@@ -268,7 +256,7 @@ app.delete("/api/playlists/:id", requireAuth, async (req, res) => {
 app.post("/api/playlists/:id/tracks", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    const denied = checkPlaylistOwner(id, req.auth!.uid);
     if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const { videoId, answers } = req.body;
@@ -298,7 +286,7 @@ app.post("/api/playlists/:id/tracks", requireAuth, async (req, res) => {
 app.delete("/api/playlists/:id/tracks/:videoId", requireAuth, async (req, res) => {
   try {
     const { id, videoId } = req.params;
-    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    const denied = checkPlaylistOwner(id, req.auth!.uid);
     if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const result = await playlistService.removeTrack(id, videoId);
@@ -318,7 +306,7 @@ app.delete("/api/playlists/:id/tracks/:videoId", requireAuth, async (req, res) =
 app.put("/api/playlists/:id/tracks/:videoId", requireAuth, async (req, res) => {
   try {
     const { id, videoId } = req.params;
-    const denied = checkPlaylistOwner(id, req.auth!.sub);
+    const denied = checkPlaylistOwner(id, req.auth!.uid);
     if (denied) return res.status(denied.status).json({ error: denied.error });
 
     const { answers } = req.body;
@@ -377,10 +365,6 @@ async function startServer() {
   console.log("🚀 Starting ListenUp! server...");
 
   validateEnvYouTube();
-  validateEnvAuth();
-
-  // 데이터베이스 초기화 (테이블 생성)
-  initializeDatabase();
 
   // 플레이리스트 서비스 초기화
   await playlistService.initialize();

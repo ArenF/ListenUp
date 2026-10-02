@@ -10,6 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "socket.io-client": "^4.8.1",
     "svelte": "^5.40.0"
   },

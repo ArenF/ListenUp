@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// 원칙: 통계·업적 획득은 서버(Admin SDK, 규칙 우회)만 쓴다.
+// 클라이언트는 자기 프로필의 표시용 필드만 바꿀 수 있다.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // 업적 정의 — 누구나 읽고, 수정은 콘솔/Admin SDK에서만
+    match /achievements/{achievementId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 공개 프로필 — 게임방에서 다른 플레이어의 닉네임·아바타·칭호를 보여준다
+    match /users/{uid} {
+      allow read: if true;
+
+      // 문서 생성은 서버가 가입 시점에 한다
+      allow create, delete: if false;
+
+      // 본인은 nickname / avatar / equippedTitle만 바꿀 수 있다
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['nickname', 'avatar', 'equippedTitle', 'updatedAt'])
+        && validNickname(request.resource.data.nickname)
+        && validAvatar(request.resource.data.avatar)
+        && validEquippedTitle(uid, request.resource.data.get('equippedTitle', null));
+
+      function validNickname(nickname) {
+        return nickname is string && nickname.size() > 0 && nickname.size() <= 20;
+      }
+
+      // 아바타는 기본 제공 이미지만 고를 수 있다 (client/src/utils/avatars.ts와 같은 목록)
+      function validAvatar(avatar) {
+        return avatar in ['/avatars/avatar-1.webp', '/avatars/avatar-2.webp', '/avatars/avatar-3.webp'];
+      }
+
+      // 칭호는 비우거나(null), 실제로 얻은 업적만 장착할 수 있다
+      function validEquippedTitle(uid, title) {
+        return title == null
+          || exists(/databases/$(database)/documents/users/$(uid)/unlocked/$(title));
+      }
+
+      // 통계 카운터 — 본인만 읽기
+      match /private/{docId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+
+      // 얻은 업적 — 본인만 읽기
+      match /unlocked/{achievementId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+    }
+  }
+}

@@ -14,24 +14,9 @@
       // 에러는 authStore.error로 표시된다
     }
   }
-
-  /** 파일 선택 → 업로드 */
-  async function onFileChange(event: Event) {
-    const input = event.currentTarget as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    try {
-      await authStore.uploadAvatar(file);
-    } catch {
-      // 에러는 authStore.error로 표시된다
-    }
-    // 같은 파일을 다시 선택해도 change가 발생하도록 초기화
-    input.value = "";
-  }
 </script>
 
-<!-- 아바타 변경 (기본 아바타 선택 또는 업로드) -->
+<!-- 아바타 변경 (기본 아바타 중에서 선택) -->
 <section class="avatar-edit">
   <h3>사진 변경</h3>
 
@@ -53,17 +38,6 @@
       </button>
     {/each}
   </div>
-
-  <label class="upload" class:disabled={authStore.loading}>
-    {authStore.loading ? "처리 중..." : "📷 이미지 업로드"}
-    <input
-      type="file"
-      accept="image/png,image/jpeg,image/webp,image/gif"
-      onchange={onFileChange}
-      disabled={authStore.loading}
-    />
-  </label>
-  <p class="upload-hint">PNG · JPG · WebP · GIF / 최대 5MB</p>
 </section>
 
 <style>
@@ -95,7 +69,6 @@
   .presets {
     display: flex;
     gap: var(--space-3);
-    margin-bottom: var(--space-4);
   }
 
   .preset {
@@ -124,40 +97,5 @@
   .preset:disabled {
     opacity: 0.6;
     cursor: default;
-  }
-
-  .upload {
-    display: block;
-    padding: 0.7rem;
-    text-align: center;
-    background: color-mix(in srgb, var(--accent) 6%, var(--bg-surface));
-    border: 2px dashed color-mix(in srgb, var(--accent) 40%, var(--bg-surface));
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .upload:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .upload.disabled {
-    opacity: 0.6;
-    cursor: default;
-  }
-
-  .upload input {
-    display: none;
-  }
-
-  .upload-hint {
-    margin: var(--space-2) 0 0;
-    font-size: var(--font-size-2xs);
-    color: var(--text-secondary);
-    text-align: center;
   }
 </style>

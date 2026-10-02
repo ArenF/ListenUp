@@ -1,9 +1,11 @@
+import { auth } from "../lib/firebase";
+
 /**
  * REST API 호출 공통 래퍼
  *
  * JSON 직렬화와 에러 처리를 한곳에 모은다.
- * 인증은 서버가 발급하는 httpOnly 쿠키로 처리하므로,
- * 모든 요청에 credentials를 실어 브라우저가 쿠키를 자동으로 보내게 한다.
+ * 로그인 상태면 Firebase ID 토큰을 Authorization 헤더에 실어 보낸다.
+ * (getIdToken은 만료가 가까우면 알아서 새 토큰을 받아온다)
  */
 
 interface RequestOptions {
@@ -15,11 +17,15 @@ export async function apiFetch<T>(
   path: string,
   { method = "GET", body }: RequestOptions = {}
 ): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+
+  const token = await auth.currentUser?.getIdToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const response = await fetch(path, {
     method,
-    credentials: "include",
-    headers:
-      body === undefined ? undefined : { "Content-Type": "application/json" },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 

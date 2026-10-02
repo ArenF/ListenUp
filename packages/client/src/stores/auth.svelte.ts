@@ -1,3 +1,5 @@
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../lib/firebase";
 import * as authApi from "../api/auth";
 import { toErrorMessage } from "../utils/error";
 import type { PublicUser } from "../types/index";
@@ -5,8 +7,8 @@ import type { PublicUser } from "../types/index";
 /**
  * 로그인 세션 상태 (Svelte 5 룬 기반)
  *
- * 토큰은 서버가 httpOnly 쿠키로 관리하므로 여기서는 토큰을 다루지 않는다.
- * 세션 유지·복원은 쿠키가 알아서 하고, 이 스토어는 현재 사용자 정보만 보관한다.
+ * 세션 유지·토큰 갱신은 Firebase Auth SDK가 맡고,
+ * 이 스토어는 로그인한 사용자의 공개 프로필만 보관한다.
  * 실패하면 `error`에 메시지를 남긴 뒤 그대로 다시 던지므로,
  * 화면은 스스로 배너/alert 중 무엇으로 보여줄지 정할 수 있다.
  */
@@ -17,48 +19,65 @@ class AuthStore {
 
   readonly isLoggedIn = $derived(this.user !== null);
 
-  /** 앱 시작 시 쿠키로 세션을 복원한다 (쿠키가 없거나 무효하면 비로그인 상태) */
-  async restore() {
-    try {
-      this.user = await authApi.fetchMe();
-    } catch {
-      this.user = null;
-    }
+  // 회원가입 중에는 가입 폼의 닉네임으로 프로필을 만들어야 하므로
+  // 로그인 감지 쪽에서 먼저 프로필을 만들지 않게 막는다
+  private signingUp = false;
+
+  /** 앱 시작 시 로그인 상태 감시를 시작한다 (새로고침 후 세션 복원 포함) */
+  restore() {
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        this.user = null;
+        return;
+      }
+      if (this.signingUp) return;
+
+      try {
+        this.user = await authApi.ensureProfile();
+      } catch (err) {
+        this.error = toErrorMessage(err);
+        this.user = null;
+      }
+    });
   }
 
   async login(email: string, password: string) {
-    this.user = await this.run(() => authApi.login({ email, password }));
+    await this.run(() => authApi.login(email, password));
   }
 
-  async signup(input: {
-    email: string;
-    password: string;
-    nickname?: string;
-  }) {
-    this.user = await this.run(() => authApi.signup(input));
+  async loginWithGoogle() {
+    await this.run(() => authApi.loginWithGoogle());
+  }
+
+  async signup(input: { email: string; password: string; nickname?: string }) {
+    this.signingUp = true;
+    try {
+      this.user = await this.run(async () => {
+        await authApi.signup(input.email, input.password);
+        return authApi.ensureProfile(input.nickname);
+      });
+    } finally {
+      this.signingUp = false;
+    }
+  }
+
+  async sendPasswordReset(email: string) {
+    await this.run(() => authApi.sendPasswordReset(email));
   }
 
   /** 기본 아바타 선택 등 프로필 수정 */
   async updateProfile(updates: { nickname?: string; avatar?: string }) {
-    this.user = await this.run(() => authApi.updateProfile(updates));
+    const user = this.user;
+    if (!user) return;
+    await this.run(() => authApi.updateProfile(user.id, updates));
+    this.user = { ...user, ...updates };
   }
 
-  /** 아바타 이미지 파일 업로드 */
-  async uploadAvatar(file: File) {
-    this.user = await this.run(() => authApi.uploadAvatar(file));
-  }
-
-  /** UI는 즉시 비로그인으로 바꾸고, 서버 쿠키 제거는 뒤따르게 한다 */
   async logout() {
-    this.user = null;
-    try {
-      await authApi.logout();
-    } catch {
-      // 쿠키는 만료되면 어차피 무효하므로 실패해도 조용히 넘어간다
-    }
+    await authApi.logout();
   }
 
-  /** loading/error 상태를 관리하며 서버 작업을 실행한다 */
+  /** loading/error 상태를 관리하며 작업을 실행한다 */
   private async run<T>(task: () => Promise<T>): Promise<T> {
     try {
       this.loading = true;

@@ -1,80 +1,62 @@
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signOut,
+} from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
 import { apiFetch } from "./client";
 import type { PublicUser } from "../types/index";
 
 /**
- * 인증 REST API
+ * 인증 API
  *
- * 서버 라우터(`/api/auth`)와 1:1로 대응한다.
- * 토큰은 서버가 httpOnly 쿠키로 발급/제거하므로 JS는 사용자 정보만 다룬다.
+ * 로그인·회원가입·로그아웃은 Firebase Auth를 직접 호출한다.
+ * 서버(`/api/auth`)는 로그인 직후 공개 프로필을 준비해 주는 일만 한다.
+ * 프로필 수정은 Firestore `users/{uid}`에 직접 쓰고, 검증은 firestore.rules가 맡는다.
  */
 
-export async function signup(input: {
-  email: string;
-  password: string;
-  nickname?: string;
-  avatar?: string;
-}): Promise<PublicUser> {
-  const { user } = await apiFetch<{ user: PublicUser }>("/api/auth/signup", {
-    method: "POST",
-    body: input,
-  });
-  return user;
+export async function signup(email: string, password: string): Promise<void> {
+  await createUserWithEmailAndPassword(auth, email, password);
 }
 
-export async function login(input: {
-  email: string;
-  password: string;
-}): Promise<PublicUser> {
-  const { user } = await apiFetch<{ user: PublicUser }>("/api/auth/login", {
-    method: "POST",
-    body: input,
-  });
-  return user;
+export async function login(email: string, password: string): Promise<void> {
+  await signInWithEmailAndPassword(auth, email, password);
 }
 
-/** 인증 쿠키로 내 정보 조회 (쿠키가 없거나 무효하면 401) */
-export async function fetchMe(): Promise<PublicUser> {
-  const { user } = await apiFetch<{ user: PublicUser }>("/api/auth/me");
-  return user;
+export async function loginWithGoogle(): Promise<void> {
+  await signInWithPopup(auth, new GoogleAuthProvider());
 }
 
-/** 로그아웃 — 서버가 인증 쿠키를 제거한다 */
-export function logout(): Promise<{ success: boolean }> {
-  return apiFetch<{ success: boolean }>("/api/auth/logout", { method: "POST" });
+export async function sendPasswordReset(email: string): Promise<void> {
+  auth.languageCode = "ko";
+  await sendPasswordResetEmail(auth, email);
 }
 
-/** 프로필 수정 (닉네임 / 기본 아바타 선택) */
-export async function updateProfile(input: {
-  nickname?: string;
-  avatar?: string;
-}): Promise<PublicUser> {
-  const { user } = await apiFetch<{ user: PublicUser }>("/api/auth/me", {
-    method: "PATCH",
-    body: input,
-  });
-  return user;
+export async function logout(): Promise<void> {
+  await signOut(auth);
 }
 
 /**
- * 아바타 이미지 업로드 (multipart)
+ * 내 프로필 조회, 없으면 생성 (로그인 직후 호출)
  *
- * 파일 업로드라 JSON 래퍼(apiFetch)를 쓰지 않고 FormData로 직접 보낸다.
+ * nickname은 처음 만들 때만 쓰인다. 비우면 서버가 소셜 계정 이름이나 이메일 앞부분을 쓴다.
  */
-export async function uploadAvatar(file: File): Promise<PublicUser> {
-  const form = new FormData();
-  form.append("avatar", file);
-
-  const response = await fetch("/api/auth/avatar", {
+export async function ensureProfile(nickname?: string): Promise<PublicUser> {
+  const { user } = await apiFetch<{ user: PublicUser }>("/api/auth/me", {
     method: "POST",
-    credentials: "include",
-    body: form,
+    body: { nickname },
   });
-
-  if (!response.ok) {
-    const data = await response.json().catch(() => null);
-    throw new Error(data?.error ?? `업로드에 실패했습니다 (${response.status})`);
-  }
-
-  const { user } = (await response.json()) as { user: PublicUser };
   return user;
+}
+
+/** 프로필 수정 (닉네임 / 기본 아바타 선택) */
+export async function updateProfile(
+  uid: string,
+  updates: { nickname?: string; avatar?: string }
+): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { ...updates, updatedAt: Date.now() });
 }

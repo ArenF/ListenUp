@@ -2,18 +2,7 @@
 // Auth / User Types
 // ============================================================================
 
-// DB에 저장되는 사용자 레코드 (비밀번호 해시 포함)
-export interface UserRecord {
-  id: string;
-  email: string;
-  passwordHash: string;
-  nickname: string;
-  avatar: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
-// 클라이언트에 노출되는 안전한 사용자 정보 (비밀번호 제외)
+// 클라이언트에 내려주는 사용자 정보 (id는 Firebase uid, email은 Auth 토큰에서 가져온다)
 export interface PublicUser {
   id: string;
   email: string;
@@ -22,18 +11,11 @@ export interface PublicUser {
   createdAt: number;
 }
 
-// JWT 페이로드
-export interface AuthTokenPayload {
-  sub: string; // 사용자 ID
+// 검증된 Firebase ID 토큰에서 꺼낸 인증 정보 (req.auth)
+export interface AuthContext {
+  uid: string;
   email: string;
-}
-
-// 인증 결과
-export interface AuthResult {
-  success: boolean;
-  error?: string;
-  user?: PublicUser;
-  token?: string;
+  displayName?: string; // 소셜 로그인 계정 이름
 }
 
 export interface Player {
